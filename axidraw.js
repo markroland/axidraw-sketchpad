@@ -9,7 +9,6 @@ let sketch = function(p) {
     p.createCanvas(576, 384, p.SVG);
 
     p.noLoop();
-    // p.frameRate(10)
 
     // Set stroke
     p.strokeWeight(1.42);
@@ -18,7 +17,7 @@ let sketch = function(p) {
 
     // Download controls
     downloadButton = p.createButton('Download')
-      // .parent('download');
+      .parent('download');
     downloadButton.mousePressed(download);
   }
 
