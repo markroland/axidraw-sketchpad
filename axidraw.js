@@ -4,11 +4,12 @@ let sketch = function(p) {
   let margin = 0.25 * 96;
 
   var Patterns = {
+    "cycloid": new Cycloid(),
     "fibonacci": new Fibonacci(),
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "spiral";
+  let selectedPattern = "cycloid";
 
   p.setup = function() {
 
@@ -48,6 +49,7 @@ let sketch = function(p) {
         let y = paths[i][j][1] * ((p.min(p.width, p.height)/2) - margin * 2);
         p.vertex(x, y)
       }
+      // TODO: "mode" should be defined by the path
       p.endShape();
     }
 
