@@ -4,10 +4,11 @@ let sketch = function(p) {
   let margin = 0.25 * 96;
 
   var Patterns = {
-    "fibonacci": new Fibonacci()
+    "fibonacci": new Fibonacci(),
+    "spiral": new Spiral()
   }
 
-  let selectedPattern = "fibonacci";
+  let selectedPattern = "spiral";
 
   p.setup = function() {
 
@@ -47,7 +48,7 @@ let sketch = function(p) {
         let y = paths[i][j][1] * ((p.min(p.width, p.height)/2) - margin * 2);
         p.vertex(x, y)
       }
-      p.endShape(p.CLOSE);
+      p.endShape();
     }
 
     p.pop();
