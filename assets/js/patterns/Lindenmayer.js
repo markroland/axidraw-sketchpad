@@ -69,9 +69,9 @@ class Lindenmayer {
 
     // Read in selected value(s)
 
-    let algorithm = 'hilbert_curve';
-    let iterations = 6;
-    let segment_length = 0.035
+    let algorithm = 'sierpinski_arrowhead';
+    let iterations = 7;
+    let segment_length = 0.02
 
     let lindenmayer_string = this[algorithm].l_system.axiom
     for (let i = 0; i < iterations; i++) {
