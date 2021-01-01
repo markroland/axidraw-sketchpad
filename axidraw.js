@@ -6,12 +6,13 @@ let sketch = function(p) {
   var Patterns = {
     "cycloid": new Cycloid(),
     "fibonacci": new Fibonacci(),
+    "genuary": new Genuary(),
     "heart": new Heart(),
     "lindenmayer": new Lindenmayer(),
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "heart";
+  let selectedPattern = "genuary";
 
   p.setup = function() {
 
