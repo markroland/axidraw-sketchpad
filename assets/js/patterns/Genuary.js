@@ -16,7 +16,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_1();
+    return this.genuary_2();
 
     // Canvas limits test
     /*
@@ -87,6 +87,21 @@ class Genuary {
     //*/
 
     return path;
+  }
+
+  /**
+   * Prompt: Rule 30
+   *
+   * https://p5js.org/examples/simulate-wolfram-ca.html
+   * https://en.wikipedia.org/wiki/Rule_30
+   *
+   * @param integer Revolutions
+   *
+   * @return Array Path
+   **/
+  genuary_2() {
+    let Wolfram = new WolframRules();
+    return Wolfram.draw()
   }
 
   polygon(sides, length, rotation)
