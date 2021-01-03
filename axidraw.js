@@ -39,12 +39,38 @@ let sketch = function(p) {
     p.push();
     p.translate(p.width/2, p.height/2)
 
+    // Draw Border
+    /*
+    p.stroke(0, 128, 255);
+    p.beginShape();
+    p.vertex(-p.width/2 + margin, p.height/2 - margin)
+    p.vertex(p.width/2 - margin, p.height/2 - margin)
+    p.vertex(p.width/2 - margin, -p.height/2 + margin)
+    p.vertex(-p.width/2 + margin, -p.height/2 + margin)
+    p.vertex(-p.width/2 + margin, p.height/2 - margin)
+    p.endShape();
+    //*/
+
+    // Draw Area
+    /*
+    p.stroke(0, 128, 255);
+    p.beginShape();
+    p.vertex(-p.width/2 + 2 * margin, p.height/2 - 2 * margin)
+    p.vertex(p.width/2 - 2 * margin, p.height/2 - 2 * margin)
+    p.vertex(p.width/2 - 2 * margin, -p.height/2 + 2 * margin)
+    p.vertex(-p.width/2 + 2 * margin, -p.height/2 + 2 * margin)
+    p.vertex(-p.width/2 + 2 * margin, p.height/2 - 2 * margin)
+    p.endShape();
+    //*/
+
     // Draw axis
     /*
+    p.stroke(0, 128, 255);
     p.line(0,p.height/2,0, -p.height/2)
     p.line(-p.width/2, 0, p.width/2, 0)
     //*/
 
+    p.stroke(0);
     for (i = 0; i < paths.length; i++) {
       p.beginShape();
       for (j = 0; j < paths[i].length; j++) {

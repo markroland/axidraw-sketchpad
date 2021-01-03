@@ -15,23 +15,26 @@ class WolframRules {
 
   setup() {
 
-    this.w = 0.06;
+    let width = 40
+    let height = 24
 
-    let width = 3.0
-    let height = 4.0
+    this.w = 2 * (1 / (2 * height))
 
     // We arbitrarily start with just the middle cell having a state of "1"
     this.generation = 0;
-    this.total_generations = 34;
+    this.total_generations = 2 * height;
 
     // First generation of cells with the middle cell "active"
     // An array of 0s and 1s
-    let cells = Array(Math.floor(width / this.w));
+    // let cells = Array(Math.floor(width / this.w));
+    let cells = Array(width*2);
     for (let i = 0; i < cells.length; i++) {
       cells[i] = 0;
     }
     cells[cells.length/2] = 1;
     this.cells = cells;
+
+    console.log(this.cells)
 
     // An array to store the ruleset, for example {0,1,1,0,1,1,0,1}
     // this.ruleset = [0, 1, 0, 1, 1, 0, 1, 0];
@@ -47,7 +50,16 @@ class WolframRules {
 
     let path = new Array();
 
-    for (let g = 0; g < this.total_generations; g++) {
+    let g = 0;
+
+    let pregen = 0;
+
+    // for (g = 0; g < pregen; g++) {
+    //   this.generate();
+    // }
+
+    // for (g = 0; g < this.total_generations; g++) {
+    for (g = pregen; g < this.total_generations; g++) {
 
       for (let i = 0; i < this.cells.length; i++) {
         if (this.cells[i] === 1) {
@@ -63,27 +75,92 @@ class WolframRules {
           path.push(square)
           //*/
 
-          path.push([
+          /*
+          let square = [
             [i * this.w + 0, this.generation * this.w + 0],
-            [i * this.w + this.w, this.generation * this.w + this.w]
+            [i * this.w + this.w, this.generation * this.w + 0],
+            [i * this.w + this.w, this.generation * this.w + this.w],
+            [i * this.w + 0, this.generation * this.w + this.w],
+            [i * this.w + 0, this.generation * this.w + 0]
+          ];
+          path.push(square)
+          //*/
+
+          /*
+          let base_shape = this.polygon(5, 0.025, 0);
+          let translated_shape = this.translatePath(
+              base_shape,
+              [i * this.w, (this.generation-54) * this.w]
+          );
+          path.push(translated_shape);
+          //*/
+
+          // "X" shape
+          //*
+          path.push([
+            [(i * this.w) + 0, (this.generation - pregen) * this.w + 0],
+            [(i * this.w) + 1.0 * this.w, (this.generation - pregen) * this.w + 1.0 * this.w]
           ])
           path.push([
-            [i * this.w + this.w, this.generation * this.w + 0],
-            [i * this.w + 0, this.generation * this.w + this.w],
+            [(i * this.w) + 1.0 * this.w, (this.generation - pregen) * this.w + 0],
+            [(i * this.w) + 0, (this.generation - pregen) * this.w + 1.0 * this.w],
           ])
+          //*/
 
-          // path.push(square)
         }
       }
 
       this.generate();
     }
 
+    // Grid test
+    /*
+    let a_max = 40
+    let b_max = 24
+    for (let a = 0; a < 2 * a_max; a++) {
+
+        for (let b = 0; b < 2 * b_max; b++) {
+
+            let side_length = 2 * (1 / (2 * b_max));
+
+            // Base shape
+            // let base_shape = this.polygon(4, side_length, Math.PI/4);
+            let base_shape = [
+              [0,0],
+              [side_length,0],
+              [side_length,side_length],
+              [0,side_length],
+              [0,0]
+            ];
+
+            // Translate
+            let translated_shape = this.translatePath(
+                base_shape,
+                [1 * (a/b_max), 1 * (b/b_max)]
+            );
+
+            // Add to paths array
+            path.push(translated_shape);
+
+        }
+    }
+    //*/
+
+    /*
+    return [[
+      [-5/3,1],
+      [5/3,1],
+      [5/3,-1],
+      [-5/3,-1],
+      [-5/3,1]
+    ]]
+    //*/
+
     //*
     // Center the Paths to the canvas
     let centered_path = new Array();
     for (let i = 0; i < path.length; i++) {
-        centered_path.push(this.translatePath(path[i], [-1.571, -1]))
+        centered_path.push(this.translatePath(path[i], [-(5/3), -1]))
     }
     path = centered_path;
     //*/
@@ -123,6 +200,20 @@ class WolframRules {
     if (a == 0 && b == 0 && c == 1) return this.ruleset[6];
     if (a == 0 && b == 0 && c == 0) return this.ruleset[7];
     return 0;
+  }
+
+  polygon(sides, length, rotation)
+  {
+    let polygon = new Array();
+    let polygon_theta = 0.0;
+    for (let a = 0; a <= sides; a++) {
+      polygon_theta = (a/sides) * (2 * Math.PI);
+      polygon.push([
+        length * Math.cos(polygon_theta + rotation),
+        length * Math.sin(polygon_theta + rotation)
+      ])
+    }
+    return polygon;
   }
 
   /**
