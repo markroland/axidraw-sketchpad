@@ -34,8 +34,6 @@ class WolframRules {
     cells[cells.length/2] = 1;
     this.cells = cells;
 
-    console.log(this.cells)
-
     // An array to store the ruleset, for example {0,1,1,0,1,1,0,1}
     // this.ruleset = [0, 1, 0, 1, 1, 0, 1, 0];
     this.ruleset = [0, 0, 0, 1, 1, 1, 1, 0];
@@ -45,6 +43,47 @@ class WolframRules {
    * Draw path
    */
   draw() {
+    // return this.draw_pyramid();
+    return this.draw_circle();
+  }
+
+  draw_circle() {
+
+    this.setup();
+
+    let path = new Array();
+
+    let radius;
+
+    for (let g = 0; g < this.total_generations; g++) {
+
+      radius = 0.0 + (1.0 * g/this.total_generations);
+
+      let polygon = new Array();
+      let polygon_theta = 0.0;
+      for (let a = 0; a <= this.cells.length; a++) {
+        polygon_theta = (a/this.cells.length) * (2 * Math.PI);
+        if (this.cells[a] === 1) {
+          path.push([
+            [
+              radius * Math.cos(polygon_theta - Math.PI/this.cells.length),
+              radius * Math.sin(polygon_theta - Math.PI/this.cells.length)
+            ],
+            [
+              radius * Math.cos(polygon_theta + Math.PI/this.cells.length),
+              radius * Math.sin(polygon_theta + Math.PI/this.cells.length)
+            ]
+          ])
+        }
+      }
+
+      this.generate();
+    }
+
+    return path;
+  }
+
+  draw_pyramid() {
 
     this.setup();
 
@@ -86,17 +125,17 @@ class WolframRules {
           path.push(square)
           //*/
 
-          /*
-          let base_shape = this.polygon(5, 0.025, 0);
+          //*
+          let base_shape = this.polygon(8, 0.015, Math.PI/8);
           let translated_shape = this.translatePath(
               base_shape,
-              [i * this.w, (this.generation-54) * this.w]
+              [i * this.w, (this.generation) * this.w]
           );
           path.push(translated_shape);
           //*/
 
           // "X" shape
-          //*
+          /*
           path.push([
             [(i * this.w) + 0, (this.generation - pregen) * this.w + 0],
             [(i * this.w) + 1.0 * this.w, (this.generation - pregen) * this.w + 1.0 * this.w]
