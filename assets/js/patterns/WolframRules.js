@@ -15,8 +15,8 @@ class WolframRules {
 
   setup() {
 
-    let width = 40
-    let height = 24
+    let width = 80
+    let height = 48
 
     this.w = 2 * (1 / (2 * height))
 
@@ -49,36 +49,64 @@ class WolframRules {
 
   draw_circle() {
 
-    this.setup();
+    // We arbitrarily start with just the middle cell having a state of "1"
+    this.generation = 0;
+    this.total_generations = 140;
+
+    let start_generation = 80;
+
+    // First generation of cells with the middle cell "active"
+    // An array of 0s and 1s
+    let cells = Array(120);
+    for (let i = 0; i < cells.length; i++) {
+      cells[i] = 0;
+    }
+    cells[cells.length/2] = 1;
+    this.cells = cells;
+
+    // An array to store the ruleset, for example {0,1,1,0,1,1,0,1}
+    // this.ruleset = [0, 1, 0, 1, 1, 0, 1, 0];
+    this.ruleset = [0, 0, 0, 1, 1, 1, 1, 0];
 
     let path = new Array();
 
     let radius;
 
-    for (let g = 0; g < this.total_generations; g++) {
+    // Pre-run generations without rendering them
+    for (let g = 0; g < start_generation; g++) {
+      this.generate();
+    }
 
-      radius = 0.0 + (1.0 * g/this.total_generations);
+    // for (let g = 0; g < this.total_generations; g++) {
+    let i = 0;
+    do {
+
+      radius = 0.0 + (1.0 * i/(this.total_generations-start_generation));
 
       let polygon = new Array();
       let polygon_theta = 0.0;
-      for (let a = 0; a <= this.cells.length; a++) {
-        polygon_theta = (a/this.cells.length) * (2 * Math.PI);
+      let crop = 20;
+      for (let a = crop; a <= this.cells.length - crop; a++) {
+        polygon_theta = (a/(this.cells.length - 2 * crop)) * (2 * Math.PI);
         if (this.cells[a] === 1) {
           path.push([
             [
-              radius * Math.cos(polygon_theta - Math.PI/this.cells.length),
-              radius * Math.sin(polygon_theta - Math.PI/this.cells.length)
+              radius * Math.cos(polygon_theta - Math.PI/(this.cells.length - 2 * crop)),
+              radius * Math.sin(polygon_theta - Math.PI/(this.cells.length - 2 * crop))
             ],
             [
-              radius * Math.cos(polygon_theta + Math.PI/this.cells.length),
-              radius * Math.sin(polygon_theta + Math.PI/this.cells.length)
+              radius * Math.cos(polygon_theta + Math.PI/(this.cells.length - 2 * crop)),
+              radius * Math.sin(polygon_theta + Math.PI/(this.cells.length - 2 * crop))
             ]
           ])
         }
       }
 
+      i++;
+
       this.generate();
-    }
+
+    } while (this.generation < this.total_generations)
 
     return path;
   }
