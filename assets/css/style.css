@@ -48,6 +48,8 @@ footer {
 
 #p5js-canvas {
   margin-bottom: 1em;
+  width: 600px;
+  height: 384px;
 }
 
 #defaultCanvas0 {

@@ -16,7 +16,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_2();
+    return this.genuary_4();
 
     // Canvas limits test
     /*
@@ -102,6 +102,66 @@ class Genuary {
   genuary_2() {
     let Wolfram = new WolframRules();
     return Wolfram.draw()
+  }
+
+  /**
+   * Prompt: Small areas of symmetry.
+   **/
+  genuary_4() {
+
+    let slice_paths = new Array();
+
+    let path = new Array();
+
+    let base_shape = new Array();
+
+    let slices = 6;
+
+    let num_shapes_per_slice = 6;
+
+    // Generate 1 slice (which includes its mirror)
+    for (let s = 0; s < num_shapes_per_slice; s++) {
+
+      // Generate a base shape with 3-5 sides, random side length, and random rotation
+      base_shape = this.polygon(
+        this.getRndInteger(3,5),
+        0.05 + Math.random() / 10,
+        (Math.random() * 360) / (2 * Math.PI)
+      );
+
+      // Translate the shape a random distance from the center
+      let translated_shape = this.translatePath(base_shape, [0.1 + 0.9 * Math.random(), 0])
+
+      // Rotate the shape a random amount from the origin, limited by the slice size
+      let random_rotation = Math.random() * Math.PI / slices;
+      let rotated_shape = this.rotatePath(translated_shape, random_rotation)
+
+      // Add shape to paths
+      slice_paths.push(rotated_shape);
+
+      // Reflect shape to it's mirrored slice
+      let reflected_shape = this.rotatePath(translated_shape, -random_rotation)
+      slice_paths.push(reflected_shape);
+    }
+
+    // path = slice_paths;
+
+    // Repeat the slice a full rotation
+    for (let a = 0; a < slices; a++) {
+      for (let i = 0; i < slice_paths.length; i++) {
+        let rotated_slice_path = this.rotatePath(slice_paths[i], a * Math.PI / (slices/2));
+        path.push(rotated_slice_path)
+      }
+    }
+
+    return path;
+  }
+
+  /**
+   * https://www.w3schools.com/js/js_random.asp
+   */
+  getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
   }
 
   polygon(sides, length, rotation)
