@@ -16,7 +16,9 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_4();
+    // return this.genuary_4();
+
+    return [this.parametric()];
 
     // Canvas limits test
     /*
@@ -151,6 +153,58 @@ class Genuary {
       for (let i = 0; i < slice_paths.length; i++) {
         let rotated_slice_path = this.rotatePath(slice_paths[i], a * Math.PI / (slices/2));
         path.push(rotated_slice_path)
+      }
+    }
+
+    return path;
+  }
+
+  parametric() {
+
+    // Set initial values
+    var x;
+    var y;
+
+    // Initialize return value - the path array
+    // This stores the x,y coordinates for each step
+    var path = new Array();
+
+    // The number of "sides" to the circle.
+    let steps_per_revolution = 120;
+
+    // Loop through one revolution
+    let a = 1.2;
+    let b = 0.7;
+    let c = 0.0;
+    let d = 0.0;
+    for (let i = 0; i < 100; i++) {
+      a += (Math.random() - 0.5) / 10;
+      b += (Math.random() - 0.5) / 10;
+      c = (Math.random() - 0.5) / 10;
+      d = (Math.random() - 0.5) / 10;
+      var step = 0;
+      var t = 0.0;
+      while (t < (2 * Math.PI)) {
+
+        // Rotational Angle (steps per rotation in the denominator)
+        t = (step/steps_per_revolution) * (2 * Math.PI);
+
+        // Run the parametric equations
+        // x = 0.3 * Math.sin(t) * (Math.pow(Math.E, Math.cos(t)) - 2 * Math.cos(4*t) - Math.pow(Math.sin(t/12), 5));
+        // y = 0.3 * Math.cos(t) * (Math.pow(Math.E, Math.cos(t)) - 2 * Math.cos(4*t) - Math.pow(Math.sin(t/12), 5));
+
+        // let r = Math.sqrt(2) * Math.sqrt(Math.cos(2*t));
+        // x = r * Math.cos(t);
+        // y = r * Math.sin(t);
+
+        x = a * Math.sin(t) + c;
+        y = b * Math.sin(2*t) + d;
+
+        // Add coordinates to shape array
+        path.push([x,y]);
+
+        // Increment iteration counter
+        step++;
       }
     }
 
