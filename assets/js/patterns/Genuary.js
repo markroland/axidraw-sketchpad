@@ -169,36 +169,67 @@ class Genuary {
     // This stores the x,y coordinates for each step
     var path = new Array();
 
+    let loops = 50;
+
     // The number of "sides" to the circle.
     let steps_per_revolution = 120;
 
     // Loop through one revolution
-    let a = 1.2;
-    let b = 0.7;
-    let c = 0.0;
-    let d = 0.0;
-    for (let i = 0; i < 100; i++) {
-      a += (Math.random() - 0.5) / 10;
-      b += (Math.random() - 0.5) / 10;
-      c = (Math.random() - 0.5) / 10;
-      d = (Math.random() - 0.5) / 10;
+    let r;
+
+    // Coefficients for random permutations
+    let a0 = 1.0;
+    let a1;
+    let b0 = 1.0
+    let b1;
+    let c0 = 0;
+    let c1;
+    let d0 = 0;
+    let d1
+
+    for (let i = 0; i < loops; i++) {
+
+      // Introduce random changes to the coefficients
+      a1 = a0 + 0.2 * (Math.random() - 0.5);
+      b1 = b0 + 0.2 * (Math.random() - 0.5);
+      c1 = c0 + 0.03 * (Math.random() - 0.5);
+      d1 = d0 + 0.03 * (Math.random() - 0.5);
+
       var step = 0;
-      var t = 0.0;
-      while (t < (2 * Math.PI)) {
+      var t = 0;
+      var t_max = 2 * Math.PI
+      while (t < t_max) {
 
         // Rotational Angle (steps per rotation in the denominator)
-        t = (step/steps_per_revolution) * (2 * Math.PI);
+        t = (step/steps_per_revolution) * t_max;
 
         // Run the parametric equations
+
+        // Butterfly curve
         // x = 0.3 * Math.sin(t) * (Math.pow(Math.E, Math.cos(t)) - 2 * Math.cos(4*t) - Math.pow(Math.sin(t/12), 5));
         // y = 0.3 * Math.cos(t) * (Math.pow(Math.E, Math.cos(t)) - 2 * Math.cos(4*t) - Math.pow(Math.sin(t/12), 5));
 
-        // let r = Math.sqrt(2) * Math.sqrt(Math.cos(2*t));
-        // x = r * Math.cos(t);
-        // y = r * Math.sin(t);
+        // Infinity 1 (https://www.desmos.com/calculator/pu73klljjp)
+        //*
+        if (Math.cos(2 * t) > 0) {
+          r = Math.sqrt(Math.cos(2 * t));
+        } else {
+          r = 0
+        }
+        x = r * Math.cos(t);
+        y = r * Math.sin(t);
 
-        x = a * Math.sin(t) + c;
-        y = b * Math.sin(2*t) + d;
+        //*/
+
+        // Infinity 2 ()
+        /*
+        x = Math.sin(t);
+        y = 0.5 * Math.sin(2*t);
+        //*/
+
+        // Introduce modified coefficients
+        x = x * (a0 + (a1 - a0) * (step/steps_per_revolution)) + (c0 + (c1 - c0) * (step/steps_per_revolution));
+        y = y * (b0 + (b1 - b0) * (step/steps_per_revolution)) + (d0 + (d1 - d0) * (step/steps_per_revolution));
 
         // Add coordinates to shape array
         path.push([x,y]);
@@ -206,9 +237,18 @@ class Genuary {
         // Increment iteration counter
         step++;
       }
+
+      a0 = a1;
+      b0 = b1;
+      c0 = c1;
+      d0 = d1;
     }
 
     return path;
+  }
+
+  grid() {
+
   }
 
   /**
