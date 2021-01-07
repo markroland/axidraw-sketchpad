@@ -41,7 +41,7 @@ let sketch = function(p) {
 
     // Draw Border
     /*
-    p.stroke(0, 128, 255);
+    p.stroke(255, 0, 128);
     p.beginShape();
     p.vertex(-p.width/2 + margin, p.height/2 - margin)
     p.vertex(p.width/2 - margin, p.height/2 - margin)
@@ -65,7 +65,7 @@ let sketch = function(p) {
 
     // Draw axis
     /*
-    p.stroke(0, 128, 255);
+    p.stroke(0, 255, 128);
     p.line(0,p.height/2,0, -p.height/2)
     p.line(-p.width/2, 0, p.width/2, 0)
     //*/

@@ -48,9 +48,9 @@ class Genuary {
    * Draw path
    */
   draw() {
-    // return this.genuary_4();
+    return this.genuary_6();
 
-    return [this.parametric()];
+    // return [this.parametric()];
 
     // Canvas limits test
     /*
@@ -277,6 +277,71 @@ class Genuary {
     }
 
     return path;
+  }
+
+  genuary_6() {
+
+    // Polygon radius
+    let R = 0.03
+
+    // Equilateral triangle side length
+    let side = R * (3 / Math.sqrt(3));
+
+    let paths = new Array();
+
+    let triangle = this.polygon(3, side, Math.PI/6);
+
+    // paths.push(triangle);
+
+    let p;
+
+    for (let y = -6; y <= 6; y++) {
+      for (let x = -18; x <= 18; x++) {
+
+        p = Math.random();
+
+        if (p < 0.3) {
+          paths.push(
+            this.translatePath(
+              triangle,
+              [x * 3 * R, y * 3 * side]
+            )
+          )
+          paths.push(
+            this.translatePath(
+              triangle,
+              [x * 3 * R - 1.5 * R, y * 3 * side + 1.5 * side]
+            )
+          )
+        }
+
+        if (y > -2 && x > -14 && x < 14 && p < 0.1) {
+          paths.push(
+            this.translatePath(
+              this.scalePath(triangle, 4),
+              [x * 3 * R, y * 3 * side]
+            )
+          )
+        }
+
+        if (y > -4 && y < 4 && x > -10 && x < 10 && p < 0.1) {
+          paths.push(
+            this.translatePath(
+              this.scalePath(triangle, -8),
+              [x * 3 * R, y * 3 * side]
+            )
+          )
+        }
+
+      }
+    }
+
+    // Center artwork on page (loosely)
+    for (let p = 0; p < paths.length; p++) {
+      paths[p] = this.translatePath(paths[p], [0, 0.0])
+    }
+
+    return paths;
   }
 
   grid() {
