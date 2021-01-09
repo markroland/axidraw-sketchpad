@@ -5,11 +5,11 @@
  * [x] JAN.1 TRIPLE NESTED LOOP
  * [x] JAN.2 Rule 30 (elementary cellular automaton)
  * [ ] JAN.3 Make something human.
- * [ ] JAN.4 Small areas of symmetry.
+ * [x] JAN.4 Small areas of symmetry.
  * [x] JAN.5 Do some code golf! How little code can you write to make something interesting? Share the sketch and its code together if you can.
- * [ ] JAN.6 Triangle subdivision.
+ * [x] JAN.6 Triangle subdivision.
  * [ ] JAN.7 Generate some rules, then follow them by hand on paper.
- * [ ] JAN.8 Curve only.
+ * [x] JAN.8 Curve only.
  * [ ] JAN.9 Interference patterns.
  * [ ] JAN.10 // TREE
  * [ ] JAN.11 Use something other than a computer as an autonomous process (or use a non-computer random source).
@@ -48,9 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_6();
-
-    // return [this.parametric()];
+    return this.genuary_8();
 
     // Canvas limits test
     /*
@@ -191,94 +189,6 @@ class Genuary {
     return path;
   }
 
-  parametric() {
-
-    // Set initial values
-    var x;
-    var y;
-
-    // Initialize return value - the path array
-    // This stores the x,y coordinates for each step
-    var path = new Array();
-
-    let loops = 50;
-
-    // The number of "sides" to the circle.
-    let steps_per_revolution = 120;
-
-    // Loop through one revolution
-    let r;
-
-    // Coefficients for random permutations
-    let a0 = 1.0;
-    let a1;
-    let b0 = 1.0
-    let b1;
-    let c0 = 0;
-    let c1;
-    let d0 = 0;
-    let d1
-
-    for (let i = 0; i < loops; i++) {
-
-      // Introduce random changes to the coefficients
-      a1 = a0 + 0.2 * (Math.random() - 0.5);
-      b1 = b0 + 0.2 * (Math.random() - 0.5);
-      c1 = c0 + 0.03 * (Math.random() - 0.5);
-      d1 = d0 + 0.03 * (Math.random() - 0.5);
-
-      var step = 0;
-      var t = 0;
-      var t_max = 2 * Math.PI
-      while (t < t_max) {
-
-        // Rotational Angle (steps per rotation in the denominator)
-        t = (step/steps_per_revolution) * t_max;
-
-        // Run the parametric equations
-
-        // Butterfly curve
-        // x = 0.3 * Math.sin(t) * (Math.pow(Math.E, Math.cos(t)) - 2 * Math.cos(4*t) - Math.pow(Math.sin(t/12), 5));
-        // y = 0.3 * Math.cos(t) * (Math.pow(Math.E, Math.cos(t)) - 2 * Math.cos(4*t) - Math.pow(Math.sin(t/12), 5));
-
-        // Infinity 1 (https://www.desmos.com/calculator/pu73klljjp)
-        //*
-        if (Math.cos(2 * t) > 0) {
-          r = Math.sqrt(Math.cos(2 * t));
-        } else {
-          r = 0
-        }
-        x = r * Math.cos(t);
-        y = r * Math.sin(t);
-
-        //*/
-
-        // Infinity 2 ()
-        /*
-        x = Math.sin(t);
-        y = 0.5 * Math.sin(2*t);
-        //*/
-
-        // Introduce modified coefficients
-        x = x * (a0 + (a1 - a0) * (step/steps_per_revolution)) + (c0 + (c1 - c0) * (step/steps_per_revolution));
-        y = y * (b0 + (b1 - b0) * (step/steps_per_revolution)) + (d0 + (d1 - d0) * (step/steps_per_revolution));
-
-        // Add coordinates to shape array
-        path.push([x,y]);
-
-        // Increment iteration counter
-        step++;
-      }
-
-      a0 = a1;
-      b0 = b1;
-      c0 = c1;
-      d0 = d1;
-    }
-
-    return path;
-  }
-
   genuary_6() {
 
     // Polygon radius
@@ -344,8 +254,292 @@ class Genuary {
     return paths;
   }
 
-  grid() {
+  genuary_8() {
 
+    let paths = new Array();
+
+    // Grid test
+    let a_max = 5;
+    let b_max = 3;
+    // let side_length = 2 * (1 / (2 * b_max));
+    let shape_radius = 2 * (1/b_max);
+    let scale = 1.0;
+
+    /*
+    paths = [
+        [[0.5, 0.5],
+        [0.5, -0.5],
+        [-0.5, -0.5],
+        [-0.5, 0.5],
+        [0.5, 0.5]]
+    ];
+    //*/
+
+    /*
+    paths = [
+        [[0.5 * 5/3, 0.5],
+        [0.5 * 5/3, -0.5],
+        [0.5 * -5/3, -0.5],
+        [0.5 * -5/3, 0.5],
+        [0.5 * 5/3, 0.5]]
+    ];
+    //*/
+
+    for (let a = 0; a < a_max; a++) {
+
+        for (let b = 0; b < b_max; b++) {
+
+            // Base shape
+            // let base_shape = this.polygon(4, shape_radius, 0);
+
+            // Test shape ("shape_radius" is actually the side length in this case)
+            /*
+            let base_shape = [
+              [-shape_radius/2, shape_radius/2],
+              [shape_radius/2, shape_radius/2],
+              [shape_radius/2, -shape_radius/2],
+              [-shape_radius/2, -shape_radius/2],
+              [-shape_radius/2, shape_radius/2]
+            ];
+            //*/
+
+            // Farris Curve
+            //*
+            let base_shape = this.farris(10,
+              1 + Math.round(Math.random() * 19),
+              1 + Math.round(Math.random() * 19),
+              1 + Math.round(Math.random() * 19)
+            );
+            //*/
+
+            // Scale Shape
+            let scaled_shape = this.scalePath(base_shape, 1.25)
+
+            // Individual shape Translate
+            //*
+            let translated_shape = this.translatePath(
+                scaled_shape,
+                [2 * (a_max/b_max) * (a/a_max), 2 * (b/b_max)]
+            );
+            //*/
+
+            // Add to paths array
+            paths.push(translated_shape);
+        }
+    }
+
+    // Center the Paths to the canvas
+
+    let centered_path = new Array();
+    for (let c = 0; c < paths.length; c++) {
+        centered_path.push(
+          // this.translatePath(paths[c], [-(a_max/b_max)/2, -0.5])
+          this.translatePath(
+            paths[c],
+            [
+              -(a_max/b_max) + shape_radius/2,
+              -1 + shape_radius/2
+            ]
+          )
+        )
+    }
+    paths = centered_path;
+    //
+
+    return paths;
+  }
+
+  farris(radius, A, B, C) {
+
+    let scale = 1.0
+    let rotation = 0.0;
+
+    // Set initial values
+    var x;
+    var y;
+    var theta = 0.0;
+
+    // Initialize return value - the path array
+    // This stores the x,y coordinates for each step
+    var path = new Array();
+
+    // Iteration counter.
+    var step = 0;
+
+    // Set period of full rotation
+    let period = 2 * Math.PI;
+
+    // Set the steps per revolution. Oversample and small distances can be optimized out afterward
+    let steps_per_revolution = 1000;
+
+    // Loop through one revolution
+    // NOTE: This is not guaranteed to be 1 full cycle. It may be over or under for different A,B,C parameters
+    while (theta < period) {
+
+      // Rotational Angle (steps per rotation in the denominator)
+      theta = (step/steps_per_revolution) * period
+
+      // Run the parametric equations
+      x = (scale/100) * radius * (Math.cos(A*theta) + Math.cos(B*theta)/2 + Math.sin(C*theta)/3);
+      y = (scale/100) * radius * (Math.sin(A*theta) + Math.sin(B*theta)/2 + Math.cos(C*theta)/3);
+
+      // Add coordinates to shape array
+      path.push([x,y]);
+
+      // Increment iteration counter
+      step++;
+    }
+
+    // Rotate
+    // Every pattern is "rotated" by 12.5 degrees at Theta=0.
+    // I'm applying a base rotation so the pattern starts on the X-axis
+    // rotation = rotation - Math.atan2(1/3, 1.5) * 180 / Math.PI;
+    // path = path.map(function(element) {
+    //     return this.rotationMatrix(element[0], element[1], rotation * (Math.PI/180))
+    // }, this);
+
+    return path;
+  }
+
+  parametric() {
+
+    // Set initial values
+    var x;
+    var y;
+
+    let paths = new Array();
+
+    // Initialize return value - the path array
+    // This stores the x,y coordinates for each step
+    var path = new Array();
+
+    let loops = 50;
+
+    // The number of "sides" to the circle.
+    let steps_per_revolution = 120;
+
+    // Loop through one revolution
+    let r;
+
+    // Coefficients for random permutations
+    let a0 = 1.0;
+    let a1;
+    let b0 = 1.0
+    let b1;
+    let c0 = 0;
+    let c1;
+    let d0 = 0;
+    let d1
+
+    for (let i = 0; i < loops; i++) {
+
+      // Introduce random changes to the coefficients
+      a1 = a0 + 0.2 * (Math.random() - 0.5);
+      b1 = b0 + 0.2 * (Math.random() - 0.5);
+      c1 = c0 + 0.03 * (Math.random() - 0.5);
+      d1 = d0 + 0.03 * (Math.random() - 0.5);
+
+      var step = 0;
+      var t = 0;
+      var t_max = 2 * Math.PI
+      while (t < t_max) {
+
+        // Rotational Angle (steps per rotation in the denominator)
+        t = (step/steps_per_revolution) * t_max;
+
+        // Run the parametric equations
+
+        // Butterfly curve
+        // x = 0.3 * Math.sin(t) * (Math.pow(Math.E, Math.cos(t)) - 2 * Math.cos(4*t) - Math.pow(Math.sin(t/12), 5));
+        // y = 0.3 * Math.cos(t) * (Math.pow(Math.E, Math.cos(t)) - 2 * Math.cos(4*t) - Math.pow(Math.sin(t/12), 5));
+
+        // Infinity
+
+        // Infinity 1 (https://www.desmos.com/calculator/pu73klljjp)
+        //*
+        if (Math.cos(2 * t) > 0) {
+          r = Math.sqrt(Math.cos(2 * t));
+        } else {
+          r = 0
+        }
+        x = r * Math.cos(t);
+        y = r * Math.sin(t);
+
+        //*/
+
+        // Infinity 2 ()
+        /*
+        x = Math.sin(t);
+        y = 0.5 * Math.sin(2*t);
+        //*/
+
+        // Introduce modified coefficients
+        x = x * (a0 + (a1 - a0) * (step/steps_per_revolution)) + (c0 + (c1 - c0) * (step/steps_per_revolution));
+        y = y * (b0 + (b1 - b0) * (step/steps_per_revolution)) + (d0 + (d1 - d0) * (step/steps_per_revolution));
+
+        // -- end infinity
+
+        // Add coordinates to shape array
+        path.push([x,y]);
+
+        // Increment iteration counter
+        step++;
+      }
+
+      a0 = a1;
+      b0 = b1;
+      c0 = c1;
+      d0 = d1;
+    }
+
+    paths.push(path);
+
+    return paths;
+  }
+
+  grid(i = 40, j = 24) {
+
+    let paths = new Array();
+
+    // Grid test
+    let a_max = 40;
+    let b_max = 24;
+    for (let a = 0; a < 2 * a_max; a++) {
+
+        for (let b = 0; b < 2 * b_max; b++) {
+
+            let side_length = 2 * (1 / (2 * b_max));
+
+            // Base shape
+            // let base_shape = this.polygon(4, side_length, Math.PI/4);
+            let base_shape = [
+              [0,0],
+              [side_length,0],
+              [side_length,side_length],
+              [0,side_length],
+              [0,0]
+            ];
+
+            // Translate
+            let translated_shape = this.translatePath(
+                base_shape,
+                [1 * (a/b_max), 1 * (b/b_max)]
+            );
+
+            // Add to paths array
+            paths.push(translated_shape);
+
+        }
+    }
+
+    // Center the Paths to the canvas
+    let centered_path = new Array();
+    for (let c = 0; c < paths.length; c++) {
+        centered_path.push(this.translatePath(paths[c], [-i/j, -1]))
+    }
+    paths = centered_path;
+
+    return paths
   }
 
   /**

@@ -72,6 +72,16 @@ let sketch = function(p) {
 
     p.stroke(0);
     for (i = 0; i < paths.length; i++) {
+
+      /*
+      // Randomize stroke. This can help identify shapes if they overlap
+      p.stroke(
+        Math.random() * 255,
+        Math.random() * 255,
+        Math.random() * 255
+      );
+      //*/
+
       p.beginShape();
       for (j = 0; j < paths[i].length; j++) {
         let x = paths[i][j][0] * ((p.min(p.width, p.height)/2) - margin * 2);
