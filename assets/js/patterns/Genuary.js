@@ -10,7 +10,7 @@
  * [x] JAN.6 Triangle subdivision.
  * [ ] JAN.7 Generate some rules, then follow them by hand on paper.
  * [x] JAN.8 Curve only.
- * [ ] JAN.9 Interference patterns.
+ * [x] JAN.9 Interference patterns.
  * [ ] JAN.10 // TREE
  * [ ] JAN.11 Use something other than a computer as an autonomous process (or use a non-computer random source).
  * [ ] JAN.12 Use an API (e.g. the weather). Here’s a huge list of free public APIs.
@@ -48,7 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_8();
+    return this.genuary_9();
 
     // Canvas limits test
     /*
@@ -326,6 +326,100 @@ class Genuary {
             // Add to paths array
             paths.push(translated_shape);
         }
+    }
+
+    // Center the Paths to the canvas
+
+    let centered_path = new Array();
+    for (let c = 0; c < paths.length; c++) {
+        centered_path.push(
+          // this.translatePath(paths[c], [-(a_max/b_max)/2, -0.5])
+          this.translatePath(
+            paths[c],
+            [
+              -(a_max/b_max) + shape_radius/2,
+              -1 + shape_radius/2
+            ]
+          )
+        )
+    }
+    paths = centered_path;
+    //
+
+    return paths;
+  }
+
+  genuary_9() {
+
+    let paths = new Array();
+
+    // Grid test
+    let a_max = 10;
+    let b_max = 6;
+    let shape_radius = 2 * (1/b_max);
+    let scale = 1.0;
+
+    for (let a = 0; a < a_max; a++) {
+
+      for (let b = 0; b < b_max; b++) {
+
+        let hash_shape = new Array();
+        let c_max = (a+1)
+        for (let c = 1; c <= c_max; c++) {
+
+          // Debugging: Grid bounding box
+          /*
+          paths.push(
+            this.translatePath([
+                [-shape_radius/2, shape_radius/2],
+                [shape_radius/2, shape_radius/2],
+                [shape_radius/2, -shape_radius/2],
+                [-shape_radius/2, -shape_radius/2],
+                [-shape_radius/2, shape_radius/2]
+              ],
+              [2 * (a_max/b_max) * (a/a_max), 2 * (b/b_max)]
+            )
+          );
+          //*/
+
+          // Horizontal hashes
+          let horizontal_hash = [
+            [-shape_radius/2, shape_radius * c/c_max - shape_radius/2],
+            [shape_radius/2, shape_radius * c/c_max - shape_radius/2]
+          ];
+
+          // Center in grid
+          horizontal_hash = this.translatePath(
+              horizontal_hash,
+              [0, (a/(a+1))*(shape_radius/2) - (shape_radius/2)]
+          );
+
+          // Scale Shape
+          let scaled_shape = this.scalePath(horizontal_hash, 0.675)
+
+          // Individual shape Translate
+          //*
+          let translated_shape = this.translatePath(
+              scaled_shape,
+              [2 * (a_max/b_max) * (a/a_max), 2 * (b/b_max)]
+          );
+          //*/
+
+          // Add to paths array
+          paths.push(translated_shape);
+
+          // Vertical Hashes
+          paths.push(
+            this.translatePath(
+              this.rotatePath(
+                scaled_shape,
+                (1 - (b)/b_max) * Math.PI/2
+              ),
+              [2 * (a_max/b_max) * (a/a_max), 2 * (b/b_max)]
+            )
+          )
+        }
+      }
     }
 
     // Center the Paths to the canvas
