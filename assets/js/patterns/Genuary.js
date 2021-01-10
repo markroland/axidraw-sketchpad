@@ -423,11 +423,10 @@ class Genuary {
     }
 
     // Center the Paths to the canvas
-
+    //*
     let centered_path = new Array();
     for (let c = 0; c < paths.length; c++) {
         centered_path.push(
-          // this.translatePath(paths[c], [-(a_max/b_max)/2, -0.5])
           this.translatePath(
             paths[c],
             [
@@ -438,7 +437,7 @@ class Genuary {
         )
     }
     paths = centered_path;
-    //
+    //*/
 
     return paths;
   }
