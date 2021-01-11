@@ -11,7 +11,7 @@
  * [ ] JAN.7 Generate some rules, then follow them by hand on paper.
  * [x] JAN.8 Curve only.
  * [x] JAN.9 Interference patterns.
- * [ ] JAN.10 // TREE
+ * [x] JAN.10 // TREE
  * [ ] JAN.11 Use something other than a computer as an autonomous process (or use a non-computer random source).
  * [ ] JAN.12 Use an API (e.g. the weather). Here’s a huge list of free public APIs.
  * [ ] JAN.13 Do not repeat.
@@ -48,18 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_9();
-
-    // Canvas limits test
-    /*
-    return [
-        [[1.571, 1],
-        [1.571, -1],
-        [-1.571, -1],
-        [-1.571, 1],
-        [1.571, 1]]
-    ]
-    //*/
+    return this.genuary_10();
   }
 
   /**
@@ -440,6 +429,225 @@ class Genuary {
     //*/
 
     return paths;
+  }
+
+  genuary_10() {
+
+    let paths = new Array();
+
+    // Grid test
+    let a_max = 5;
+    let b_max = 3;
+    let shape_radius = 2 * (1/b_max);
+    let max_cactus_height = 2 * (1/b_max);
+    let scale = 1.0;
+
+    for (let a = 0; a < a_max; a++) {
+
+      for (let b = 0; b < b_max; b++) {
+
+        // Debugging: Grid bounding box
+        /*
+        paths.push(
+          this.translatePath([
+              [-shape_radius/2, shape_radius/2],
+              [shape_radius/2, shape_radius/2],
+              [shape_radius/2, -shape_radius/2],
+              [-shape_radius/2, -shape_radius/2],
+              [-shape_radius/2, shape_radius/2]
+            ],
+            [2 * (a_max/b_max) * (a/a_max), 2 * (b/b_max)]
+          )
+        );
+        //*/
+
+        // Horizontal hashes
+        // let cactus = this.egg();
+        let cactus_unit_height = 1 / (b_max/2);
+        let cactus = this.saguaro(cactus_unit_height);
+
+        // Transform
+        for (let i = 0; i < cactus.length; i++) {
+
+          // Rotate a quarter turn (90 degrees)
+          // cactus[i] = this.rotatePath(cactus[i], -Math.PI/2)
+
+          // Move shape down so that shape is centered around the local origin
+          cactus[i] = this.translatePath(cactus[i], [0, -cactus_unit_height / 2]);
+
+          // Scale down a little bit for margin between tiles
+          cactus[i] = this.scalePath(cactus[i], -0.75)
+
+          // Move to tile location on canvas
+          cactus[i] = this.translatePath(
+            cactus[i],
+            [2 * (a_max/b_max) * (a/a_max), 2 * (b/b_max)]
+          );
+
+          paths.push(cactus[i]);
+        }
+
+      }
+    }
+
+    // Center the Paths to the canvas
+    //*
+    let centered_path = new Array();
+    for (let c = 0; c < paths.length; c++) {
+        centered_path.push(
+          this.translatePath(
+            paths[c],
+            [
+              -(a_max/b_max) + shape_radius/2,
+              -1 + shape_radius/2
+            ]
+          )
+        )
+    }
+    paths = centered_path;
+    //*/
+
+    return paths;
+  }
+
+  saguaro(cactus_unit_height) {
+
+    // Sample data format
+    /*
+    return [
+      [
+        [0, 0.01],
+        [0, -0.01],
+      ],
+      [
+        [0,0],
+        [0.1,0]
+      ]
+    ];
+    //*/
+
+    let height = cactus_unit_height/2 + (Math.random()/2 * cactus_unit_height)
+
+    // Base shape
+    let base = new Array();
+    base.push([0.01, 0], [-0.01, 0]);
+
+    // Trunk
+    let trunk = Array();
+    trunk.push([0, 0], [0, height]);
+    // for (let i = 0; i <= 10; i++) {
+    //   trunk.push([(i/10) * height, 0])
+    // }
+
+    // Arms
+    let arms = new Array();
+    let num_arms = Math.round(Math.random() * 5);
+    for (let a = 0; a < num_arms; a++) {
+      let branch_base_height = height/4 + (Math.random() * height/4)
+      let branch_y = branch_base_height + (Math.random() * height/4)
+      // let branch_theta = (Math.random() - 0.5) * (Math.PI/3) + Math.PI/2;
+      // let branch_length = 0.1 + Math.random()/20;
+      let branch_exp = 1 + 2 * Math.random();
+      let branch_width = (2 * Math.random() - 1) / 50;
+      let branch_height = 0.002 + Math.random() / 500;
+      let arm = new Array();
+      for (let b = 0; b < 5; b++) {
+        arm.push([
+          branch_width * b,
+          branch_y + branch_height * Math.pow(branch_exp, b)
+        ])
+      }
+      arms.push(arm);
+
+      // Line arm
+      /*
+      arms.push([
+        [0, branch_y],
+        [
+          (branch_length * Math.cos(branch_theta)),
+          branch_y + branch_length * Math.sin(branch_theta)
+        ]
+      ]);
+      //*/
+    }
+
+    let local_paths = new Array();
+    // local_paths.push(base);
+    local_paths.push(trunk);
+    // local_paths.push(arm1);
+    for (let a = 0; a < arms.length; a++) {
+      local_paths.push(arms[a]);
+    }
+
+    /*
+    // Transform to fit in parent tile
+    for (let i = 0; i < local_paths.length; i++) {
+
+      // Rotate a quarter turn (90 degrees)
+      local_paths[i] = this.rotatePath(local_paths[i], -Math.PI/2)
+
+      // Move shape down so that shape is centered around the local origin
+      local_paths[i] = this.translatePath(local_paths[i], [0, cactus_unit_height/2]);
+
+      // Scale down a little bit for margin between tiles
+      local_paths[i] = this.scalePath(local_paths[i], 0.9)
+    }
+    //*/
+
+    return local_paths;
+  }
+
+
+  /**
+  * Parametric Equation for an Egg shape
+  *
+  * https://math.stackexchange.com/questions/3375853/parametric-equations-for-a-true-egg-shape
+  */
+  egg() {
+
+    let path = new Array();
+
+    let x,y;
+    let k = 1.00;
+    let b = 2.02;
+
+    // The number of "sides" to the shape.
+    // A larger number makes the shape more smooth
+    let sides = 60;
+    let theta;
+
+    // Calculate standard Egg shape
+    for (var i = 0; i <= sides; i++) {
+
+      // Rotational Angle
+      theta = (i/sides) * (2 * Math.PI) - Math.PI;
+
+      x = (1 / (2 * Math.sqrt(1 + Math.pow(k,2))))
+        * (
+          (((Math.pow(k,2) - 1)/k)*b)
+          + (
+              (((Math.pow(k,2) + 1)/k)*b)
+              *
+              Math.sqrt(Math.pow(b,2) - 4 * k * Math.cos(theta))
+            )
+        );
+
+      y = (2 * Math.sin(theta))
+        / (
+          b + Math.sqrt(Math.pow(b,2) - 4 * k * Math.cos(theta))
+        );
+
+      // This is my customization because the equations as translated
+      // from the source web site didn't look quite right.
+      x = 0.4 * x;
+
+      // Add coordinates to shape array
+      path.push([x,y]);
+    }
+
+    return this.scalePath(path, 0.1);
+
+    return path;
   }
 
   farris(radius, A, B, C) {
