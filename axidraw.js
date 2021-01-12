@@ -8,10 +8,11 @@ let sketch = function(p) {
     "fibonacci": new Fibonacci(),
     "heart": new Heart(),
     "lindenmayer": new Lindenmayer(),
+    "lissajous": new Lissajous(),
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "heart";
+  let selectedPattern = "lissajous";
 
   p.setup = function() {
 
