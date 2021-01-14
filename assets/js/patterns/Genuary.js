@@ -14,7 +14,7 @@
  * [x] JAN.10 // TREE
  * [ ] JAN.11 Use something other than a computer as an autonomous process (or use a non-computer random source).
  * [ ] JAN.12 Use an API (e.g. the weather). Here’s a huge list of free public APIs.
- * [ ] JAN.13 Do not repeat.
+ * [x] JAN.13 Do not repeat.
  * [ ] JAN.14 // SUBDIVISION
  * [ ] JAN.15 Let someone else decide the general rules of your piece.
  * [ ] JAN.16 Circles only
@@ -48,7 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_25();
+    return this.genuary_13();
   }
 
   /**
@@ -510,6 +510,127 @@ class Genuary {
     return paths;
   }
 
+  genuary_13() {
+
+    let paths = new Array();
+    let circles = new Array();
+    let num_circles = 100;
+    let attempt = 0;
+    let max_attempts = num_circles * 50;
+    let collision = false;
+
+    let x,y,r;
+
+    // First circle
+    r = 0.1 + Math.random() / 4;
+    x = 2 * Math.random() * ((5/3) - r) - ((5/3) - r);
+    y = 2 * Math.random() * (1 - r) - (1 - r);
+
+    circles.push({
+      "x": x,
+      "y": y,
+      "r": r
+    });
+    if (r/2 > 0.1) {
+      paths.push(
+        this.translatePath(
+          this.farris(
+            r/2 * 50,
+            1 + Math.round(Math.random() * 19),
+            1 + Math.round(Math.random() * 19),
+            1 + Math.round(Math.random() * 19)
+          ),
+          [x, y]
+        )
+      )
+
+      // Debugging
+      /*
+      paths.push(
+        this.translatePath(
+          this.polygon(32, r/2, 0),
+          [x, y]
+        )
+      );
+      //*/
+
+    } else {
+      paths.push(
+        this.translatePath(
+          this.polygon(32, r/2, 0),
+          [x, y]
+        )
+      );
+    }
+
+    // Others
+    do {
+
+      attempt = attempt + 1;
+
+      r = 0.05 + (Math.random() / 4) * ((max_attempts - attempt)/max_attempts);
+      // console.log(r)
+      x = 2 * Math.random() * ((5/3) - r) - ((5/3) - r);
+      y = 2 * Math.random() * (1 - r) - (1 - r);
+
+      let i_max = circles.length;
+      collision = false;
+      for (let i = 0; i < i_max; i++) {
+        if (this.circleCollision(x, y, r/2, circles[i].x, circles[i].y, circles[i].r/2) == true) {
+          collision = true;
+          break;
+        }
+      };
+
+      if (!collision) {
+        circles.push({
+          "x": x,
+          "y": y,
+          "r": r
+        });
+
+        if (r/2 > 0.12) {
+          paths.push(
+            this.translatePath(
+              this.farris(
+                r/2 * 50,
+                1 + Math.round(Math.random() * 19),
+                1 + Math.round(Math.random() * 19),
+                1 + Math.round(Math.random() * 19)
+              ),
+              [x, y]
+            )
+          )
+
+          // Debugging
+          /*
+          paths.push(
+            this.translatePath(
+              this.polygon(32, r/2, 0),
+              [x, y]
+            )
+          );
+          //*/
+
+        } else {
+          paths.push(
+            this.translatePath(
+              this.polygon(32, r/2, 0),
+              [x, y]
+            )
+          );
+        }
+      }
+
+      // console.log("Attempts: " + attempt);
+      // console.log("Paths:" + paths.length);
+
+    } while(paths.length < num_circles && attempt < max_attempts)
+
+    return paths;
+
+  }
+
   genuary_25(i = 40, j = 24) {
 
     let paths = new Array();
@@ -563,7 +684,6 @@ class Genuary {
 
     return paths
   }
-
 
   saguaro(cactus_unit_height) {
 
@@ -652,6 +772,26 @@ class Genuary {
     return local_paths;
   }
 
+  /*
+   * Adapted from http://www.jeffreythompson.org/collision-detection/circle-circle.php
+   *
+   */
+  circleCollision(c1x, c1y, c1r, c2x, c2y, c2r) {
+
+    // get distance between the circle's centers
+    // use the Pythagorean Theorem to compute the distance
+    let distX = c1x - c2x;
+    let distY = c1y - c2y;
+    let distance = Math.sqrt( (distX*distX) + (distY*distY) );
+
+    // if the distance is less than the sum of the circle's
+    // radii, the circles are touching!
+    if (distance <= c1r+c2r) {
+      return true;
+    }
+
+    return false;
+  }
 
   /**
   * Parametric Equation for an Egg shape
