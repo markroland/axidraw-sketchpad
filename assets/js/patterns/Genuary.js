@@ -26,7 +26,7 @@
  * [ ] JAN.22 Draw a line. Wrong answers only.
  * [ ] JAN.23 #264653 #2a9d8f #e9c46a #f4a261 #e76f51, no gradients. Optionally, you can use a black or white background.
  * [ ] JAN.24 500 lines.
- * [ ] JAN.25 Make a grid of permutations of something.
+ * [...] JAN.25 Make a grid of permutations of something.
  * [ ] JAN.26 2D Perspective.
  * [ ] JAN.27 Gradients without lines.
  * [ ] JAN.28 Use sound.
@@ -48,7 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_10();
+    return this.genuary_25();
   }
 
   /**
@@ -510,6 +510,61 @@ class Genuary {
     return paths;
   }
 
+  genuary_25(i = 40, j = 24) {
+
+    let paths = new Array();
+
+    let superellipse = new Superellipse();
+
+    // Grid test
+    let a_max = 10;
+    let b_max = 6;
+    for (let a = 0; a < 2 * a_max; a++) {
+
+      for (let b = 0; b < 2 * b_max; b++) {
+
+        let index = 0;
+
+        let side_length = 2 * (1 / (2 * b_max));
+
+        // Superellipse
+        let base_shape = superellipse.calc(
+          side_length/2,
+          side_length/2,
+          // 0.1 + (a/a_max) * 10, // 0.1 - 10
+          0.1 + (0.4 * Math.exp(a/a_max)),
+          // 0.5,
+          0,
+          true
+        );
+
+        // Scale down a little bit for margin between tiles
+        base_shape = this.scalePath(base_shape, 0.9)
+
+        base_shape = this.rotatePath(base_shape, (b/(2 * b_max - 1)) * Math.PI/2);
+
+        // Translate
+        let translated_shape = this.translatePath(
+            base_shape,
+            [1 * (a/b_max), 1 * (b/b_max)]
+        );
+
+        // Add to paths array
+        paths.push(translated_shape);
+      }
+    }
+
+    // Center the Paths to the canvas
+    let centered_path = new Array();
+    for (let c = 0; c < paths.length; c++) {
+        centered_path.push(this.translatePath(paths[c], [-i/j, -1]))
+    }
+    paths = centered_path;
+
+    return paths
+  }
+
+
   saguaro(cactus_unit_height) {
 
     // Sample data format
@@ -802,35 +857,60 @@ class Genuary {
 
     let paths = new Array();
 
+    let superellipse = new Superellipse();
+
     // Grid test
-    let a_max = 40;
-    let b_max = 24;
+    let a_max = 10;
+    let b_max = 6;
     for (let a = 0; a < 2 * a_max; a++) {
 
-        for (let b = 0; b < 2 * b_max; b++) {
+      for (let b = 0; b < 2 * b_max; b++) {
 
-            let side_length = 2 * (1 / (2 * b_max));
+        let index = 0;
 
-            // Base shape
-            // let base_shape = this.polygon(4, side_length, Math.PI/4);
-            let base_shape = [
-              [0,0],
-              [side_length,0],
-              [side_length,side_length],
-              [0,side_length],
-              [0,0]
-            ];
+        let side_length = 2 * (1 / (2 * b_max));
 
-            // Translate
-            let translated_shape = this.translatePath(
-                base_shape,
-                [1 * (a/b_max), 1 * (b/b_max)]
-            );
+        // Polygon
+        // let base_shape = this.polygon(4, side_length, Math.PI/4);
 
-            // Add to paths array
-            paths.push(translated_shape);
+        // Square
+        /*
+        let base_shape = [
+          [0,0],
+          [side_length,0],
+          [side_length,side_length],
+          [0,side_length],
+          [0,0]
+        ];
+        //*/
 
-        }
+        // Superellipse
+        //*
+        let base_shape = superellipse.calc(
+          side_length/2,
+          side_length/2,
+          // 0.1 + (a/a_max) * 10, // 0.1 - 10
+          0.1 + (0.4 * Math.exp(a/a_max)),
+          // 0.5,
+          0,
+          true
+        );
+        //*/
+
+        // Scale down a little bit for margin between tiles
+        base_shape = this.scalePath(base_shape, 0.9)
+
+        base_shape = this.rotatePath(base_shape, (b/(2 * b_max - 1)) * Math.PI/2);
+
+        // Translate
+        let translated_shape = this.translatePath(
+            base_shape,
+            [1 * (a/b_max), 1 * (b/b_max)]
+        );
+
+        // Add to paths array
+        paths.push(translated_shape);
+      }
     }
 
     // Center the Paths to the canvas
