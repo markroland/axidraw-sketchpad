@@ -19,6 +19,12 @@ let sketch = function(p) {
     // Create SVG Canvas (6" x 4" @ 96pts/inch)
     p.createCanvas(576, 384, p.SVG);
 
+    // Initials
+    //*
+    let initials = '<path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42" d="M 0.52831513,9.9326943 2.8794102,-0.05945861 4.0549577,6.1121658 6.6999395,0.52831513 5.5243921,11.108241" id="path1421" /><path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42"  d="m 7.3002589,10.146612 0.458014,-9.61829687 c 0,0 3.7857471,0.3053972 4.1221261,1.83205677 0.336379,1.5266596 -3.2060981,3.6641137 -3.2060981,3.6641137 L 13.712455,10.37562" id="path1423" />';
+    document.querySelector('#defaultCanvas0>svg>g').innerHTML = '<g transform="translate(532,340)">' + initials + "</g>";
+    //*/
+
     p.noLoop();
 
     // Set stroke
