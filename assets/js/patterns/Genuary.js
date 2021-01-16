@@ -709,32 +709,146 @@ class Genuary {
 
   genuary_16() {
 
-     let paths = new Array();
+    let paths = new Array();
 
-     let circles = new Array();
+    let circles = new Array();
 
-     let circle = this.polygon(32, 1.0, Math.random() * 2 * Math.PI);
+    let unit_circle = this.polygon(32, 1.0, Math.random() * 2 * Math.PI);
+    paths.push(unit_circle);
 
-     // paths.push(circle);
+    // Circle 1
+    let circle_radius = 0.1;
+    let circleObject = {
+      "x": (1 - circle_radius) * Math.cos(0 * 2 * Math.PI),
+      "y": (1 - circle_radius) * Math.sin(0 * 2 * Math.PI),
+      "r": circle_radius
+    }
+    circles.push(circleObject)
 
-     let i_max = 60;
-     for (let i = 0; i < i_max; i++) {
+    // Push it to the paths
+    paths.push(
+      this.translatePath(
+        this.scalePath(unit_circle, circles[0].r),
+        [
+          circles[0].x,
+          circles[0].y
+        ]
+      )
+    )
 
-        let circle_diameter = 0.025 + Math.random() * 0.025;
 
-        let this_circle = this.scalePath(circle, circle_diameter/1);
-        paths.push(
-          this.translatePath(
-            this_circle,
-            [
-              (1 - circle_diameter) * Math.cos((i/i_max) * 2 * Math.PI),
-              (1 - circle_diameter) * Math.sin((i/i_max) * 2 * Math.PI)
-            ]
-          )
+    // Circle 2
+    let alpha = 0.0;
+    circle_radius = 0.05;
+    circleObject = {
+      "x": 0.0,
+      "y": 0.0,
+      "r": circle_radius
+    }
+    let a = circles[0].r + circleObject.r;
+    let b = 1 - circleObject.r;
+    let c = circles[0].x;
+    alpha = Math.acos((Math.pow(b, 2) + Math.pow(c, 2) - Math.pow(a, 2))/(2 * b * c))
+    circleObject.x = (1 - circleObject.r) * Math.cos(alpha)
+    circleObject.y = (1 - circleObject.r) * Math.sin(alpha)
 
+    // Push it to the circles array
+    circles.push(circleObject)
+
+    paths.push(
+      this.translatePath(
+        this.scalePath(unit_circle, circles[1].r),
+        [
+          circles[1].x,
+          circles[1].y
+        ]
+      )
+    )
+
+    return paths;
+
+    $collision = false;
+    let i = 0;
+    do {
+
+      // Generate random circle object
+      let theta = 0;
+      if (circles.length > 0) {
+        theta = Math.atan2(
+          circles[circles.length-1].y,
+          circles[circles.length-1].x
         )
+      }
+      let circleObject = {
+        "x": (1 - circle_diameter) * Math.cos((i/i_max) * 2 * Math.PI),
+        "y": (1 - circle_diameter) * Math.sin((i/i_max) * 2 * Math.PI),
+        "r": 0.025 + Math.random() * 0.025
+      }
 
-     }
+
+
+
+      // Check for collision
+      if (cicles.length > 0) {
+        let i_max = circles.length;
+        collision = false;
+        for (let i = 0; i < i_max; i++) {
+          if (this.circleCollision(
+              circleObject.x,
+              circleObject.y,
+              circleObject.r/2,
+              circles[i].x,
+              circles[i].y,
+              circles[i].r/2) == true
+          ) {
+            collision = true;
+            break;
+          }
+        };
+      }
+
+      // Proceed if
+      // if (!$collision || cicles.length < 1) {
+
+      //   // Push it to the paths
+      //   paths.push(
+      //     this.translatePath(
+      //       unit_circle,
+      //       [
+      //         (1 - circle_diameter) * Math.cos((i/i_max) * 2 * Math.PI),
+      //         (1 - circle_diameter) * Math.sin((i/i_max) * 2 * Math.PI)
+      //       ]
+      //     )
+      //   )
+
+      //   // Push it to the circles array
+      //   circles.push(circleObject)
+      // }
+
+      // temp hack to stop the loop
+      i = i + 1;
+      if (i > 10) {
+        $collision = true;
+      }
+
+    } while (!$collision);
+
+    // let i_max = 60;
+    // for (let i = 0; i < i_max; i++) {
+
+    //   let circle_diameter = 0.025 + Math.random() * 0.025;
+
+    //   let this_circle = this.scalePath(circle, circle_diameter/1);
+    //   paths.push(
+    //     this.translatePath(
+    //       this_circle,
+    //       [
+    //         (1 - circle_diameter) * Math.cos((i/i_max) * 2 * Math.PI),
+    //         (1 - circle_diameter) * Math.sin((i/i_max) * 2 * Math.PI)
+    //       ]
+    //     )
+    //   )
+    // }
 
      return paths;
   }

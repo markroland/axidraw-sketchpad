@@ -70,7 +70,7 @@ let sketch = function(p) {
     //*/
 
     // Draw axis
-    /*
+    //*
     p.stroke(0, 255, 128);
     p.line(0,p.height/2,0, -p.height/2)
     p.line(-p.width/2, 0, p.width/2, 0)
