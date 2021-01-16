@@ -16,7 +16,7 @@
  * [ ] JAN.12 Use an API (e.g. the weather). Here’s a huge list of free public APIs.
  * [x] JAN.13 Do not repeat.
  * [ ] JAN.14 // SUBDIVISION
- * [ ] JAN.15 Let someone else decide the general rules of your piece.
+ * [x] JAN.15 Let someone else decide the general rules of your piece.
  * [ ] JAN.16 Circles only
  * [ ] JAN.17 Draw a line, pick a new color, move a bit.
  * [ ] JAN.18 One process grows, another process prunes.
@@ -48,7 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_13();
+    return this.genuary_15();
   }
 
   /**
@@ -629,6 +629,82 @@ class Genuary {
 
     return paths;
 
+  }
+
+  genuary_15() {
+
+    let paths = new Array();
+
+    let LSystem = new Lindenmayer();
+
+    // Read in selected value(s)
+
+    // Terdragon
+    // https://en.wikipedia.org/wiki/Dragon_curve
+    //*
+    let algorithm = {
+      "l_system": {
+        "axiom": "F",
+        "rules": [
+          ["F", "F+F-F"]
+          // ["B", "AF-BF-A"]
+        ]
+      },
+      "draw": {
+        "angle": 120
+      }
+    }
+    let iterations = 7;
+    let segment_length = 0.05
+    //*/
+
+    // Dragon
+    /*
+    let algorithm = {
+      "l_system": {
+        "axiom": "FA",
+        "rules": [
+          ["A", "A+BF+"],
+          ["B", "-FA-B"]
+        ]
+      },
+      "draw": {
+        "angle": 90
+      }
+    }
+    let iterations = 10;
+    let segment_length = 0.03
+    //*/
+
+    // Sierpinski
+    /*
+    let algorithm = {
+      "l_system": {
+        "axiom": "AF",
+        "rules": [
+          ["A", "BF+AF+B"],
+          ["B", "AF-BF-A"]
+        ]
+      },
+      "draw": {
+        "angle": 60
+      }
+    }
+    let iterations = 7;
+    let segment_length = 0.02
+    //*/
+
+    let lindenmayer_string = algorithm.l_system.axiom
+    for (let i = 0; i < iterations; i++) {
+      lindenmayer_string = LSystem.compose_lindenmayer_string(lindenmayer_string, algorithm);
+    }
+
+    // Calculate path
+    let path = LSystem.calc(algorithm, lindenmayer_string, segment_length);
+
+    paths.push(path);
+
+    return paths;
   }
 
   genuary_25(i = 40, j = 24) {
