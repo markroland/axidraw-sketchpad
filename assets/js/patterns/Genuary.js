@@ -48,7 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_15();
+    return this.genuary_16();
   }
 
   /**
@@ -705,6 +705,38 @@ class Genuary {
     paths.push(path);
 
     return paths;
+  }
+
+  genuary_16() {
+
+     let paths = new Array();
+
+     let circles = new Array();
+
+     let circle = this.polygon(32, 1.0, Math.random() * 2 * Math.PI);
+
+     // paths.push(circle);
+
+     let i_max = 60;
+     for (let i = 0; i < i_max; i++) {
+
+        let circle_diameter = 0.025 + Math.random() * 0.025;
+
+        let this_circle = this.scalePath(circle, circle_diameter/1);
+        paths.push(
+          this.translatePath(
+            this_circle,
+            [
+              (1 - circle_diameter) * Math.cos((i/i_max) * 2 * Math.PI),
+              (1 - circle_diameter) * Math.sin((i/i_max) * 2 * Math.PI)
+            ]
+          )
+
+        )
+
+     }
+
+     return paths;
   }
 
   genuary_25(i = 40, j = 24) {
