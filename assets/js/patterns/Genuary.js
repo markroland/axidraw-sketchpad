@@ -48,7 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_19();
+    return this.shapeMorph();
   }
 
   /**
@@ -927,6 +927,21 @@ class Genuary {
     }
 
     return false;
+  }
+
+  shapeMorph() {
+    let Morph = new ShapeMorph();
+
+    let path = Morph.calc(
+      Morph.circleShape(60, 1.0),
+      Morph.squareShape(60, 1.0),
+      60,
+      40,
+      1.0,
+      0
+    );
+
+    return [path];
   }
 
   /**
