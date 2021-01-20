@@ -20,7 +20,7 @@
  * [ ] JAN.16 Circles only
  * [ ] JAN.17 Draw a line, pick a new color, move a bit.
  * [ ] JAN.18 One process grows, another process prunes.
- * [ ] JAN.19 Increase the randomness along the Y-axis.
+ * [x] JAN.19 Increase the randomness along the Y-axis.
  * [ ] JAN.20 No loops.
  * [ ] JAN.21 function f(x) {  DRAW(x); f(1 * x / 4); f(2 * x / 4); f(3 * x / 4); }
  * [ ] JAN.22 Draw a line. Wrong answers only.
@@ -48,7 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_15();
+    return this.genuary_19();
   }
 
   /**
@@ -705,6 +705,66 @@ class Genuary {
     paths.push(path);
 
     return paths;
+  }
+
+  genuary_19() {
+
+    let paths = new Array();
+
+    let superellipse = new Superellipse();
+
+    // Grid test
+    let a_max = 10;
+    let b_max = 6;
+    for (let a = 0; a < 2 * a_max; a++) {
+
+      for (let b = 0; b < 2 * b_max; b++) {
+
+        let index = 0;
+
+        let side_length = 2 * (1 / (2 * b_max));
+
+        // Superellipse
+        let base_shape = superellipse.calc(
+          side_length/2,
+          side_length/2,
+          // 0.1 + (a/a_max) * 10, // 0.1 - 10
+          0.3 + (0.2 * a/(2*a_max) * (Math.random() - 0.5)) + (0.1 * Math.exp(a/a_max)),
+          // 0.5,
+          0,
+          true
+        );
+
+        // Scale down a little bit for margin between tiles
+        base_shape = this.scalePath(base_shape, 0.9 + 0.3 * (a/(2*a_max)))
+
+        base_shape = this.rotatePath(
+          base_shape,
+          // (b/(2 * b_max - 1)) * Math.PI/2 + (b/(2*b_max) * Math.random() * Math.PI)
+          (((a/(2*a_max))) * Math.random() * Math.PI)
+        );
+
+        // Translate
+        let translated_shape = this.translatePath(
+            base_shape,
+            [1 * (a/b_max) + side_length/2, 1 * (b/b_max) + side_length/2]
+        );
+
+        // Add to paths array
+        paths.push(translated_shape);
+      }
+    }
+
+    // Center the Paths to the canvas
+    //*
+    let centered_path = new Array();
+    for (let c = 0; c < paths.length; c++) {
+        centered_path.push(this.translatePath(paths[c], [-5/3, -1]))
+    }
+    paths = centered_path;
+    //*/
+
+    return paths
   }
 
   genuary_25(i = 40, j = 24) {
