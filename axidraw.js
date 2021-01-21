@@ -28,6 +28,24 @@ let sketch = function(p) {
     document.querySelector('#defaultCanvas0>svg>g').innerHTML = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">' + initials + "</g>";
     //*/
 
+    // Load the font JSON data
+    $.getJSON('/assets/js/hersheytext.min.json', function(fonts){
+
+        // Render some text into the SVG area with it
+        let svg_code = renderText('Test', {
+          font: fonts['futural'],
+          pos: {x: 0, y: 0},
+          scale: 2,
+          charWidth: 8,
+        });
+
+        console.log(svg_code);
+
+        // Initials
+        document.querySelector('#defaultCanvas0>svg>g').innerHTML = '<g transform="translate(532,340)">' + svg_code + "</g>";
+
+    });
+
     p.noLoop();
 
     // Set stroke

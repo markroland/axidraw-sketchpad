@@ -5,6 +5,139 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="assets/css/style.css" rel="stylesheet">
 
+  <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+  <script type="text/javascript">
+
+    /**
+     * Render a string of text in a Hershey engraving font to a given SVG element
+     *
+     * @param {string} s
+     *   Text string to be rendered
+     * @param {object} options
+     *   Object of named options:
+     *    font {obj}: [Required] Font object containing path elements for font
+     *    id {string}: [Required] ID to give the final g(roup) SVG DOM object
+     *    pos {object}: [Required] {X, Y} object of where to place the final object within the SVG
+     *    charWidth {int}: [Optional] Base width given to each character
+     *    charHeight {int}: [Optional] Base height given to each character (when wrapping)
+     *    scale {int}: [Optional] Scale to multiply size of everything by
+     *    wrapWidth {int}: [Optional] Max line size at which to wrap to the next line
+     *    centerWidth {int}: [Optional] Width to center multiline text inside of
+     *    centerHeight {int}: [Optional] Height to center text inside of vertically
+     *
+     * @returns {boolean}
+     *   Operates directly on the given target given in options, returns false if
+     *   required option missing or other failure.
+     */
+    function renderText(s, options) {
+
+      let svg_string = '';
+
+      try {
+        const font = options.font.chars;
+        options.charWidth = options.charWidth ? options.charWidth : 10;
+        options.charHeight = options.charHeight ? options.charHeight : 28;
+
+        const offset = { left: 0, top: 0 };
+        options.scale = options.scale ? options.scale : 1;
+
+        // Create central group
+        const $group = $('<g>').attr({
+          id: options.id,
+          style: 'stroke:#000000; fill:none;',
+          transform:
+            'scale(' + options.scale + ') ' +
+            'translate(' + options.pos.x + ',' + options.pos.y + ')'
+        });
+        // $(options.target).prepend($group);
+
+        // Initial Line container
+        let lineCount = 0;
+        let $groupLine = $('<g>').attr('id', options.id + '-line-' + lineCount);
+        $group.prepend($groupLine);
+
+        // Move through each word
+        const words = s.split(' ');
+        for(let w in words) {
+          const word = words[w];
+
+          // Move through each letter
+          for(let i in word) {
+            const index = word.charCodeAt(i) - 33;
+
+            // Only print in range chars
+            let charOffset = options.charWidth;
+            if (font[index]){
+              charOffset = font[index].o;
+
+              svg_string += '<path d="' + font[index].d + '" style="stroke:#000000; fill:none;" fill="none" transform="translate(' + offset.left + ', ' + offset.top + ')" />' + "\n";
+
+              // Add the char to the DOM
+              $groupLine.prepend(
+                $('<path>').attr({
+                  d: font[index].d,
+                  style: 'stroke:#000000; fill:none;',
+                  fill: 'none',
+                  transform: 'translate(' + offset.left + ', ' + offset.top + ')'
+                })
+              );
+            }
+
+            // Add space between
+            offset.left+= charOffset + options.charWidth;
+          }
+
+
+
+          // Wrap words to width
+         //  if (options.wrapWidth) {
+         //     if (offset.left > options.wrapWidth) {
+         //       if (options.centerWidth) {
+         //         const c = (options.centerWidth / 2) - (offset.left / 2);
+         //         $groupLine.attr('transform', 'translate(' + c + ',0)');
+         //       }
+
+         //       offset.left = 0;
+         //       offset.top += options.charHeight;
+
+         //       // New Line container
+         //       lineCount++;
+         //       $groupLine = $('<g>').attr('id', options.id + '-line-' + lineCount);
+         //       $group.prepend($groupLine);
+         //     } else {
+         //       offset.left += options.charWidth*2; // Add regular space
+         //     }
+         //   } else {
+         //     offset.left += options.charWidth*2; // Add regular space
+         //   }
+         // }
+
+        // if (options.centerWidth) {
+        //   const c = (options.centerWidth / 2) - (offset.left / 2);
+        //   $groupLine.attr('transform', 'translate(' + c + ',0)');
+        // }
+
+        // if (options.centerHeight) {
+        //   const c = (options.centerHeight / 2) - ((options.charHeight*(lineCount+1)) / 2) + options.pos.y;
+        //   $group.attr({
+        //     transform:
+        //     'scale(' + options.scale + ') ' +
+        //     'translate(' + options.pos.x + ',' + c + ')'
+        //   });
+        }
+      } catch(e) {
+        console.error(e);
+        return false; // Error!
+      }
+
+      console.log($('<path>'))
+
+      return svg_string;
+    }
+
+  </script>
+
   <!-- P5JS: PLEASE NO CHANGES BELOW THIS LINE (UNTIL I SAY SO) -->
   <script language="javascript" type="text/javascript" src="assets/js/libraries/p5.min.js"></script>
   <!-- OK, YOU CAN MAKE CHANGES BELOW THIS LINE AGAIN -->
@@ -39,5 +172,6 @@
     <script language="javascript" type="text/javascript" src="axidraw.js"></script>
   </div>
   <footer><p><a href="https://shop.evilmadscientist.com/productsmenu/924" target="_blank" rel="noreferrer noopener">AxiDraw MiniKit v2</a> | <a href="https://github.com/markroland/axidraw-sketchpad" target="_blank" rel="noreferrer noopener">GitHub</a></p></footer>
+
 </body>
 </html>
