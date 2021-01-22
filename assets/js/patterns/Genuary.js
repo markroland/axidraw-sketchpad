@@ -17,7 +17,7 @@
  * [x] JAN.13 Do not repeat.
  * [ ] JAN.14 // SUBDIVISION
  * [x] JAN.15 Let someone else decide the general rules of your piece.
- * [ ] JAN.16 Circles only
+ * [x] JAN.16 Circles only
  * [ ] JAN.17 Draw a line, pick a new color, move a bit.
  * [ ] JAN.18 One process grows, another process prunes.
  * [x] JAN.19 Increase the randomness along the Y-axis.
@@ -48,7 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.shapeMorph();
+    return this.genuary_16();
   }
 
   /**
@@ -765,6 +765,93 @@ class Genuary {
     //*/
 
     return paths
+  }
+
+  genuary_16() {
+
+    let paths = new Array();
+
+    let circles = new Array();
+
+    // Create a unit circle
+    let unit_circle = this.polygon(32, 1.0, Math.random() * 2 * Math.PI);
+
+    // Draw outer circle
+    // paths.push(unit_circle);
+
+    let alpha_offset = 0;
+
+    // Circle 1
+    let alpha
+    let circle_radius = 0.03 + Math.random() * 0.03;
+    let circleObject = {
+      "x": (1 - circle_radius) * Math.cos(0 * 2 * Math.PI),
+      "y": (1 - circle_radius) * Math.sin(0 * 2 * Math.PI),
+      "r": circle_radius
+    }
+    circles.push(circleObject)
+
+    // Push it to the paths
+    paths.push(
+      this.translatePath(
+        this.scalePath(unit_circle, circles[0].r),
+        [
+          circles[0].x,
+          circles[0].y
+        ]
+      )
+    )
+
+    // Add circles
+    for (let j = 1; j < 70; j++) {
+
+      // Calculate alpha offset based on last circle
+      // alpha_offset = Math.sqrt(Math.pow(circles[j-1].x,2) + Math.pow(circles[j-1].y,2))
+      // alpha_offset = Math.atan2(circles[j-1].y, circles[j-1].x)
+
+      // Create Circle object
+      circle_radius = 0.025 + Math.random() * 0.05;
+      circleObject = {
+        "x": 0.0,
+        "y": 0.0,
+        "r": circle_radius
+      }
+
+      // Calculate circle position based on last circle's location
+      // https://en.wikipedia.org/wiki/Law_of_cosines
+      let a = circles[j-1].r + circleObject.r;
+      let b = 1 - circleObject.r;
+      let c = Math.sqrt(Math.pow(circles[j-1].x,2) + Math.pow(circles[j-1].y,2))
+      alpha = Math.acos((Math.pow(b, 2) + Math.pow(c, 2) - Math.pow(a, 2))/(2 * b * c))
+      circleObject.x = (1 - circleObject.r) * Math.cos(alpha + alpha_offset)
+      circleObject.y = (1 - circleObject.r) * Math.sin(alpha + alpha_offset)
+
+      // Track offset
+      alpha_offset += alpha;
+
+      // Stop if circle filled in
+      // TODO: Fill in the last circle with the remaining space
+      if (alpha + alpha_offset >= 2 * Math.PI) {
+        break;
+      }
+
+      // Push it to the circles array
+      circles.push(circleObject)
+
+      // Add to paths
+      paths.push(
+        this.translatePath(
+          this.scalePath(unit_circle, circleObject.r),
+          [
+            circleObject.x,
+            circleObject.y
+          ]
+        )
+      )
+
+    }
+
+    return paths;
   }
 
   genuary_25(i = 40, j = 24) {
