@@ -868,10 +868,29 @@ class Genuary {
   // }
   gen21_f(paths, x, i, i_max) {
 
+    let circle = this.polygon(100, x, Math.random() * 2 * Math.PI)
+
+    for (let i = 0; i < circle.length; i++) {
+
+      let rand = Math.random()
+
+      if (rand > 0.4) {
+        paths.push([
+
+          [
+            x * Math.cos(i/circle.length * 2 * Math.PI),
+            x * Math.sin(i/circle.length * 2 * Math.PI)
+          ],
+          [
+            rand * x * Math.cos(i/circle.length * 2 * Math.PI),
+            rand * x * Math.sin(i/circle.length * 2 * Math.PI)
+          ]
+        ])
+      }
+    }
+
     // "Draw" (circle with Radius "x")
-    paths.push(
-      this.polygon(60, x, Math.random() * 2 * Math.PI)
-    )
+    // paths.push(circle)
 
     // Repeat Recursively
     if (i <= i_max) {
