@@ -48,7 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_16();
+    return this.genuary_21();
   }
 
   /**
@@ -849,6 +849,34 @@ class Genuary {
         )
       )
 
+    }
+
+    return paths;
+  }
+
+  genuary_21() {
+    let paths = new Array()
+
+    return this.gen21_f(paths, 1.0, 1, 4)
+  }
+
+  // f(x) {
+  //   DRAW(x);
+  //   f(1 * x / 4);
+  //   f(2 * x / 4);
+  //   f(3 * x / 4);
+  // }
+  gen21_f(paths, x, i, i_max) {
+
+    // "Draw" (circle with Radius "x")
+    paths.push(
+      this.polygon(60, x, Math.random() * 2 * Math.PI)
+    )
+
+    // Repeat Recursively
+    if (i <= i_max) {
+      i = i + 1;
+      this.gen21_f(paths, x * (i-1)/i_max, i, i_max)
     }
 
     return paths;
