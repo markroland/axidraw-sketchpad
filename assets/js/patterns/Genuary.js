@@ -48,7 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_21();
+    return this.gravity();
   }
 
   /**
@@ -1274,6 +1274,45 @@ class Genuary {
     }
 
     paths.push(path);
+
+    return paths;
+  }
+
+  gravity() {
+
+    let paths = new Array();
+
+    let gravity = new Gravity();
+
+    // Define the Mover object - this represents the ball
+    // The "mass" on this appears to have no impact on the path
+    gravity.mover = new Mover(
+      5,
+      2 * (5/3) * (Math.random() - 0.5),
+      2 * (Math.random() - 0.5),
+      1 * Math.random(),
+      1 * Math.random()
+    );
+
+    // Define the Attractor objects that the Mover object is attracted toward
+    for (let i = 0; i < 2; i++) {
+      gravity.attractors.push(
+        new Attractor(
+          1,
+          20 + (Math.random() - 0.5) * 20,
+          30 + (Math.random() - 0.5) * 30,
+          30 + (Math.random() - 0.5) * 30
+        )
+      );
+    }
+
+    // Calculate path
+    let path = gravity.calc(2000);
+
+    // scale
+    path = this.scalePath(path, 0.01)
+
+    paths.push(path)
 
     return paths;
   }
