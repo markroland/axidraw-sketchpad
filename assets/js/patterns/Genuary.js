@@ -48,7 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.gravity();
+    return this.genuary_25(10, 6);
   }
 
   /**
@@ -908,40 +908,92 @@ class Genuary {
     let superellipse = new Superellipse();
 
     // Grid test
-    let a_max = 10;
-    let b_max = 6;
-    for (let a = 0; a < 2 * a_max; a++) {
+    let a_max = i;
+    let b_max = j;
+    for (let a = 0; a < a_max; a++) {
 
-      for (let b = 0; b < 2 * b_max; b++) {
+      for (let b = 0; b < b_max; b++) {
 
         let index = 0;
 
-        let side_length = 2 * (1 / (2 * b_max));
+        let side_length = 2 * 1/b_max;
 
         // Superellipse
-        let base_shape = superellipse.calc(
-          side_length/2,
-          side_length/2,
-          // 0.1 + (a/a_max) * 10, // 0.1 - 10
-          0.1 + (0.4 * Math.exp(a/a_max)),
-          // 0.5,
-          0,
-          true
-        );
+        let base_shape = this.gen25_polygon(4);
 
         // Scale down a little bit for margin between tiles
-        base_shape = this.scalePath(base_shape, 0.9)
+        base_shape = this.scalePath(base_shape, 0.35/2)
 
-        base_shape = this.rotatePath(base_shape, (b/(2 * b_max - 1)) * Math.PI/2);
+        base_shape = this.rotatePath(base_shape, Math.PI/4);
+
+        // base_shape = this.rotatePath(base_shape, (b/(b_max - 1)) * Math.PI/2);
 
         // Translate
-        let translated_shape = this.translatePath(
+        //*
+        base_shape = this.translatePath(
             base_shape,
-            [1 * (a/b_max), 1 * (b/b_max)]
+            [
+              2 * (a/b_max) + side_length/2,
+              2 * (b/b_max) + side_length/2
+            ]
         );
+        //*/
+
+        let sub_shape = this.gen25_web(paths, base_shape);
+        // paths.push(sub_shape);
+
+        let quadratic_bezier = this.gen25_quadratic_bezier(
+          sub_shape[1],
+          sub_shape[2],
+          sub_shape[3],
+          10
+        )
+        paths.push(quadratic_bezier);
+
+        quadratic_bezier = this.gen25_quadratic_bezier(
+          sub_shape[3],
+          sub_shape[4],
+          sub_shape[5],
+          10
+        )
+        paths.push(quadratic_bezier);
+
+        quadratic_bezier = this.gen25_quadratic_bezier(
+          sub_shape[5],
+          sub_shape[6],
+          sub_shape[7],
+          10
+        )
+        paths.push(quadratic_bezier);
+
+        quadratic_bezier = this.gen25_quadratic_bezier(
+          sub_shape[7],
+          sub_shape[0],
+          sub_shape[1],
+          10
+        )
+        paths.push(quadratic_bezier);
+
+        // Inner Shape subdivision
+        /*
+        let sub_shape = this.gen25_subdivide(paths, base_shape);
+        // paths.push(sub_shape);
+
+        let sub_shape2 = this.gen25_subdivide(paths, sub_shape);
+        // paths.push(sub_shape2);
+
+        let sub_shape3 = this.gen25_subdivide(paths, sub_shape2);
+        // paths.push(sub_shape3);
+
+        let sub_shape4 = this.gen25_subdivide(paths, sub_shape3);
+        paths.push(sub_shape4);
+
+        let sub_shape5 = this.gen25_subdivide(paths, sub_shape4);
+        // paths.push(sub_shape5);
+        //*/
 
         // Add to paths array
-        paths.push(translated_shape);
+        // paths.push(base_shape);
       }
     }
 
@@ -953,6 +1005,103 @@ class Genuary {
     paths = centered_path;
 
     return paths
+  }
+
+  gen25_polygon(sides = 4) {
+    let polygon = new Array();
+    let polygon_theta = 0.0;
+    for (let a = 0; a < sides; a++) {
+      polygon_theta = (a/sides) * (2 * Math.PI);
+      let random_r = (1 + (Math.random()-0.5)/5)
+      let random_theta = (2 * (Math.random()-0.5)) * polygon_theta/5
+      polygon.push([
+        random_r * Math.cos(polygon_theta + random_theta),
+        random_r * Math.sin(polygon_theta + random_theta)
+      ])
+    }
+    polygon.push(polygon[0]);
+    return polygon;
+  }
+
+  gen25_subdivide(paths, path) {
+    let points = new Array();
+    for (let i = 0; i < path.length-1; i++) {
+      // points.push(path[i]);
+      points.push([
+        path[i][0] - (path[i][0] - path[i+1][0])/2,
+        path[i][1] - (path[i][1] - path[i+1][1])/2
+      ]);
+    }
+    points.push(points[0]);
+    // console.log(points);
+    return points;
+  }
+
+  gen25_web(paths, path) {
+    let points = new Array();
+    for (let i = 0; i < path.length-1; i++) {
+      points.push(path[i]);
+      points.push([
+        path[i][0] - (path[i][0] - path[i+1][0])/2,
+        path[i][1] - (path[i][1] - path[i+1][1])/2
+      ]);
+    }
+    points.push(points[0]);
+    return points;
+  }
+
+  gen25_quadratic_bezier(p1, p2, p3, segments) {
+
+    let path = new Array();
+
+    // Test
+    // path.push(p1, p2, p3); return path;
+
+    path.push(p1)
+
+    //*
+    let a = p1
+    let b = p2
+    let c;
+    let d;
+    for (let i = 1; i < segments; i++) {
+      c = [
+        p1[0] - (p1[0] - p2[0]) * (i/segments),
+        p1[1] - (p1[1] - p2[1]) * (i/segments)
+      ];
+      d = [
+        p2[0] - (p2[0] - p3[0]) * (i/segments),
+        p2[1] - (p2[1] - p3[1]) * (i/segments)
+      ];
+      path.push(this.intersect_point(a,b,c,d))
+      a = c;
+      b = d
+    }
+    //*/
+
+    path.push(p3)
+
+    console.log(path)
+
+    return path;
+  }
+
+  // Copied from https://editor.p5js.org/mwburke/sketches/h1ec1s6LG
+  intersect_point(p1, p2, p3, p4) {
+    const ua = ((p4[0] - p3[0]) * (p1[1] - p3[1]) -
+      (p4[1] - p3[1]) * (p1[0] - p3[0])) /
+      ((p4[1] - p3[1]) * (p2[0] - p1[0]) -
+      (p4[0] - p3[0]) * (p2[1] - p1[1]));
+
+    const ub = ((p2[0] - p1[0]) * (p1[1] - p3[1]) -
+      (p2[1] - p1[1]) * (p1[0] - p3[0])) /
+      ((p4[1] - p3[1]) * (p2[0] - p1[0]) -
+      (p4[0] - p3[0]) * (p2[1] - p1[1]));
+
+    const x = p1[0] + ua * (p2[0] - p1[0]);
+    const y = p1[1] + ua * (p2[1] - p1[1]);
+
+    return [x, y]
   }
 
   saguaro(cactus_unit_height) {
@@ -1406,6 +1555,10 @@ class Genuary {
       ])
     }
     return polygon;
+  }
+
+  getRandom(min, max) {
+    return Math.random() * (max - min) + min
   }
 
   /**
