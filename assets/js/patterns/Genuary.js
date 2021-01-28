@@ -25,7 +25,7 @@
  * [ ] JAN.21 function f(x) {  DRAW(x); f(1 * x / 4); f(2 * x / 4); f(3 * x / 4); }
  * [ ] JAN.22 Draw a line. Wrong answers only.
  * [ ] JAN.23 #264653 #2a9d8f #e9c46a #f4a261 #e76f51, no gradients. Optionally, you can use a black or white background.
- * [ ] JAN.24 500 lines.
+ * [x] JAN.24 500 lines.
  * [x] JAN.25 Make a grid of permutations of something.
  * [ ] JAN.26 2D Perspective.
  * [ ] JAN.27 Gradients without lines.
@@ -928,8 +928,6 @@ class Genuary {
 
         base_shape = this.rotatePath(base_shape, Math.PI/4);
 
-        // base_shape = this.rotatePath(base_shape, (b/(b_max - 1)) * Math.PI/2);
-
         // Translate
         //*
         base_shape = this.translatePath(
@@ -946,11 +944,13 @@ class Genuary {
 
         shape = [];
 
+        let num_verts = 9;
+
         let quadratic_bezier = this.gen25_quadratic_bezier(
           sub_shape[1],
           sub_shape[2],
           sub_shape[3],
-          10
+          num_verts
         )
         shape = shape.concat(quadratic_bezier);
 
@@ -958,33 +958,45 @@ class Genuary {
           sub_shape[3],
           sub_shape[4],
           sub_shape[5],
-          10
+          num_verts
         )
-        shape = shape.concat(quadratic_bezier);
+        shape = shape.concat(quadratic_bezier.slice(-num_verts));
 
         quadratic_bezier = this.gen25_quadratic_bezier(
           sub_shape[5],
           sub_shape[6],
           sub_shape[7],
-          10
+          num_verts
         )
-        shape = shape.concat(quadratic_bezier);
+        shape = shape.concat(quadratic_bezier.slice(-num_verts));
 
         quadratic_bezier = this.gen25_quadratic_bezier(
           sub_shape[7],
           sub_shape[0],
           sub_shape[1],
-          10
+          num_verts
         )
-        shape = shape.concat(quadratic_bezier);
+        shape = shape.concat(quadratic_bezier.slice(-num_verts));
 
         // Wrap path coordinates so that pen up/down occurs at different place
-        let new_shape = new Array();
-        let slice_position = Math.floor(Math.random() * shape.length);
-        new_shape.push(shape.slice(slice_position-shape.length), shape.slice(0,slice_position));
+        // let new_shape = new Array();
+        // let slice_position = Math.floor(Math.random() * shape.length);
+        // new_shape.push(shape.slice(slice_position-shape.length), shape.slice(0,slice_position));
 
-        paths.push(shape);
+        // paths.push(shape);
 
+        // console.log(shape)
+
+        let shape_a = new Array();
+        // console.log(shape.length);
+        for (let a = 0; a < (shape.length-1)/2; a++) {
+          // if (a % 4 == 0) {
+            paths.push([
+              shape[a],
+              shape[a + (shape.length-1)/2]
+            ]);
+          // }
+        }
 
         // Inner Shape subdivision
         /*
@@ -1066,34 +1078,27 @@ class Genuary {
 
     let path = new Array();
 
-    // Test
-    // path.push(p1, p2, p3); return path;
-
     path.push(p1)
 
-    //*
     let a = p1
     let b = p2
     let c;
     let d;
-    for (let i = 1; i < segments - 1; i++) {
+    for (let i = 1; i < segments; i++) {
       c = [
-        p1[0] - (p1[0] - p2[0]) * (i/segments),
-        p1[1] - (p1[1] - p2[1]) * (i/segments)
+        p1[0] - (p1[0] - p2[0]) * (i/(segments-1)),
+        p1[1] - (p1[1] - p2[1]) * (i/(segments-1))
       ];
       d = [
-        p2[0] - (p2[0] - p3[0]) * (i/segments),
-        p2[1] - (p2[1] - p3[1]) * (i/segments)
+        p2[0] - (p2[0] - p3[0]) * (i/(segments-1)),
+        p2[1] - (p2[1] - p3[1]) * (i/(segments-1))
       ];
       path.push(this.intersect_point(a,b,c,d))
       a = c;
       b = d
     }
-    //*/
 
     path.push(p3)
-
-    // console.log(path)
 
     return path;
   }
