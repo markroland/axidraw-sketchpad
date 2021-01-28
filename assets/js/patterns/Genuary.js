@@ -907,6 +907,8 @@ class Genuary {
 
     let superellipse = new Superellipse();
 
+    let shape = new Array();
+
     // Grid test
     let a_max = i;
     let b_max = j;
@@ -942,13 +944,15 @@ class Genuary {
         let sub_shape = this.gen25_web(paths, base_shape);
         // paths.push(sub_shape);
 
+        shape = [];
+
         let quadratic_bezier = this.gen25_quadratic_bezier(
           sub_shape[1],
           sub_shape[2],
           sub_shape[3],
           10
         )
-        paths.push(quadratic_bezier);
+        shape = shape.concat(quadratic_bezier);
 
         quadratic_bezier = this.gen25_quadratic_bezier(
           sub_shape[3],
@@ -956,7 +960,7 @@ class Genuary {
           sub_shape[5],
           10
         )
-        paths.push(quadratic_bezier);
+        shape = shape.concat(quadratic_bezier);
 
         quadratic_bezier = this.gen25_quadratic_bezier(
           sub_shape[5],
@@ -964,7 +968,7 @@ class Genuary {
           sub_shape[7],
           10
         )
-        paths.push(quadratic_bezier);
+        shape = shape.concat(quadratic_bezier);
 
         quadratic_bezier = this.gen25_quadratic_bezier(
           sub_shape[7],
@@ -972,7 +976,15 @@ class Genuary {
           sub_shape[1],
           10
         )
-        paths.push(quadratic_bezier);
+        shape = shape.concat(quadratic_bezier);
+
+        // Wrap path coordinates so that pen up/down occurs at different place
+        let new_shape = new Array();
+        let slice_position = Math.floor(Math.random() * shape.length);
+        new_shape.push(shape.slice(slice_position-shape.length), shape.slice(0,slice_position));
+
+        paths.push(shape);
+
 
         // Inner Shape subdivision
         /*
@@ -1064,7 +1076,7 @@ class Genuary {
     let b = p2
     let c;
     let d;
-    for (let i = 1; i < segments; i++) {
+    for (let i = 1; i < segments - 1; i++) {
       c = [
         p1[0] - (p1[0] - p2[0]) * (i/segments),
         p1[1] - (p1[1] - p2[1]) * (i/segments)
@@ -1081,7 +1093,7 @@ class Genuary {
 
     path.push(p3)
 
-    console.log(path)
+    // console.log(path)
 
     return path;
   }
