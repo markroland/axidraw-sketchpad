@@ -26,7 +26,7 @@
  * [ ] JAN.22 Draw a line. Wrong answers only.
  * [ ] JAN.23 #264653 #2a9d8f #e9c46a #f4a261 #e76f51, no gradients. Optionally, you can use a black or white background.
  * [ ] JAN.24 500 lines.
- * [...] JAN.25 Make a grid of permutations of something.
+ * [x] JAN.25 Make a grid of permutations of something.
  * [ ] JAN.26 2D Perspective.
  * [ ] JAN.27 Gradients without lines.
  * [ ] JAN.28 Use sound.
