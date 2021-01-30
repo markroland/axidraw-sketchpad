@@ -43,19 +43,19 @@
         options.scale = options.scale ? options.scale : 1;
 
         // Create central group
-        const $group = $('<g>').attr({
-          id: options.id,
-          style: 'stroke:#000000; fill:none;',
-          transform:
-            'scale(' + options.scale + ') ' +
-            'translate(' + options.pos.x + ',' + options.pos.y + ')'
-        });
+        // const $group = $('<g>').attr({
+        //   id: options.id,
+        //   style: 'stroke:#000000; fill:none;',
+        //   transform:
+        //     'scale(' + options.scale + ') ' +
+        //     'translate(' + options.pos.x + ',' + options.pos.y + ')'
+        // });
         // $(options.target).prepend($group);
 
         // Initial Line container
         let lineCount = 0;
-        let $groupLine = $('<g>').attr('id', options.id + '-line-' + lineCount);
-        $group.prepend($groupLine);
+        // let $groupLine = $('<g>').attr('id', options.id + '-line-' + lineCount);
+        // $group.prepend($groupLine);
 
         // Move through each word
         const words = s.split(' ');
@@ -71,22 +71,27 @@
             if (font[index]){
               charOffset = font[index].o;
 
-              svg_string += '<path d="' + font[index].d + '" style="stroke:#000000; fill:none;" fill="none" transform="translate(' + offset.left + ', ' + offset.top + ')" />' + "\n";
+              svg_string += '<path d="' + font[index].d + '" style="stroke:rgb(0,0,0); fill:none;" fill="none" transform="translate(' + offset.left + ', ' + offset.top + ')" />' + "\n";
 
               // Add the char to the DOM
-              $groupLine.prepend(
-                $('<path>').attr({
-                  d: font[index].d,
-                  style: 'stroke:#000000; fill:none;',
-                  fill: 'none',
-                  transform: 'translate(' + offset.left + ', ' + offset.top + ')'
-                })
-              );
+              // $groupLine.prepend(
+              //   $('<path>').attr({
+              //     d: font[index].d,
+              //     style: 'stroke:#000000; fill:none;',
+              //     fill: 'none',
+              //     transform: 'translate(' + offset.left + ', ' + offset.top + ')'
+              //   })
+              // );
             }
 
-            // Add space between
+            console.log(word);
+
+            // Add space between letters
             offset.left+= charOffset + options.charWidth;
           }
+
+          // Add space between words
+          offset.left += options.charWidth/2;
 
 
 
@@ -130,8 +135,6 @@
         console.error(e);
         return false; // Error!
       }
-
-      console.log($('<path>'))
 
       return svg_string;
     }

@@ -31,18 +31,33 @@ let sketch = function(p) {
     // Load the font JSON data
     $.getJSON('/assets/js/hersheytext.min.json', function(fonts){
 
-        // Render some text into the SVG area with it
-        let svg_code = renderText('Test', {
+      let svg_text = '';
+
+      // Title
+      let font_size = 12;
+      let title_svg = renderText('Lissajous     Curve', {
+        font: fonts['futural'],
+        pos: {x: 0, y: 0},
+        scale: 2,
+        charWidth: 8,
+      });
+      svg_text = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + title_svg + "</g>"
+
+      // Date
+      font_size = 8;
+      let now = new Date();
+      let date_svg = renderText(
+        (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear(),
+        {
           font: fonts['futural'],
           pos: {x: 0, y: 0},
           scale: 2,
           charWidth: 8,
-        });
+        }
+      );
+      svg_text += '<g transform="translate(' + margin + ',' + ((p.height - 2 * margin) + ((2 * margin - font_size)/2)) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + date_svg + "</g>"
 
-        console.log(svg_code);
-
-        // Initials
-        document.querySelector('#defaultCanvas0>svg>g').innerHTML = '<g transform="translate(532,340)">' + svg_code + "</g>";
+      document.querySelector('#defaultCanvas0>svg>g').innerHTML = svg_text;
 
     });
 
