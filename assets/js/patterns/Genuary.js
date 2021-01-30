@@ -48,7 +48,7 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_25(10, 6);
+    return this.genuary_25(5, 3);
   }
 
   /**
@@ -924,7 +924,7 @@ class Genuary {
         let base_shape = this.gen25_polygon(4);
 
         // Scale down a little bit for margin between tiles
-        base_shape = this.scalePath(base_shape, 0.35/2)
+        base_shape = this.scalePath(base_shape, 0.4)
 
         base_shape = this.rotatePath(base_shape, Math.PI/4);
 
@@ -989,11 +989,12 @@ class Genuary {
 
         let shape_a = new Array();
         // console.log(shape.length);
-        for (let a = 0; a < (shape.length-1)/2; a++) {
+        let jump_distance = 10;
+        for (let a = 0; a < shape.length; a++) {
           // if (a % 4 == 0) {
             paths.push([
               shape[a],
-              shape[a + (shape.length-1)/2]
+              shape[(a + jump_distance) % shape.length]
             ]);
           // }
         }
