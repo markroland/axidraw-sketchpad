@@ -26,14 +26,16 @@ let sketch = function(p) {
       let svg_text = '';
 
       // Title
+      //*
       let font_size = 12;
-      let title_svg = renderText('Lissajous     Curve', {
+      let title_svg = renderText('Genuary 24: 500 Lines', {
         font: fonts['futural'],
         pos: {x: 0, y: 0},
         scale: 2,
         charWidth: 8,
       });
       svg_text = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + title_svg + "</g>"
+      //*/
 
       // Date
       font_size = 8;
