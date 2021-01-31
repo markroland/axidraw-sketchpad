@@ -63,6 +63,15 @@ let sketch = function(p) {
 
       document.querySelector('#defaultCanvas0>svg>g').innerHTML = svg_text;
 
+      // Doesn't work
+      /*
+      var node = document.createElement('g');
+      node.innerHTML = svg_test;
+      // let node_paths = document.createElement(svg_test)
+      // node.appendChild(node_paths)
+      document.querySelector('#defaultCanvas0>svg').appendChild(node);
+      //*/
+
     });
 
     p.noLoop();
