@@ -71,7 +71,7 @@
             if (font[index]){
               charOffset = font[index].o;
 
-              svg_string += '<path d="' + font[index].d + '" style="stroke:rgb(0,0,0); fill:none;" fill="none" transform="translate(' + offset.left + ', ' + offset.top + ')" />' + "\n";
+              svg_string += '<path d="' + font[index].d + '" fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.5" style="stroke:rgb(0,0,0); fill:none;" transform="translate(' + offset.left + ', ' + offset.top + ')" />' + "\n";
 
               // Add the char to the DOM
               // $groupLine.prepend(
