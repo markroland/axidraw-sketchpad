@@ -4,6 +4,7 @@ let sketch = function(p) {
   let margin = 0.25 * 96;
 
   var Patterns = {
+    "bezierquadratic": new BezierQuadratic(),
     "cycloid": new Cycloid(),
     "fibonacci": new Fibonacci(),
     "genuary": new Genuary(),
@@ -13,7 +14,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "genuary";
+  let selectedPattern = "bezierquadratic";
 
   p.setup = function() {
 
@@ -28,7 +29,7 @@ let sketch = function(p) {
       // Title
       //*
       let font_size = 12;
-      let title_svg = renderText('Genuary 24: 500 Lines', {
+      let title_svg = renderText('Quadratic Bezier Curve', {
         font: fonts['futural'],
         pos: {x: 0, y: 0},
         scale: 2,
@@ -89,7 +90,7 @@ let sketch = function(p) {
 
   p.draw = function() {
 
-    paths = Patterns[selectedPattern].draw();
+    paths = Patterns[selectedPattern].draw(p);
 
     p.push();
     p.translate(p.width/2, p.height/2)
