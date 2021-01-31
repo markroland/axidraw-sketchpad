@@ -14,7 +14,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "bezierquadratic";
+  let selectedPattern = "spiral";
 
   p.setup = function() {
 
@@ -27,9 +27,9 @@ let sketch = function(p) {
       let svg_text = '';
 
       // Title
-      //*
+      /*
       let font_size = 12;
-      let title_svg = renderText('Quadratic Bezier Curve', {
+      let title_svg = renderText('', {
         font: fonts['futural'],
         pos: {x: 0, y: 0},
         scale: 2,

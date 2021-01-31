@@ -15,6 +15,8 @@ class Spiral {
    */
   draw() {
 
+    return [this.fermat()]
+
     // Calculate path
     let path = this.calc(
       0.0,
@@ -27,6 +29,7 @@ class Spiral {
 
     return [path];
   }
+
   /**
    * Calculate coordinates for the shape
    *
@@ -80,4 +83,62 @@ class Spiral {
 
     return path;
   }
+
+  fermat()
+  {
+    let revolutions = 28;
+
+    // Set initial values
+    var x;
+    var y;
+
+    // Initialize return value - the path array
+    // This stores the x,y coordinates for each step
+    var path = new Array();
+
+    // Iteration counter.
+    var step = 0;
+
+    // Controls "tightness" of spiral. 1.0 is a good value
+    const pow_n = 1.0;
+
+    // Radius of spiral
+    let a = 28 / revolutions;
+
+    // Arbitrarily scale down
+    a = a / 150;
+
+    // The number of "sides" to the circle.
+    const steps_per_revolution = 60;
+
+    // Loop through one revolution
+    const t_min = revolutions * 0;
+    const t_max = revolutions * (2 * Math.PI);
+    const t_step = (t_max - t_min) / (revolutions * steps_per_revolution);
+
+    // Negative Radius
+    for (var t = t_max; t >= t_min; t -= t_step) {
+
+      // Run the parametric equations
+      x = a * Math.pow(t, pow_n) * Math.cos(t);
+      y = a * Math.pow(t, pow_n) * Math.sin(t);
+
+      // Add coordinates to shape array
+      path.push([x,y]);
+    }
+
+    // Positive Radius
+    for (var t = t_min; t <= t_max + t_step; t += t_step) {
+
+      // Run the parametric equations
+      x = -a * Math.pow(t, pow_n) * Math.cos(t);
+      y = -a * Math.pow(t, pow_n) * Math.sin(t);
+
+      // Add coordinates to shape array
+      path.push([x,y]);
+    }
+
+    return path;
+  }
+
 }
