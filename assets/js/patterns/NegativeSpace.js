@@ -46,6 +46,12 @@ class NegativeSpace {
       // Right-most point of horizontal line
       p2 = [max_x, 2 * (i/num_lines) - 1];
 
+      // Draw every other line straight through
+      if (i % 2 == 1) {
+        paths.push([p1,p2]);
+        continue;
+      }
+
       // No intersection betweeen line and triangle, so draw entire line
       if (p1[1] > triangle_max_y || p1[1] < triangle_min_y) {
         paths.push([p1,p2]);
