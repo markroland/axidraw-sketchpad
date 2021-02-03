@@ -23,6 +23,11 @@ class NegativeSpace {
 
     triangle = this.rotatePath(triangle, (Math.random() - 0.5) * Math.PI/6)
 
+    let circle = new Object;
+    circle.r = 0.25 + Math.random() * 0.5;
+    circle.x = this.getRandom(-5/3 + circle.r, 5/3 - circle.r)
+    circle.y = this.getRandom(-1 + circle.r, 1 - circle.r);
+
     // Define function to extract column from multidimensional array
     const arrayColumn = (arr, n) => arr.map(a => a[n]);
 
@@ -38,19 +43,29 @@ class NegativeSpace {
     let p1,p2
     for(let i = 0; i <= num_lines; i++) {
 
+      let y = 2 * (i/num_lines) - 1;
+
       // Initialize intersection values
       min_int_x = null;
       max_int_x = null;
 
       // Left-most Point of horizontal line
-      p1 = [min_x, 2 * (i/num_lines) - 1];
+      p1 = [min_x, y];
 
       // Right-most point of horizontal line
-      p2 = [max_x, 2 * (i/num_lines) - 1];
+      p2 = [max_x, y];
 
       // Draw every other line straight through
       if (i % 2 == 1) {
-        paths.push([p1,p2]);
+
+        // Circle
+        if (y >= circle.y - circle.r && y <= circle.y + circle.r) {
+          paths.push([
+            [circle.x - Math.sqrt(Math.pow(circle.r, 2) - Math.pow(circle.y - y, 2)), y],
+            [circle.x + Math.sqrt(Math.pow(circle.r, 2) - Math.pow(circle.y - y, 2)), y]
+          ])
+        }
+
         continue;
       }
 
@@ -94,6 +109,10 @@ class NegativeSpace {
     }
 
     return paths;
+  }
+
+  getRandom(min, max) {
+    return Math.random() * (max - min) + min
   }
 
   // Copied from https://editor.p5js.org/mwburke/sketches/h1ec1s6LG
