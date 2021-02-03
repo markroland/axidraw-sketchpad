@@ -10,11 +10,12 @@ let sketch = function(p) {
     "genuary": new Genuary(),
     "heart": new Heart(),
     "lindenmayer": new Lindenmayer(),
+    "negativespace": new NegativeSpace(),
     "lissajous": new Lissajous(),
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "spiral";
+  let selectedPattern = "negativespace";
 
   p.setup = function() {
 
@@ -90,7 +91,7 @@ let sketch = function(p) {
 
   p.draw = function() {
 
-    paths = Patterns[selectedPattern].draw(p);
+    paths = Patterns[selectedPattern].draw();
 
     p.push();
     p.translate(p.width/2, p.height/2)
