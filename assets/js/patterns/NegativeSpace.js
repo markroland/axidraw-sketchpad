@@ -14,12 +14,14 @@ class NegativeSpace {
     for (let i = 0; i < 3; i++) {
       triangle.push(
         [
-          Math.random() * Math.cos(i/3 * Math.PI * 2),
-          Math.random() * Math.sin(i/3 * Math.PI * 2)
+          (0.5 + Math.random()/2) * Math.cos(i/3 * Math.PI * 2),
+          (0.5 + Math.random()/2) *  Math.sin(i/3 * Math.PI * 2)
         ]
       );
     }
     triangle.push(triangle[0]);
+
+    triangle = this.rotatePath(triangle, (Math.random() - 0.5) * Math.PI/6)
 
     // Define function to extract column from multidimensional array
     const arrayColumn = (arr, n) => arr.map(a => a[n]);
@@ -110,6 +112,19 @@ class NegativeSpace {
     const y = p1[1] + ua * (p2[1] - p1[1]);
 
     return [x, y]
+  }
+
+  /**
+   * Rotate points x and y by angle theta about center point (0,0)
+   * https://en.wikipedia.org/wiki/Rotation_matrix
+   **/
+  rotatePath(path, theta) {
+    return path.map(function(a){
+      return [
+        a[0] * Math.cos(theta) - a[1] * Math.sin(theta),
+        a[0] * Math.sin(theta) + a[1] * Math.cos(theta)
+      ]
+    });
   }
 
 }
