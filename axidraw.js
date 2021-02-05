@@ -6,6 +6,7 @@ let sketch = function(p) {
   var Patterns = {
     "bezierquadratic": new BezierQuadratic(),
     "cycloid": new Cycloid(),
+    "extrusion": new Extrusion(),
     "fibonacci": new Fibonacci(),
     "genuary": new Genuary(),
     "heart": new Heart(),
@@ -16,7 +17,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "radiallines";
+  let selectedPattern = "extrusion";
 
   p.setup = function() {
 
