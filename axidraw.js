@@ -12,10 +12,11 @@ let sketch = function(p) {
     "lindenmayer": new Lindenmayer(),
     "negativespace": new NegativeSpace(),
     "lissajous": new Lissajous(),
+    "radiallines": new RadialLines(),
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "negativespace";
+  let selectedPattern = "radiallines";
 
   p.setup = function() {
 
