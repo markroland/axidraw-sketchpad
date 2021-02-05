@@ -164,6 +164,10 @@ let sketch = function(p) {
             paths[i][j][1]
           )
 
+          // Don't add point if the point is off the canvas
+          if (point == null) {
+            continue;
+          }
         }
 
         // Draw Vertex in "P5" Land
@@ -190,11 +194,19 @@ let sketch = function(p) {
     let y_max = 1;
     let y_min = -1;
 
-    if (x1 > x_max) {
+    // Return null if current point and previous point are out of bounds
+    if (
+      (y0 > y_max && y1 > y_max)
+      || (y0 < y_min && y1 < y_min)
+    ) {
+      return;
+    }
+
+    if (x > x_max) {
       intersect = intersect_point([x_max,y_min], [x_max,y_max], [x0, y0], [x1, y1])
       x = intersect[0]
       y = intersect[1]
-    } else if (x1 < x_min) {
+    } else if (x < x_min) {
       intersect = intersect_point([x_min,y_min], [x_min,y_max], [x0, y0], [x1, y1])
       x = intersect[0]
       y = intersect[1]
