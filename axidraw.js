@@ -127,6 +127,12 @@ let sketch = function(p) {
     p.line(-p.width/2, 0, p.width/2, 0)
     //*/
 
+    let constrain = true;
+
+    // Set the "canvas unit" as the number of pixels between
+    // the center of the canvas and the nearest margin
+    let canvas_unit = ((p.min(p.width, p.height)/2) - margin * 2)
+
     p.stroke(0);
     for (i = 0; i < paths.length; i++) {
 
@@ -141,15 +147,91 @@ let sketch = function(p) {
 
       p.beginShape();
       for (j = 0; j < paths[i].length; j++) {
-        let x = paths[i][j][0] * ((p.min(p.width, p.height)/2) - margin * 2);
-        let y = paths[i][j][1] * ((p.min(p.width, p.height)/2) - margin * 2);
-        p.vertex(x, y)
+
+        // Reformat data
+        let point = [
+          paths[i][j][0],
+          paths[i][j][1]
+        ]
+
+        // Constrain
+        if (constrain && j > 0) {
+          point = trim_path(
+            paths[i][j-1][0],
+            paths[i][j-1][1],
+            paths[i][j][0],
+            paths[i][j][1]
+          )
+
+        }
+
+        // Draw Vertex in "P5" Land
+        p.vertex(
+          point[0] * canvas_unit,
+          point[1] * canvas_unit
+        )
       }
+
       // TODO: "mode" should be defined by the path
       p.endShape();
     }
 
     p.pop();
+  }
+
+  function trim_path(x0, y0, x1, y1) {
+    let x = x1;
+    let y = y1;
+    let intersect;
+
+    let x_max = 5/3;
+    let x_min = -5/3;
+    let y_max = 1;
+    let y_min = -1;
+
+    if (x1 > x_max) {
+      intersect = intersect_point([x_max,y_min], [x_max,y_max], [x0, y0], [x1, y1])
+      x = intersect[0]
+      y = intersect[1]
+    } else if (x1 < x_min) {
+      intersect = intersect_point([x_min,y_min], [x_min,y_max], [x0, y0], [x1, y1])
+      x = intersect[0]
+      y = intersect[1]
+    }
+
+    if (y > 1) {
+      intersect = intersect_point([-5/3,1], [5/3,1], [x0, y0], [x, y])
+      x = intersect[0]
+      y = intersect[1]
+    } else if (y < -1) {
+      intersect = intersect_point([-5/3,-1], [5/3,-1], [x0, y0], [x, y])
+      x = intersect[0]
+      y = intersect[1]
+    }
+
+    return [x,y]
+  }
+
+  function distance(p1, p2) {
+    return Math.sqrt(Math.pow(p2[0] - p1[0], 2) + Math.pow(p2[1] - p1[1], 2));
+  }
+
+  // Copied from https://editor.p5js.org/mwburke/sketches/h1ec1s6LG
+  function intersect_point(p1, p2, p3, p4) {
+    const ua = ((p4[0] - p3[0]) * (p1[1] - p3[1]) -
+      (p4[1] - p3[1]) * (p1[0] - p3[0])) /
+      ((p4[1] - p3[1]) * (p2[0] - p1[0]) -
+      (p4[0] - p3[0]) * (p2[1] - p1[1]));
+
+    const ub = ((p2[0] - p1[0]) * (p1[1] - p3[1]) -
+      (p2[1] - p1[1]) * (p1[0] - p3[0])) /
+      ((p4[1] - p3[1]) * (p2[0] - p1[0]) -
+      (p4[0] - p3[0]) * (p2[1] - p1[1]));
+
+    const x = p1[0] + ua * (p2[0] - p1[0]);
+    const y = p1[1] + ua * (p2[1] - p1[1]);
+
+    return [x, y]
   }
 
   function download()
