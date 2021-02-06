@@ -1,6 +1,10 @@
 class RadialLines {
 
   draw() {
+    return this.draw2();
+  }
+
+  draw1() {
 
     // Create paths array to return
     let paths = new Array();
@@ -44,6 +48,42 @@ class RadialLines {
           outer_radius * Math.sin(i/num_lines * Math.PI * 2)
         ]
       ]);
+    }
+
+    return paths;
+  }
+
+  draw2() {
+
+    // Create paths array to return
+    let paths = new Array();
+
+    let PathHelp = new PathHelper();
+
+    let radius = 0.75
+
+    let sine_wave
+    let periods = 1
+    sine_wave = new Array();
+    for (let a = 0; a < 100; a++) {
+      sine_wave.push([
+        (radius * 2) * (a/(100)),
+        0.1 * Math.sin(a/100 * Math.PI * 2 * periods),
+      ])
+    }
+
+    let num_lines = 60;
+    for (let i = 0; i < num_lines; i++) {
+      let theta =  i/num_lines * Math.PI * 2
+      paths.push(
+        PathHelp.translatePath(
+          sine_wave,
+          [
+            -radius + radius * Math.cos(theta),
+            radius * Math.sin(theta),
+          ]
+        )
+      );
     }
 
     return paths;

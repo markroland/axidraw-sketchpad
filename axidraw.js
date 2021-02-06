@@ -17,7 +17,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "extrusion";
+  let selectedPattern = "radiallines";
 
   p.setup = function() {
 
