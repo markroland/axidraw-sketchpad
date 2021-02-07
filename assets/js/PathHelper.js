@@ -7,7 +7,7 @@ class PathHelper {
     return Math.floor(Math.random() * (max - min + 1) ) + min;
   }
 
-  polygon(sides, length, rotation)
+  polygon(sides, length, rotation = 0)
   {
     let polygon = new Array();
     let polygon_theta = 0.0;

@@ -1,7 +1,7 @@
 class RadialLines {
 
   draw() {
-    return this.draw2();
+    return this.draw3();
   }
 
   draw1() {
@@ -89,4 +89,58 @@ class RadialLines {
     return paths;
   }
 
+  draw3() {
+
+    // Create paths array to return
+    let paths = new Array();
+
+    let PathHelp = new PathHelper();
+
+    let circle = PathHelp.polygon(24, 0.05)
+
+    let radius
+
+    let sine_wave
+    let periods
+
+    let num_lines = 60;
+    for (let i = 0; i < num_lines; i++) {
+
+      let theta =  i/num_lines * Math.PI * 2
+
+      for (let j = 0; j < 2; j++) {
+        sine_wave = new Array();
+        periods = 0.5 + Math.random()
+        radius = (5/3) * (0.25 + Math.random()/2)
+        let inner_radius = 0.1 + (Math.random()/5);
+        let phase = Math.random() * Math.PI
+        for (let a = 0; a < 100; a++) {
+          sine_wave.push([
+            inner_radius + radius * (a/100),
+            0.1 * Math.sin(a/100 * Math.PI * 2 * periods + phase),
+          ])
+        }
+
+        // Circle at end of Sine wave
+        /*
+        sine_wave = sine_wave.concat(
+          PathHelp.translatePath(circle, [inner_radius + radius + 0.05, sine_wave[sine_wave.length-1][1]])
+        );
+        //*/
+
+        paths.push(
+          PathHelp.rotatePath(
+            sine_wave,
+            theta + 5 * (Math.random() - 0.5)
+          )
+        );
+
+      }
+
+
+
+    }
+
+    return paths;
+  }
 }
