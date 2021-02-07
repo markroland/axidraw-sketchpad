@@ -30,10 +30,10 @@ let sketch = function(p) {
       let svg_text = '';
 
       // Title
-      /*
+      //*
       let font_size = 12;
-      let title_svg = renderText('', {
-        font: fonts['futural'],
+      let title_svg = renderText('ABCDEFGHIJKLMNOPQRSTUVWXYZ', {
+        font: fonts['EMSTech'],
         pos: {x: 0, y: 0},
         scale: 2,
         charWidth: 8,
@@ -47,7 +47,7 @@ let sketch = function(p) {
       let date_svg = renderText(
         (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear(),
         {
-          font: fonts['futural'],
+          font: fonts['EMSTech'],
           pos: {x: 0, y: 0},
           scale: 2,
           charWidth: 8,
