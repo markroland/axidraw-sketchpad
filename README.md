@@ -11,3 +11,9 @@ require using P5.js in [instance mode](https://github.com/processing/p5.js/wiki/
 in order to specify where to insert the HTML `<canvas>` element.
 
 - [p5.SVG Basic Examples](http://zenozeng.github.io/p5.js-svg/examples/#basic)
+
+## Run from server
+
+```
+python3 -m http.server
+```
