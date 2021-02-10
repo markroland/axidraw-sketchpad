@@ -45,7 +45,7 @@ let sketch = function(p) {
       // Title
       //*
       let font_size = 12;
-      let title_svg = renderText('Bitmap to Line Art. Test #1', {
+      let title_svg = renderText('Bitmap to Line Art. Test #2', {
         font: fonts['EMSTech'],
         pos: {x: 0, y: 0},
         scale: 2,

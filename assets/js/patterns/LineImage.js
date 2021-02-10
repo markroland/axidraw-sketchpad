@@ -16,7 +16,10 @@ class LineImage {
     let paths = new Array();
 
     let downscale = 1/10;
-    let num_shades = 2;
+
+    // 2: 0 (black), 255 (white)
+    // 4: 0 85, 170, 255 (Increments of 255/3)
+    let num_shades = 4;
 
     // Render Original Image
     // p5.image(imported_image, 0, 0);
@@ -31,13 +34,15 @@ class LineImage {
     let x = 0;
     let y = 0;
     for (let i = 0; i < pixelCount; i++) {
+
+      // Get average intensity of RGB color channels
       let average = (imported_image.pixels[i*4 + 0] + imported_image.pixels[i*4 + 1] + imported_image.pixels[i*4 + 2]) / 3;
+      let clamped_intensity = p5.round((average/255) * (num_shades-1)) * (255/(num_shades-1));
+      // console.log(average, clamped_intensity);
 
-      average = p5.round((average/255) * num_shades) * (256/num_shades);
-
-      imported_image.pixels[i*4 + 0] = average;
-      imported_image.pixels[i*4 + 1] = average;
-      imported_image.pixels[i*4 + 2] = average;
+      imported_image.pixels[i*4 + 0] = clamped_intensity;
+      imported_image.pixels[i*4 + 1] = clamped_intensity;
+      imported_image.pixels[i*4 + 2] = clamped_intensity;
       imported_image.pixels[i*4 + 3] = 255;
 
       y = Math.floor(i / imported_image.width)
@@ -47,7 +52,7 @@ class LineImage {
       if (image_array[y] == undefined) {
         image_array[y] = new Array();
       }
-      image_array[y][x] = average
+      image_array[y][x] = clamped_intensity
     }
     imported_image.updatePixels();
 
@@ -64,28 +69,38 @@ class LineImage {
     for (let a = 0; a < image_array.length; a++) {
       for (let b = 0; b < image_array[a].length; b++) {
 
-        // Hatch: Diagonal top-left to bottom-right
-        if (image_array[a][b] < 255) {
+        // Render in "p5 land"
+        /*
+        p5.noStroke();
+        p5.fill(image_array[a][b])
+        p5.rectMode(p5.CORNER);
+        p5.rect(b * 4, a * 4, 4, 4)
+        //*/
 
-          // Render in "p5 land"
-          // p5.fill(0)
-          // p5.rect(100 + b * 3, a * 3, 3, 3)
-
+        if (image_array[a][b] < 255 * 3/(num_shades-1)) {
+          // Hatch: Diagonal top-left to bottom-right
           paths.push([
             [2 * ((b / imported_image.width) - 0.5), 2 * (a / imported_image.width - 0.5)],
             [2 * ((b / imported_image.width) - 0.5) + pixel_size, 2 * (a / imported_image.width - 0.5) + pixel_size],
           ])
+
         }
 
-        // Hatch: Diagonal top-right to bottom-left
-        //*
-        if (image_array[a][b] < 255/3) {
+        if (image_array[a][b] < 255 * 2/(num_shades-1)) {
+          // Hatch: Diagonal top-right to bottom-left
           paths.push([
             [2 * ((b / imported_image.width) - 0.5) + pixel_size, 2 * (a / imported_image.width - 0.5)],
             [2 * ((b / imported_image.width) - 0.5), 2 * (a / imported_image.width - 0.5) + pixel_size],
           ])
         }
-        //*/
+
+        if (image_array[a][b] < 255 * 1/(num_shades-1)) {
+          // Hatch: Horizonal
+          paths.push([
+            [2 * ((b / imported_image.width) - 0.5), 2 * (a / imported_image.width - 0.5) + pixel_size/2],
+            [2 * ((b / imported_image.width) - 0.5) + pixel_size, 2 * (a / imported_image.width - 0.5) + pixel_size/2],
+          ])
+        }
       }
     }
     p5.noFill()
