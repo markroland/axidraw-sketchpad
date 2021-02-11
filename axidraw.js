@@ -3,6 +3,10 @@ let sketch = function(p) {
   // Set sketch margin in inches
   let margin = 0.25 * 96;
 
+  let imported_svg
+
+  let imported_image
+
   var Patterns = {
     "bezierquadratic": new BezierQuadratic(),
     "cycloid": new Cycloid(),
@@ -11,13 +15,22 @@ let sketch = function(p) {
     "genuary": new Genuary(),
     "heart": new Heart(),
     "lindenmayer": new Lindenmayer(),
+    "lineimage": new LineImage(),
     "negativespace": new NegativeSpace(),
     "lissajous": new Lissajous(),
     "radiallines": new RadialLines(),
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "radiallines";
+  let selectedPattern = "lineimage";
+
+  // Preload data
+  p.preload = function() {
+    imported_image = p.loadImage("assets/data/portrait.jpg",
+      success => { /* console.log('jpg success') */ },
+      fail => { /* console.log('jpg fail') */ }
+    );
+  }
 
   p.setup = function() {
 
@@ -32,7 +45,7 @@ let sketch = function(p) {
       // Title
       //*
       let font_size = 12;
-      let title_svg = renderText('ABCDEFGHIJKLMNOPQRSTUVWXYZ', {
+      let title_svg = renderText('Bitmap to Line Art. Test #2', {
         font: fonts['EMSTech'],
         pos: {x: 0, y: 0},
         scale: 2,
@@ -93,7 +106,7 @@ let sketch = function(p) {
 
   p.draw = function() {
 
-    paths = Patterns[selectedPattern].draw();
+    paths = Patterns[selectedPattern].draw(p, imported_image);
 
     p.push();
     p.translate(p.width/2, p.height/2)
