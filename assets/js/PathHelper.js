@@ -112,4 +112,33 @@ class PathHelper {
     return divided_path;
   }
 
+  quadraticBezierPath(p1, p2, p3, segments) {
+
+    let path = new Array();
+
+    path.push(p1)
+
+    let a = p1
+    let b = p2
+    let c;
+    let d;
+    for (let i = 1; i < segments; i++) {
+      c = [
+        p1[0] - (p1[0] - p2[0]) * (i/(segments-1)),
+        p1[1] - (p1[1] - p2[1]) * (i/(segments-1))
+      ];
+      d = [
+        p2[0] - (p2[0] - p3[0]) * (i/(segments-1)),
+        p2[1] - (p2[1] - p3[1]) * (i/(segments-1))
+      ];
+      path.push(this.intersect_point(a,b,c,d))
+      a = c;
+      b = d
+    }
+
+    path.push(p3)
+
+    return path;
+  }
+
 }
