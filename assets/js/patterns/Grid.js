@@ -75,47 +75,6 @@ class Grid {
         let num_verts = 10;
         let shape = new Array();
 
-        // Build "manually"
-        /*
-
-        // Corner 1
-        let quadratic_bezier = PathHelp.quadraticBezierPath(
-          sub_shape[1],
-          sub_shape[2],
-          sub_shape[3],
-          num_verts
-        )
-        shape = shape.concat(quadratic_bezier);
-
-        // Corner 2
-        quadratic_bezier = PathHelp.quadraticBezierPath(
-          sub_shape[3],
-          sub_shape[4],
-          sub_shape[5],
-          num_verts
-        )
-        shape = shape.concat(quadratic_bezier.slice(-num_verts));
-
-        // Corner 3
-        quadratic_bezier = PathHelp.quadraticBezierPath(
-          sub_shape[5],
-          sub_shape[6],
-          sub_shape[7],
-          num_verts
-        )
-        shape = shape.concat(quadratic_bezier.slice(-num_verts));
-
-        // Corner 4
-        quadratic_bezier = PathHelp.quadraticBezierPath(
-          sub_shape[7],
-          sub_shape[0],
-          sub_shape[1],
-          num_verts
-        )
-        shape = shape.concat(quadratic_bezier.slice(-num_verts));
-
-        //*/
-
         // Incomplete generalization of corners
         // Warning: Not tested for shapes with more than 4 corners
         // Warning: Some points may be duplicated!
@@ -151,7 +110,6 @@ class Grid {
         )
     }
     paths = centered_path;
-    //
 
     return paths;
   }
