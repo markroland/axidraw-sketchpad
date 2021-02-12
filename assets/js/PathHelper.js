@@ -82,4 +82,34 @@ class PathHelper {
     });
   }
 
+  /**
+   * Split each segment of the source path into 2 parts and return the result
+   **/
+  subdividePath(path) {
+
+    let divided_path = new Array();
+
+    for (let i = 0; i < path.length-1; i++) {
+
+      // Current point
+      divided_path.push(path[i]);
+
+      // Point halfway to next point
+      divided_path.push([
+        path[i][0] + (path[i+1][0] - path[i][0])/2,
+        path[i][1] + (path[i+1][1] - path[i][1])/2
+      ]);
+
+      // Point halfway to next point (Also works)
+      /*
+      divided_path.push([
+        path[i][0] - (path[i][0] - path[i+1][0])/2,
+        path[i][1] - (path[i][1] - path[i+1][1])/2
+      ]);
+      //*/
+    }
+
+    return divided_path;
+  }
+
 }
