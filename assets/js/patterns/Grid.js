@@ -23,7 +23,7 @@ class Grid {
     let corner_randomness = 0.2
 
     // TODO: This is inverted
-    let corner_radius = 0.0;
+    let corner_radius = 0.5;
 
     let PathHelp = new PathHelper();
 
@@ -91,7 +91,7 @@ class Grid {
         // Warning: Not tested for shapes with more than 4 corners
         // Warning: Some points may be duplicated!
         let bezier_path = new Array();
-        let p1, p2, p3;
+        let p1, p2, p3, p4;
         for (let s = 0; s < base_shape.length - 1; s++) {
 
           // Define Bezier control points
@@ -112,6 +112,13 @@ class Grid {
           bezier_path = PathHelp.quadraticBezierPath(p1, p2, p3, num_verts)
 
           shape = shape.concat(bezier_path);
+
+          p4 = sub_shape[((s*2) + 4) % sub_shape.length];
+
+          shape = shape.concat(
+            PathHelp.dividePath([p3, p4], 10)
+          )
+
         }
 
         // Close path by adding the first point to the end of the path
@@ -140,8 +147,8 @@ class Grid {
         p_center[1] += PathHelp.getRandom(-0.1, 0.1);
 
         // Add circle inside shape
-        let circle = PathHelp.polygon(shape.length-1, 0.125, (2 * Math.PI) * -10/(shape.length-1))
-        /*
+        let circle = PathHelp.polygon(shape.length-1, 0.25, (2 * Math.PI) * -10/(shape.length-1))
+        //*
         paths.push(
           PathHelp.translatePath(
             circle,
@@ -152,13 +159,15 @@ class Grid {
 
         // Rays
         for (let r = 0; r < shape.length; r++) {
-          paths.push([
-            shape[r],
-            [
-              p_center[0] + circle[r][0],
-              p_center[1] + circle[r][1]
-            ]
-          ])
+          if (r % 4 == 0) {
+            paths.push([
+              shape[r],
+              [
+                p_center[0],
+                p_center[1]
+              ]
+            ])
+          }
         }
 
       }
