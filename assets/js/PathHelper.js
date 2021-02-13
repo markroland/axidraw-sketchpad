@@ -7,6 +7,13 @@ class PathHelper {
     return Math.floor(Math.random() * (max - min + 1) ) + min;
   }
 
+  /**
+   * Linear Interpolate between two points
+   **/
+  lerp(beginning, end, percent) {
+    return beginning + (end - beginning) * percent;
+  }
+
   polygon(sides, length, rotation = 0)
   {
     let polygon = new Array();
@@ -42,6 +49,31 @@ class PathHelper {
 
     return [x, y]
   }
+
+  arrayColumn(arr, n){
+    return arr.map(a => a[n]);
+  }
+
+  /*
+  center(path) {
+
+    // Define function to extract column from multidimensional array
+    // const arrayColumn = (arr, n) => arr.map(a => a[n]);
+
+    // Get X and Y coordinates as an 1-dimensional array
+    let x_coordinates = this.arrayColumn(path, 0);
+    let x_min = Math.min(...x_coordinates);
+    let x_max = Math.max(...x_coordinates);
+    let x_range = x_max - x_min;
+
+    let y_coordinates = this.arrayColumn(path, 1);
+    let y_min = Math.min(...y_coordinates);
+    let y_max = Math.max(...y_coordinates);
+    let y_range = y_max - y_min;
+
+    return [x_min + x_range/2, y_min + y_range/2]
+  }
+  //*/
 
   /**
    * Scale Path
@@ -80,6 +112,84 @@ class PathHelper {
         a[0] * Math.sin(theta) + a[1] * Math.cos(theta)
       ]
     });
+  }
+
+  /**
+   * Split each segment of the source path into 2 parts and return the result
+   **/
+  subdividePath(path) {
+
+    let divided_path = new Array();
+
+    for (let i = 0; i < path.length-1; i++) {
+
+      // Current point
+      divided_path.push(path[i]);
+
+      // Point halfway to next point
+      divided_path.push([
+        path[i][0] + (path[i+1][0] - path[i][0])/2,
+        path[i][1] + (path[i+1][1] - path[i][1])/2
+      ]);
+
+      // Point halfway to next point (Also works)
+      /*
+      divided_path.push([
+        path[i][0] - (path[i][0] - path[i+1][0])/2,
+        path[i][1] - (path[i][1] - path[i+1][1])/2
+      ]);
+      //*/
+    }
+
+    return divided_path;
+  }
+
+  /**
+   * Split each segment of the source path into 2 parts and return the result
+   **/
+  dividePath(path, segments) {
+
+    let divided_path = new Array();
+
+    for (let i = 0; i < segments; i++) {
+      divided_path.push(
+        [
+          this.lerp(path[0][0], path[1][0], i/segments),
+          this.lerp(path[0][1], path[1][1], i/segments)
+        ]
+      )
+    }
+
+    return divided_path;
+  }
+
+  quadraticBezierPath(p1, p2, p3, segments) {
+
+    let path = new Array();
+
+    path.push(p1)
+
+    let a = p1
+    let b = p2
+    let c;
+    let d;
+    for (let i = 1; i < segments; i++) {
+      c = [
+        p1[0] - (p1[0] - p2[0]) * (i/(segments-1)),
+        p1[1] - (p1[1] - p2[1]) * (i/(segments-1))
+      ];
+      d = [
+        p2[0] - (p2[0] - p3[0]) * (i/(segments-1)),
+        p2[1] - (p2[1] - p3[1]) * (i/(segments-1))
+      ];
+      path.push(this.intersect_point(a,b,c,d))
+      a = c;
+      b = d
+    }
+
+    path.push(p3)
+
+    return path;
   }
 
 }

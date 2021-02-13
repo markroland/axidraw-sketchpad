@@ -13,6 +13,7 @@ let sketch = function(p) {
     "extrusion": new Extrusion(),
     "fibonacci": new Fibonacci(),
     "genuary": new Genuary(),
+    "grid": new Grid(),
     "heart": new Heart(),
     "lindenmayer": new Lindenmayer(),
     "lineimage": new LineImage(),
@@ -22,14 +23,16 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "lineimage";
+  let selectedPattern = "grid";
 
   // Preload data
   p.preload = function() {
-    imported_image = p.loadImage("assets/data/portrait.jpg",
-      success => { /* console.log('jpg success') */ },
-      fail => { /* console.log('jpg fail') */ }
-    );
+    if (selectedPattern == "lineimage") {
+      imported_image = p.loadImage("assets/data/portrait.jpg",
+        success => { /* console.log('jpg success') */ },
+        fail => { /* console.log('jpg fail') */ }
+      );
+    }
   }
 
   p.setup = function() {
@@ -45,7 +48,7 @@ let sketch = function(p) {
       // Title
       //*
       let font_size = 12;
-      let title_svg = renderText('Bitmap to Line Art. Test #2', {
+      let title_svg = renderText('', {
         font: fonts['EMSTech'],
         pos: {x: 0, y: 0},
         scale: 2,
@@ -142,7 +145,7 @@ let sketch = function(p) {
     p.line(-p.width/2, 0, p.width/2, 0)
     //*/
 
-    let constrain = true;
+    let constrain = false;
 
     // Set the "canvas unit" as the number of pixels between
     // the center of the canvas and the nearest margin
