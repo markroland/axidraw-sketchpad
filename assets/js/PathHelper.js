@@ -144,6 +144,25 @@ class PathHelper {
     return divided_path;
   }
 
+  /**
+   * Split each segment of the source path into 2 parts and return the result
+   **/
+  dividePath(path, segments) {
+
+    let divided_path = new Array();
+
+    for (let i = 0; i < segments; i++) {
+      divided_path.push(
+        [
+          this.lerp(path[0][0], path[1][0], i/segments),
+          this.lerp(path[0][1], path[1][1], i/segments)
+        ]
+      )
+    }
+
+    return divided_path;
+  }
+
   quadraticBezierPath(p1, p2, p3, segments) {
 
     let path = new Array();
