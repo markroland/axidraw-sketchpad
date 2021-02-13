@@ -7,6 +7,10 @@ class PathHelper {
     return Math.floor(Math.random() * (max - min + 1) ) + min;
   }
 
+  getRandom(min, max) {
+    return Math.random() * (max - min) + min
+  }
+
   /**
    * Linear Interpolate between two points
    **/
@@ -26,10 +30,6 @@ class PathHelper {
       ])
     }
     return polygon;
-  }
-
-  getRandom(min, max) {
-    return Math.random() * (max - min) + min
   }
 
   // Copied from https://editor.p5js.org/mwburke/sketches/h1ec1s6LG

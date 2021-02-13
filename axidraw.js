@@ -20,10 +20,11 @@ let sketch = function(p) {
     "negativespace": new NegativeSpace(),
     "lissajous": new Lissajous(),
     "radiallines": new RadialLines(),
+    "radiography": new Radiography(),
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "grid";
+  let selectedPattern = "radiography";
 
   // Preload data
   p.preload = function() {
