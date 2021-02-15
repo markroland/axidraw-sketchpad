@@ -24,7 +24,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "radiography";
+  let selectedPattern = "fibonacci";
 
   // Preload data
   p.preload = function() {
