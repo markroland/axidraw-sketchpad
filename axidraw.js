@@ -24,7 +24,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "fibonacci";
+  let selectedPattern = "grid";
 
   // Preload data
   p.preload = function() {
@@ -49,7 +49,7 @@ let sketch = function(p) {
       // Title
       //*
       let font_size = 12;
-      let title_svg = renderText('Happy Valentine\'s Day', {
+      let title_svg = renderText('', {
         font: fonts['EMSTech'],
         pos: {x: 0, y: 0},
         scale: 2,

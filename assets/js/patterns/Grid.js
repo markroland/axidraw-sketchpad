@@ -4,11 +4,11 @@
 class Grid {
 
   constructor() {
-
+    this.constrain = true
   }
 
   draw() {
-    return this.grid1();
+    return this.perspectiveGrid();
   }
 
   grid1() {
@@ -193,4 +193,31 @@ class Grid {
     return paths;
   }
 
+  perspectiveGrid() {
+
+    let paths = new Array();
+
+    let i_max = 50;
+    for (let i = 0; i < i_max; i++) {
+      // let y = i/i_max;
+      let y = -0.67 + (-1 + Math.exp(1.0 * (i/i_max)))
+      paths.push([
+        [-5/3, y],
+        [5/3, y]
+      ])
+    }
+
+    for (let i = 0; i < 50; i++) {
+      paths.push([
+        [-(i/10) * (1/3), -0.67],
+        [-(i/10) * (5/3), 1]
+      ])
+      paths.push([
+        [(i/10) * (1/3), -0.67],
+        [(i/10) * (5/3), 1]
+      ])
+    }
+
+    return paths;
+  }
 }
