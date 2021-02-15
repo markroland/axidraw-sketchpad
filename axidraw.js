@@ -49,7 +49,7 @@ let sketch = function(p) {
       // Title
       //*
       let font_size = 12;
-      let title_svg = renderText('', {
+      let title_svg = renderText('Happy Valentine\'s Day', {
         font: fonts['EMSTech'],
         pos: {x: 0, y: 0},
         scale: 2,
@@ -147,6 +147,9 @@ let sketch = function(p) {
     //*/
 
     let constrain = false;
+    if (Patterns[selectedPattern].constrain !== undefined) {
+      constrain = Patterns[selectedPattern].constrain;
+    }
 
     // Set the "canvas unit" as the number of pixels between
     // the center of the canvas and the nearest margin
