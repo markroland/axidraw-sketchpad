@@ -24,7 +24,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "grid";
+  let selectedPattern = "lineimage";
 
   // Preload data
   p.preload = function() {
