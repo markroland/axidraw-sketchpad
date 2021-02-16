@@ -3,12 +3,14 @@
  */
 class Grid {
 
-  constructor() {
+  constructor(p5) {
     this.constrain = true
+
   }
 
-  draw() {
-    return this.perspectiveGrid();
+  draw(p5) {
+    this.p5 = p5
+    return this.perspectiveGridWithNoise();
   }
 
   grid1() {
@@ -215,6 +217,42 @@ class Grid {
       paths.push([
         [(i/10) * (1/3), -0.67],
         [(i/10) * (5/3), 1]
+      ])
+    }
+
+    return paths;
+  }
+
+  perspectiveGridWithNoise() {
+
+    let paths = new Array();
+
+    // Horizontal Lines
+    let i_max = 30;
+    let horizon = new Array();
+    for (let i = 0; i < i_max; i++) {
+      // let y = i/i_max;
+      let y = -0.67 + (-1 + Math.exp(1.0 * (i/i_max)))
+      let path = new Array();
+      for (let x = -50; x < 50; x++) {
+
+        let noiseVal = 0;
+        noiseVal = 0.4 * this.p5.noise((x + 50)/100, y)
+        path.push([(x/50) * (5/3), y + noiseVal])
+      }
+      paths.push(path);
+
+      if (i == 0) {
+        horizon = path
+      }
+    }
+
+    // Vanishing Lines
+    for (let x = -50; x < 50; x++) {
+      let px = (x/50) * (5/3)
+      paths.push([
+        [px, horizon[x+50][1]],
+        [5 * px, 1]
       ])
     }
 
