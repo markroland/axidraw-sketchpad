@@ -161,8 +161,43 @@ class LineImage {
     }
     //*/
 
+    // Vertical lines
+    let verticalLines = new Array();
+    //*
+    for (let col = 0; col < image_array[0].length; col++) {
+      let start_row = null
+      for (let row = 0; row < image_array.length; row++) {
+        if (image_array[row][col] < 255) {
+          if (start_row === null) {
+            start_row = row
+          }
+        } else {
+          if (start_row !== null) {
+            verticalLines.push([
+              [scale * (((col + 0.5) / imported_image.width) - 0.5), scale * ((start_row - 0.5) / imported_image.width - 0.5)],
+              [scale * (((col + 0.5) / imported_image.width) - 0.5), scale * ((row) / imported_image.width - 0.5)],
+            ]);
+            start_row = null
+          }
+        }
 
-    // paths = renderLines; return paths;
+        // Terminate line at the end of the column if a line has already been started
+        if (start_row !== null && row == image_array.length - 1) {
+          verticalLines.push([
+            [scale * (((col + 0.5) / imported_image.width) - 0.5), scale * ((start_row - 0.5) / imported_image.width - 0.5)],
+            [scale * (((col + 0.5) / imported_image.width) - 0.5), scale * ((row) / imported_image.width - 0.5)],
+          ]);
+        }
+      }
+    }
+    //*/
+
+    // Combine vertical lines with the horizontal lines
+    renderLines = renderLines.concat(verticalLines)
+
+    paths = renderLines;
+
+    return paths;
 
     // Convert straight lines to wavy lines with Perlin noise
     let segmentation = 0.01
