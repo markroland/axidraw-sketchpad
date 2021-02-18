@@ -130,6 +130,9 @@ class LineImage {
     // Render image pixels to paths
     let scale = 2;
     let renderLines = new Array();
+
+    // Horizontal lines
+    //*
     for (let row = 0; row < image_array.length; row++) {
       let start_col = null
       for (let col = 0; col < image_array[row].length; col++) {
@@ -146,8 +149,18 @@ class LineImage {
             start_col = null
           }
         }
+
+        // Terminate line at the end of the row if a line has already been started
+        if (start_col !== null && col == image_array[row].length - 1) {
+          renderLines.push([
+            [scale * ((start_col / imported_image.width) - 0.5),        scale * (row / imported_image.width - 0.5)],
+            [scale * ((col / imported_image.width) - 0.5), scale * (row / imported_image.width - 0.5)],
+          ]);
+        }
       }
     }
+    //*/
+
 
     // paths = renderLines; return paths;
 
