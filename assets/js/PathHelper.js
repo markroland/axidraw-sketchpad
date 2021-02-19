@@ -164,6 +164,18 @@ class PathHelper {
   }
 
   quadraticBezierPath(p1, p2, p3, segments) {
+    let path = new Array();
+    for (let i = 0; i < segments; i++) {
+      let t = i/segments;
+      path.push([
+        Math.pow(1-t, 2) * p1[0] + 2 * (1-t) * t * p2[0] + Math.pow(t, 2) * p3[0],
+        Math.pow(1-t, 2) * p1[1] + 2 * (1-t) * t * p2[1] + Math.pow(t, 2) * p3[1]
+      ])
+    }
+    return path;
+  }
+
+  quadraticBezierPathAlgorithm(p1, p2, p3, segments) {
 
     let path = new Array();
 
@@ -189,6 +201,22 @@ class PathHelper {
 
     path.push(p3)
 
+    return path;
+  }
+
+  /**
+   * Bezier Path with 4 control points
+   * Equations from https://javascript.info/bezier-curve
+   */
+  cubicBezierPath(p1, p2, p3, p4, segments) {
+    let path = new Array();
+    for (let i = 0; i <= segments; i++) {
+      let t = i/segments;
+      path.push([
+        Math.pow(1-t, 3) * p1[0] + 3 * Math.pow(1-t, 2) * t * p2[0] + 3 * (1-t) * Math.pow(t,2) * p3[0] + Math.pow(t,3) * p4[0],
+        Math.pow(1-t, 3) * p1[1] + 3 * Math.pow(1-t, 2) * t * p2[1] + 3 * (1-t) * Math.pow(t,2) * p3[1] + Math.pow(t,3) * p4[1]
+      ])
+    }
     return path;
   }
 

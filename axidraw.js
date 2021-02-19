@@ -24,7 +24,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "lineimage";
+  let selectedPattern = "bezierquadratic";
 
   // Preload data
   p.preload = function() {
