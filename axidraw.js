@@ -1,3 +1,5 @@
+let sketch_title = 'Marching Squares Portrait #1'
+
 let sketch = function(p) {
 
   // Set sketch margin in inches
@@ -24,7 +26,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "bezierquadratic";
+  let selectedPattern = "lineimage";
 
   // Preload data
   p.preload = function() {
@@ -47,16 +49,16 @@ let sketch = function(p) {
       let svg_text = '';
 
       // Title
-      //*
-      let font_size = 12;
-      let title_svg = renderText('Cubic Bezier Curves Test #1', {
-        font: fonts['EMSTech'],
-        pos: {x: 0, y: 0},
-        scale: 2,
-        charWidth: 8,
-      });
-      svg_text = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + title_svg + "</g>"
-      //*/
+      if (sketch_title) {
+        let font_size = 12;
+        let title_svg = renderText(sketch_title, {
+          font: fonts['EMSTech'],
+          pos: {x: 0, y: 0},
+          scale: 2,
+          charWidth: 8,
+        });
+        svg_text = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + title_svg + "</g>"
+      }
 
       // Date
       font_size = 8;

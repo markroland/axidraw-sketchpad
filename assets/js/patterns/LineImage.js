@@ -9,7 +9,14 @@ class LineImage {
 
   draw(p5, imported_image) {
     this.p5 = p5
-    return this.calcLines(imported_image);
+
+    let paths = new Array();
+
+    // paths = this.calcLines(imported_image);
+
+    paths = this.calcOutlines(p5, imported_image);
+
+    return paths;
   }
 
   calcHash(p5, imported_image) {
@@ -227,6 +234,58 @@ class LineImage {
     }
 
     paths = perlinLines;
+
+    return paths;
+  }
+
+  calcOutlines(p5, imported_image) {
+
+    // Initialize drawing paths
+    let paths = new Array();
+
+    // Reduce the dimensions of the image
+    let downscale = 1/8;
+
+    let orig_width = imported_image.width;
+    let orig_height = imported_image.height;
+
+    // Downscale original image
+    imported_image.resize(imported_image.width * downscale, imported_image.height * downscale)
+
+    // Debugging: Render image
+    // p5.image(imported_image, 24, 24);
+
+    // Reduce the number of tones in the image
+    let image_array = this.posterize(imported_image, 16)
+
+    // Contour "Marching Squares"
+    let lines = new Array();
+    let num_steps = 8
+    for (let i = 1; i < num_steps; i++) {
+
+      // Log progress to console since this is slow
+      console.log(i)
+
+      let threshold = i * (256/num_steps);
+      lines = lines.concat(p5.marchingSquares(image_array, threshold));
+    }
+
+    let scaling_factor = (orig_width * downscale) / 2;
+    for (let l = 0; l < lines.length; l++) {
+
+      // TODO: Identity closed paths and join as single shape
+
+      paths.push([
+        [
+          (lines[l][0] - scaling_factor) / scaling_factor,
+          (lines[l][1] - scaling_factor) / scaling_factor
+        ],
+        [
+          (lines[l][2] - scaling_factor) / scaling_factor,
+          (lines[l][3] - scaling_factor) / scaling_factor
+        ]
+      ])
+    }
 
     return paths;
   }
