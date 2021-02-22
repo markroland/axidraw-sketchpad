@@ -4,13 +4,15 @@
 class Grid {
 
   constructor(p5) {
-    this.constrain = true
+    this.constrain = false
 
   }
 
   draw(p5) {
-    this.p5 = p5
-    return this.perspectiveGridWithNoise();
+    // this.p5 = p5
+    // return this.perspectiveGridWithNoise();
+    // return this.grid1()
+    return this.TenPrint(12) // 12 Feels nice
   }
 
   grid1() {
@@ -193,6 +195,89 @@ class Grid {
     paths = centered_path;
 
     return paths;
+  }
+
+  /**
+   * Inspiration: https://10print.org
+   */
+  TenPrint(gridScale) {
+
+    let paths = new Array();
+
+    // Grid test
+    let rows = 3 * gridScale;
+    let columns = 5 * gridScale;
+    let side_length = 2 * (1/rows);
+
+
+    // Shapes. Defined with local coordinates "[0,0]" at center of shape
+
+    // Square
+    let base_shape = [
+      [-side_length/2, -side_length/2],
+      [ side_length/2, -side_length/2],
+      [ side_length/2, side_length/2],
+      [-side_length/2, side_length/2],
+      [-side_length/2, -side_length/2]
+    ]
+
+    // Path option 1
+    let forward_slash = [
+      [-side_length/2, side_length/2],
+      [side_length/2, -side_length/2]
+    ]
+
+    // Path option 2
+    let back_slash = [
+      [-side_length/2, -side_length/2],
+      [side_length/2, side_length/2]
+    ]
+
+    // --- END Shapes
+
+
+    let PathHelp = new PathHelper();
+
+    let path = new Array();
+    for (let c = 0; c < columns; c++) {
+      for (let r = 0; r <  rows; r++) {
+
+        // Randomly select a shape
+        if (Math.random() > 0.5) {
+          path = forward_slash
+        } else {
+          path = back_slash
+        }
+
+        // Move to position on gride
+        path = PathHelp.translatePath(
+          path,
+          [
+            2 * (columns/rows) * (c/columns),
+            2 * (r/rows)
+          ]
+        );
+
+        paths.push(path)
+      }
+    }
+
+    // Center the Paths to the canvas
+    let centered_path = new Array();
+    for (let c = 0; c < paths.length; c++) {
+      centered_path.push(
+        PathHelp.translatePath(
+          paths[c],
+          [
+            -(columns/rows) + side_length/2,
+            -1 + side_length/2
+          ]
+        )
+      )
+    }
+    paths = centered_path;
+
+    return paths
   }
 
   perspectiveGrid() {

@@ -1,4 +1,4 @@
-let sketch_title = 'Marching Squares Portrait #1'
+let sketch_title = '10 PRINT'
 
 let sketch = function(p) {
 
@@ -26,7 +26,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "lineimage";
+  let selectedPattern = "grid";
 
   // Preload data
   p.preload = function() {
