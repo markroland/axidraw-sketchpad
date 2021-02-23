@@ -10,7 +10,7 @@ let sketch = function(p) {
   let imported_image
 
   var Patterns = {
-    "bezierquadratic": new BezierQuadratic(),
+    "bezier": new Bezier(),
     "cycloid": new Cycloid(),
     "extrusion": new Extrusion(),
     "fibonacci": new Fibonacci(),
@@ -26,7 +26,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "grid";
+  let selectedPattern = "bezier";
 
   // Preload data
   p.preload = function() {

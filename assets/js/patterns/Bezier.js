@@ -1,13 +1,13 @@
 /**
  * Bezier Quadratic
  */
-class BezierQuadratic {
+class Bezier {
 
   constructor() {
 
-    this.key = "bezierquadratic";
+    this.key = "bezier";
 
-    this.name = "Bezier Quadratic";
+    this.name = "Bezier Curves";
   }
 
   /**
