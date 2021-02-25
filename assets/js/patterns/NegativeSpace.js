@@ -1,5 +1,12 @@
 class NegativeSpace {
   draw() {
+    // return this.sketch1();
+    return this.sketch2();
+  }
+
+  sketch1() {
+
+    let PathHelp = new PathHelper;
 
     // Create paths array to return
     let paths = new Array();
@@ -21,12 +28,12 @@ class NegativeSpace {
     }
     triangle.push(triangle[0]);
 
-    triangle = this.rotatePath(triangle, (Math.random() - 0.5) * Math.PI/6)
+    triangle = PathHelp.rotatePath(triangle, (Math.random() - 0.5) * Math.PI/6)
 
     let circle = new Object;
     circle.r = 0.25 + Math.random() * 0.5;
-    circle.x = this.getRandom(-5/3 + circle.r, 5/3 - circle.r)
-    circle.y = this.getRandom(-1 + circle.r, 1 - circle.r);
+    circle.x = PathHelp.getRandom(-5/3 + circle.r, 5/3 - circle.r)
+    circle.y = PathHelp.getRandom(-1 + circle.r, 1 - circle.r);
 
     // Define function to extract column from multidimensional array
     const arrayColumn = (arr, n) => arr.map(a => a[n]);
@@ -80,7 +87,7 @@ class NegativeSpace {
       // is the Processing coordinates system (positive is down)
 
       // Side 1: Betwen 0 and 120 degrees
-      let intersect_1 = this.intersect_point(p1,p2,triangle[0],triangle[1]);
+      let intersect_1 = PathHelp.intersect_point(p1,p2,triangle[0],triangle[1]);
       if (p1[1] >= triangle[0][1]) {
         paths.push([
           [intersect_1[0], p1[1]],
@@ -89,7 +96,7 @@ class NegativeSpace {
       }
 
       // Side 2: Betwen 120 and 240 degrees
-      let intersect_2 = this.intersect_point(p1,p2,triangle[1],triangle[2]);
+      let intersect_2 = PathHelp.intersect_point(p1,p2,triangle[1],triangle[2]);
       if (intersect_2[0] < min_int_x) {
         paths.push([
           p1,
@@ -98,7 +105,7 @@ class NegativeSpace {
       }
 
       // Side 3: Between 240 and 360 degrees
-      let intersect_3 = this.intersect_point(p1,p2,triangle[2],triangle[0]);
+      let intersect_3 = PathHelp.intersect_point(p1,p2,triangle[2],triangle[0]);
       if (p1[1] < triangle[0][1]) {
         paths.push([
           [intersect_3[0], p1[1]],
@@ -111,39 +118,40 @@ class NegativeSpace {
     return paths;
   }
 
-  getRandom(min, max) {
-    return Math.random() * (max - min) + min
+  sketch2() {
+
+    let paths = new Array();
+
+    let sine_wave = new Array();
+
+    let wave_amplitude = 0.25
+
+    let wave_periods = 1.5
+
+    let i_max = 80;
+
+    for (let i = 0; i < i_max; i++) {
+
+      let x = (5/3) * ((i - i_max/2) / (i_max/2))
+
+      let wave_y = wave_amplitude * Math.sin(wave_periods * (i/i_max) * 2 * Math.PI)
+
+      paths.push([
+        [x, -1],
+        [x, wave_y - wave_amplitude]
+      ])
+
+      paths.push([
+        [x, 1],
+        [x, wave_y + wave_amplitude]
+      ])
+
+      sine_wave = sine_wave.concat([[x, wave_y]])
+
+    }
+
+    // paths.push(sine_wave)
+
+    return paths;
   }
-
-  // Copied from https://editor.p5js.org/mwburke/sketches/h1ec1s6LG
-  intersect_point(p1, p2, p3, p4) {
-    const ua = ((p4[0] - p3[0]) * (p1[1] - p3[1]) -
-      (p4[1] - p3[1]) * (p1[0] - p3[0])) /
-      ((p4[1] - p3[1]) * (p2[0] - p1[0]) -
-      (p4[0] - p3[0]) * (p2[1] - p1[1]));
-
-    const ub = ((p2[0] - p1[0]) * (p1[1] - p3[1]) -
-      (p2[1] - p1[1]) * (p1[0] - p3[0])) /
-      ((p4[1] - p3[1]) * (p2[0] - p1[0]) -
-      (p4[0] - p3[0]) * (p2[1] - p1[1]));
-
-    const x = p1[0] + ua * (p2[0] - p1[0]);
-    const y = p1[1] + ua * (p2[1] - p1[1]);
-
-    return [x, y]
-  }
-
-  /**
-   * Rotate points x and y by angle theta about center point (0,0)
-   * https://en.wikipedia.org/wiki/Rotation_matrix
-   **/
-  rotatePath(path, theta) {
-    return path.map(function(a){
-      return [
-        a[0] * Math.cos(theta) - a[1] * Math.sin(theta),
-        a[0] * Math.sin(theta) + a[1] * Math.cos(theta)
-      ]
-    });
-  }
-
 }

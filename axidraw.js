@@ -1,4 +1,4 @@
-let sketch_title = '10 PRINT'
+let sketch_title = ''
 
 let sketch = function(p) {
 
@@ -26,7 +26,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "bezier";
+  let selectedPattern = "negativespace";
 
   // Preload data
   p.preload = function() {
