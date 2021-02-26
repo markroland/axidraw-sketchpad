@@ -13,8 +13,9 @@ class LineImage {
     let paths = new Array();
 
     // paths = this.calcLines(imported_image);
-
-    paths = this.calcOutlines(p5, imported_image);
+    // paths = this.calcOutlines(p5, imported_image);
+    // paths = this.calcHash(p5, imported_image);
+    paths = this.gridLines(p5, imported_image)
 
     return paths;
   }
@@ -288,6 +289,80 @@ class LineImage {
     }
 
     return paths;
+  }
+
+  gridLines(p5, imported_image) {
+
+    // Initialize drawing paths
+    let paths = new Array();
+
+    // Reduce the dimensions of the image
+    let downscale = 1/20;
+
+    // 2: 0 (black), 255 (white)
+    // 4: 0 85, 170, 255 (Increments of 255/3)
+    let num_shades = 8;
+
+    // Downscale original image
+    imported_image.resize(imported_image.width * downscale, imported_image.height * downscale)
+
+    // Render Original Image
+    // p5.image(imported_image, 0, 0);
+
+    // Reduce the number of tones in the image
+    let image_array = this.posterize(imported_image, num_shades)
+
+    // Render image pixels to paths
+    let scale = 2;
+    let pixel_size = 2 / imported_image.height
+    let renderLines = new Array();
+
+    // Horizontal lines
+    //*
+    for (let row = 0; row < image_array.length; row++) {
+      let start_col = null
+      for (let col = 0; col < image_array[row].length; col++) {
+
+        let pixel_x = 2 * ((col / imported_image.width) - 0.5);
+        let pixel_y = 2 * (row / imported_image.width - 0.5)
+
+        let pixel_path = this.renderPixel(num_shades, image_array[row][col])
+
+        for (let p = 0; p < pixel_path.length; p++) {
+          paths.push([
+            [
+              pixel_x + pixel_path[p][0][0] * pixel_size,
+              pixel_y + pixel_path[p][0][1] * pixel_size
+            ],
+            [
+              pixel_x + pixel_path[p][1][0] * pixel_size,
+              pixel_y + pixel_path[p][1][1] * pixel_size
+            ]
+          ])
+        }
+
+      }
+    }
+    //*/
+
+    // Combine vertical lines with the horizontal lines
+    // renderLines = renderLines.concat(verticalLines)
+
+    // paths = renderLines;
+
+    return paths;
+  }
+
+  renderPixel(levels, value) {
+    let path = new Array();
+    let num = (255 - value)/255 * levels
+    for (let l = 0; l < num; l++) {
+      path.push([
+        [0,l/num],
+        [1,l/num]
+      ])
+    }
+    return path;
   }
 
   posterize(image, levels) {

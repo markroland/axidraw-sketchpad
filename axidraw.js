@@ -26,7 +26,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "negativespace";
+  let selectedPattern = "lineimage";
 
   // Preload data
   p.preload = function() {
