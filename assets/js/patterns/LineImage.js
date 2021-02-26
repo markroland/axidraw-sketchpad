@@ -15,7 +15,7 @@ class LineImage {
     // paths = this.calcLines(imported_image);
     // paths = this.calcOutlines(p5, imported_image);
     // paths = this.calcHash(p5, imported_image);
-    paths = this.gridLines(p5, imported_image)
+    paths = this.fillPixels(p5, imported_image)
 
     return paths;
   }
@@ -291,17 +291,18 @@ class LineImage {
     return paths;
   }
 
-  gridLines(p5, imported_image) {
+  fillPixels(p5, imported_image) {
 
     // Initialize drawing paths
     let paths = new Array();
 
     // Reduce the dimensions of the image
-    let downscale = 1/20;
+    let desired_pixels_per_side = 20;
+    let downscale = 1/(imported_image.width/desired_pixels_per_side);
 
     // 2: 0 (black), 255 (white)
     // 4: 0 85, 170, 255 (Increments of 255/3)
-    let num_shades = 8;
+    let num_shades = 12;
 
     // Downscale original image
     imported_image.resize(imported_image.width * downscale, imported_image.height * downscale)
@@ -317,16 +318,24 @@ class LineImage {
     let pixel_size = 2 / imported_image.height
     let renderLines = new Array();
 
-    // Horizontal lines
-    //*
-    for (let row = 0; row < image_array.length; row++) {
+    // Render "pixels"
+    let num_rows = image_array.length
+    let num_columns = image_array[0].length
+    for (let row = 0; row < num_rows; row++) {
       let start_col = null
-      for (let col = 0; col < image_array[row].length; col++) {
+      for (let col = 0; col < num_columns; col++) {
+
+        let index = (row * num_columns) + (col % num_columns)
 
         let pixel_x = 2 * ((col / imported_image.width) - 0.5);
         let pixel_y = 2 * (row / imported_image.width - 0.5)
 
-        let pixel_path = this.renderPixel(num_shades, image_array[row][col])
+        let orientation = 0;
+        if (index % 2 == 0) {
+          orientation = 90;
+        }
+
+        let pixel_path = this.renderPixel(num_shades, image_array[row][col], orientation)
 
         for (let p = 0; p < pixel_path.length; p++) {
           paths.push([
@@ -343,24 +352,25 @@ class LineImage {
 
       }
     }
-    //*/
-
-    // Combine vertical lines with the horizontal lines
-    // renderLines = renderLines.concat(verticalLines)
-
-    // paths = renderLines;
 
     return paths;
   }
 
-  renderPixel(levels, value) {
+  renderPixel(levels, value, orientation) {
     let path = new Array();
     let num = (255 - value)/255 * levels
     for (let l = 0; l < num; l++) {
-      path.push([
+      let points = [
         [0,l/num],
         [1,l/num]
-      ])
+      ]
+      if (orientation == 90) {
+        points = [
+          [l/num, 0],
+          [l/num, 1]
+        ]
+      }
+      path.push(points)
     }
     return path;
   }
