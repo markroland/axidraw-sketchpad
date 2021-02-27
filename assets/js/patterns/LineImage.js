@@ -293,6 +293,8 @@ class LineImage {
 
   fillPixels(p5, imported_image) {
 
+    let PathHelp = new PathHelper;
+
     // Initialize drawing paths
     let paths = new Array();
 
@@ -322,32 +324,27 @@ class LineImage {
     let num_rows = image_array.length
     let num_columns = image_array[0].length
     for (let row = 0; row < num_rows; row++) {
-      let start_col = null
+
       for (let col = 0; col < num_columns; col++) {
 
+        // Set the linear index (0 to row * col)  of the pixel
         let index = (row * num_columns) + (col % num_columns)
 
+        // Set the X and Y coordinates of the pixels
         let pixel_x = 2 * ((col / imported_image.width) - 0.5);
         let pixel_y = 2 * (row / imported_image.width - 0.5)
 
-        let orientation = 0;
-        if (index % 2 == 0) {
-          orientation = 90;
-        }
+        // Set path to fill the pixel
+        let pixel_path = this.renderWeavePixel(num_shades, image_array[row][col], index)
 
-        let pixel_path = this.renderPixel(num_shades, image_array[row][col], orientation)
-
+        // Scale and translate the pixel paths into place on the canvas
         for (let p = 0; p < pixel_path.length; p++) {
-          paths.push([
-            [
-              pixel_x + pixel_path[p][0][0] * pixel_size,
-              pixel_y + pixel_path[p][0][1] * pixel_size
-            ],
-            [
-              pixel_x + pixel_path[p][1][0] * pixel_size,
-              pixel_y + pixel_path[p][1][1] * pixel_size
-            ]
-          ])
+          paths.push(
+            PathHelp.translatePath(
+              PathHelp.scalePath(pixel_path[p], pixel_size),
+              [pixel_x, pixel_y]
+            )
+          );
         }
 
       }
@@ -356,23 +353,35 @@ class LineImage {
     return paths;
   }
 
-  renderPixel(levels, value, orientation) {
-    let path = new Array();
+  /**
+   * Fill a 1 x 1 "pixel" unit with horizontal or vertical lines
+   * that represent a hue value
+   * @param {integer} levels - The number of hue values (Max 255)
+   * @param {float} value - The value to render
+   * @param {integer} index - The pixel position to render, used for alternating pattern
+   * @returns {array} A Path array the local coordinates 0 to 1 in the X and Y directions
+   */
+  renderWeavePixel(levels, value, index) {
+
+    let paths = new Array();
+
     let num = (255 - value)/255 * levels
+
     for (let l = 0; l < num; l++) {
-      let points = [
+      let path = [
         [0,l/num],
         [1,l/num]
       ]
-      if (orientation == 90) {
-        points = [
+      if (index % 2 == 0) {
+        path = [
           [l/num, 0],
           [l/num, 1]
         ]
       }
-      path.push(points)
+      paths.push(path)
     }
-    return path;
+
+    return paths;
   }
 
   posterize(image, levels) {
