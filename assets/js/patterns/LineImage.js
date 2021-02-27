@@ -336,7 +336,8 @@ class LineImage {
 
         // Set path to fill the pixel
         // let pixel_path = this.renderWeavePixel(num_shades, image_array[row][col], index)
-        let pixel_path = this.renderBoxPixel(num_shades, image_array[row][col], index)
+        // let pixel_path = this.renderBoxPixel(num_shades, image_array[row][col], index)
+        let pixel_path = this.renderSpiralPixel(num_shades, image_array[row][col], index)
 
         // Scale and translate the pixel paths into place on the canvas
         for (let p = 0; p < pixel_path.length; p++) {
@@ -417,12 +418,35 @@ class LineImage {
 
   }
 
-  /*
-  // TODO:
   renderSpiralPixel(levels, value, index) {
 
+    let PathHelp = new PathHelper
+
+    let paths = new Array();
+
+    let spiral = new Array();
+    let spiral_sides = 4;
+    let phase_offset = Math.PI * (1/4)
+    // let phase_offset = Math.PI * (1/2)
+
+    let num = (255 - value)/255 * levels
+
+    let revolutions = Math.ceil(num)
+
+    // Incomplete Here
+    let steps = revolutions * spiral_sides;
+    for (let s = 0; s < steps; s++) {
+      let radius = (s/steps) * 0.75
+      let theta = (s/spiral_sides) * Math.PI * 2
+      let x = radius * Math.cos(theta + phase_offset)
+      let y = radius * Math.sin(theta + phase_offset)
+      spiral.push([x,y])
+    }
+
+    paths.push(spiral)
+
+    return paths;
   }
-  //*/
 
   posterize(image, levels) {
 
