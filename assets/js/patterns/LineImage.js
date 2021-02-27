@@ -295,18 +295,18 @@ class LineImage {
 
     let PathHelp = new PathHelper;
 
-    let connect_pixels = false
+    let connect_pixels = true
 
     // Initialize drawing paths
     let paths = new Array();
 
     // Reduce the dimensions of the image
-    let desired_pixels_per_side = 16;
+    let desired_pixels_per_side = 20;
     let downscale = 1/(imported_image.width/desired_pixels_per_side);
 
     // 2: 0 (black), 255 (white)
     // 4: 0 85, 170, 255 (Increments of 255/3)
-    let num_shades = 6;
+    let num_shades = 3;
 
     // Downscale original image
     imported_image.resize(imported_image.width * downscale, imported_image.height * downscale)
@@ -346,7 +346,8 @@ class LineImage {
         // Set path to fill the pixel
         // let pixel_path = this.renderWeavePixel(num_shades, image_array[row][col], index)
         // let pixel_path = this.renderBoxPixel(num_shades, image_array[row][col], index)
-        let pixel_path = this.renderSpiralPixel(num_shades, image_array[row][col], index)
+        // let pixel_path = this.renderSpiralPixel(num_shades, image_array[row][col], index)
+        let pixel_path = this.renderFermatSpiralPixel(num_shades, image_array[row][col], [num_rows, num_columns], [row, col], connect_pixels)
 
         // Scale and translate the pixel paths into place on the canvas
         for (let p = 0; p < pixel_path.length; p++) {
@@ -450,13 +451,12 @@ class LineImage {
     let minimum_revolutions = 1
     let revolutions = Math.floor(num) + minimum_revolutions
 
-    // Incomplete Here
     let steps = revolutions * spiral_sides;
     for (let s = 0; s < steps; s++) {
 
       // Note radius multiplier is somewhat arbitrary
       // and controls the margin between pixels
-      // 0.75 works well for 4-sided spirals
+      // 0.75 works well for 4-sided spirals (sqrt(2)/2 ?)
       let radius = (s/steps) * 0.75
 
       let theta = (s/spiral_sides) * Math.PI * 2
@@ -464,6 +464,107 @@ class LineImage {
       let y = radius * Math.sin(theta + phase_offset)
       spiral.push([x,y])
     }
+
+    if (spiral.length > 0) {
+      paths.push(spiral)
+    }
+
+    return paths;
+  }
+
+  renderFermatSpiralPixel(hue_levels, value, dimensions, index, connect) {
+
+    let PathHelp = new PathHelper
+
+    let paths = new Array();
+
+    let spiral = new Array();
+    let spiral_sides = 4;
+    let phase_offset = Math.PI * (5/4)
+    // let phase_offset = Math.PI * (1/2)
+
+    // If connected pixels, add 180-degree rotation on odd rows
+    // to make things line up nice
+    if (connect && index[0] % 2) {
+      phase_offset += Math.PI
+    }
+
+    // Convert pixel value on scale of 0-255 to a
+    // number based on the requested Hue hue_levels
+    let num = (255 - value)/255 * hue_levels
+
+    let minimum_revolutions = 1
+    let revolutions = Math.floor(num) + minimum_revolutions
+
+    // Debugging
+    // console.log(index, num, revolutions)
+
+    // Controls "tightness" of spiral. 1.0 is a good value
+    const pow_n = 1.0;
+    let spiral_scale = 1/8
+
+    // Radius of spiral
+    let a = (1 / revolutions) * spiral_scale;
+
+    // Loop through one revolution
+    let t_min = revolutions * 0;
+    let t_max = revolutions * (2 * Math.PI);
+    const t_step = (t_max - t_min) / (revolutions * spiral_sides);
+
+    // Negative Radius
+    // Starts top-left and goes to center
+    for (var t = t_max; t >= t_min; t -= t_step) {
+
+      // Run the parametric equations
+      let x = a * Math.pow(t, pow_n) * Math.cos(t + phase_offset);
+      let y = a * Math.pow(t, pow_n) * Math.sin(t + phase_offset);
+
+      // Add coordinates to shape array
+      spiral.push([x,y]);
+    }
+
+    // Positive Radius
+    // center and goes to bottom-right
+
+    // TODO: Refactor this after loop in the "if (connect)" loop?
+    if (connect && index[1] < dimensions[1] - 1) {
+      t_max = t_max - 2;
+    }
+
+    for (var t = t_min; t <= t_max + t_step; t += t_step) {
+
+      // Run the parametric equations
+      let x = -a * Math.pow(t, pow_n) * Math.cos(t + phase_offset);
+      let y = -a * Math.pow(t, pow_n) * Math.sin(t + phase_offset);
+
+      // Add coordinates to shape array
+      spiral.push([x,y]);
+    }
+
+    // Manipulate paths to make cleaner connections
+    if (connect) {
+
+      // Remove first point if not in the first or last column
+      if (index[1] > 0 && index[1] < dimensions[1]) {
+        spiral.shift()
+      }
+
+      // Remove last point if the last/right-most column
+      if(index[1] + 1 == dimensions[1]) {
+        spiral.pop()
+
+        // Remove last point if not the final, bottom-right pixel
+        if (index[0] + 1 != dimensions[0]) {
+          spiral.pop()
+        }
+      }
+
+      // Remove first point if the first/left-most column
+      if(index[1] == 0 && index[0] != 0) {
+        spiral.shift()
+      }
+    }
+
 
     if (spiral.length > 0) {
       paths.push(spiral)
