@@ -295,6 +295,8 @@ class LineImage {
 
     let PathHelp = new PathHelper;
 
+    let connect_pixels = false
+
     // Initialize drawing paths
     let paths = new Array();
 
@@ -348,15 +350,22 @@ class LineImage {
 
         // Scale and translate the pixel paths into place on the canvas
         for (let p = 0; p < pixel_path.length; p++) {
-          paths.push(
-            PathHelp.translatePath(
-              PathHelp.scalePath(pixel_path[p], pixel_size),
-              [pixel_x, pixel_y]
-            )
-          );
+          let positioned_pixel_path = PathHelp.translatePath(
+            PathHelp.scalePath(pixel_path[p], pixel_size),
+            [pixel_x, pixel_y]
+          )
+          if (connect_pixels) {
+            paths = paths.concat(positioned_pixel_path);
+          } else {
+            paths.push(positioned_pixel_path);
+          }
         }
-
       }
+    }
+
+    // Wrap composited path in an array
+    if (connect_pixels) {
+      paths = [paths]
     }
 
     return paths;
