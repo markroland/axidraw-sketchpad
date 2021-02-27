@@ -28,7 +28,7 @@ class LineImage {
 
     // 2: 0 (black), 255 (white)
     // 4: 0 85, 170, 255 (Increments of 255/3)
-    let num_shades = 4;
+    let num_shades = 8;
 
     // Render Original Image
     // p5.image(imported_image, 0, 0);
@@ -431,19 +431,27 @@ class LineImage {
 
     let num = (255 - value)/255 * levels
 
-    let revolutions = Math.ceil(num)
+    let minimum_revolutions = 1
+    let revolutions = Math.floor(num) + minimum_revolutions
 
     // Incomplete Here
     let steps = revolutions * spiral_sides;
     for (let s = 0; s < steps; s++) {
+
+      // Note radius multiplier is somewhat arbitrary
+      // and controls the margin between pixels
+      // 0.75 works well for 4-sided spirals
       let radius = (s/steps) * 0.75
+
       let theta = (s/spiral_sides) * Math.PI * 2
       let x = radius * Math.cos(theta + phase_offset)
       let y = radius * Math.sin(theta + phase_offset)
       spiral.push([x,y])
     }
 
-    paths.push(spiral)
+    if (spiral.length > 0) {
+      paths.push(spiral)
+    }
 
     return paths;
   }
