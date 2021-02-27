@@ -325,7 +325,14 @@ class LineImage {
     let num_columns = image_array[0].length
     for (let row = 0; row < num_rows; row++) {
 
-      for (let col = 0; col < num_columns; col++) {
+      for (let j = 0; j < num_columns; j++) {
+
+        // "Snake" through pixels to optimize plotting
+        // Odd rows go in reverse order, right-to-left
+        let col = j
+        if (row % 2 == 1) {
+          col = num_columns-1 - j
+        }
 
         // Set the linear index (0 to row * col)  of the pixel
         let index = (row * num_columns) + (col % num_columns)
