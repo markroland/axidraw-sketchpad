@@ -299,12 +299,12 @@ class LineImage {
     let paths = new Array();
 
     // Reduce the dimensions of the image
-    let desired_pixels_per_side = 20;
+    let desired_pixels_per_side = 16;
     let downscale = 1/(imported_image.width/desired_pixels_per_side);
 
     // 2: 0 (black), 255 (white)
     // 4: 0 85, 170, 255 (Increments of 255/3)
-    let num_shades = 12;
+    let num_shades = 6;
 
     // Downscale original image
     imported_image.resize(imported_image.width * downscale, imported_image.height * downscale)
@@ -335,7 +335,8 @@ class LineImage {
         let pixel_y = 2 * (row / imported_image.width - 0.5)
 
         // Set path to fill the pixel
-        let pixel_path = this.renderWeavePixel(num_shades, image_array[row][col], index)
+        // let pixel_path = this.renderWeavePixel(num_shades, image_array[row][col], index)
+        let pixel_path = this.renderBoxPixel(num_shades, image_array[row][col], index)
 
         // Scale and translate the pixel paths into place on the canvas
         for (let p = 0; p < pixel_path.length; p++) {
@@ -383,6 +384,45 @@ class LineImage {
 
     return paths;
   }
+
+  renderBoxPixel(levels, value, index) {
+
+    let PathHelp = new PathHelper
+
+    let paths = new Array();
+
+    let square = [
+      [0,0],
+      [0,1],
+      [1,1],
+      [1,0],
+      [0,0]
+    ]
+
+    let num = (255 - value)/255 * levels
+
+    // console.log(value, num)
+
+    for (let l = 1; l < num; l++) {
+      let scale = l/num
+      paths.push(
+        PathHelp.translatePath(
+          PathHelp.scalePath(square, scale),
+          [0.5-scale/2, 0.5-scale/2]
+        )
+      )
+    }
+
+    return paths;
+
+  }
+
+  /*
+  // TODO:
+  renderSpiralPixel(levels, value, index) {
+
+  }
+  //*/
 
   posterize(image, levels) {
 
