@@ -14,8 +14,8 @@ class LineImage {
 
     // paths = this.calcLines(imported_image);
     // paths = this.calcOutlines(p5, imported_image);
-    // paths = this.calcHash(p5, imported_image);
-    paths = this.fillPixels(p5, imported_image)
+    paths = this.calcHash(p5, imported_image);
+    // paths = this.fillPixels(p5, imported_image)
 
     return paths;
   }
@@ -24,14 +24,14 @@ class LineImage {
 
     let paths = new Array();
 
-    let downscale = 1/10;
+    let downscale = 1/3;
 
     // 2: 0 (black), 255 (white)
     // 4: 0 85, 170, 255 (Increments of 255/3)
     let num_shades = 8;
 
     // Render Original Image
-    // p5.image(imported_image, 0, 0);
+    // p5.image(imported_image, 48, 48);
 
     // Downscale original image
     imported_image.resize(imported_image.width * downscale, imported_image.height * downscale)
@@ -65,65 +65,93 @@ class LineImage {
     }
     imported_image.updatePixels();
 
-    // Render image
-    // p5.image(imported_image, 24, 24);
-
-    //*/
-    // End: End load image
-
     // Render to paths
 
     let pixel_size = 2 / imported_image.height
 
-    for (let a = 0; a < image_array.length; a++) {
-      for (let b = 0; b < image_array[a].length; b++) {
+    let scale = 1;
+
+    let rows = image_array.length
+    let columns = image_array[0].length - 1
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+
+        let x = col * pixel_size;
+        let y = row * pixel_size;
 
         // Render in "p5 land"
         /*
         p5.noStroke();
         p5.fill(image_array[a][b])
         p5.rectMode(p5.CORNER);
-        p5.rect(b * 4, a * 4, 4, 4)
+        p5.rect(
+          48 + b * (1/downscale),
+          48 + a * (1/downscale),
+          (1/downscale),
+          (1/downscale)
+        )
         //*/
 
-        if (image_array[a][b] < 255 * 3/(num_shades-1)) {
+        if (image_array[row][col] < 255 * 3/(num_shades-1)) {
           // Hatch: Diagonal top-left to bottom-right
           paths.push([
-            [2 * ((b / imported_image.width) - 0.5), 2 * (a / imported_image.width - 0.5)],
-            [2 * ((b / imported_image.width) - 0.5) + pixel_size, 2 * (a / imported_image.width - 0.5) + pixel_size],
+            [x - pixel_size/2, y + pixel_size/2],
+            [x + pixel_size/2, y - pixel_size/2]
           ])
-
         }
 
-        if (image_array[a][b] < 255 * 2/(num_shades-1)) {
+        if (image_array[row][col] < 255 * 2/(num_shades-1)) {
           // Hatch: Diagonal top-right to bottom-left
           paths.push([
-            [2 * ((b / imported_image.width) - 0.5) + pixel_size, 2 * (a / imported_image.width - 0.5)],
-            [2 * ((b / imported_image.width) - 0.5), 2 * (a / imported_image.width - 0.5) + pixel_size],
+            [x + pixel_size/2, y + pixel_size/2],
+            [x - pixel_size/2, y - pixel_size/2]
           ])
         }
 
-        if (image_array[a][b] < 255 * 1/(num_shades-1)) {
+        if (image_array[row][col] < 255 * 1/(num_shades-1)) {
           // Hatch: Horizonal
           paths.push([
-            [2 * ((b / imported_image.width) - 0.5), 2 * (a / imported_image.width - 0.5) + pixel_size/2],
-            [2 * ((b / imported_image.width) - 0.5) + pixel_size, 2 * (a / imported_image.width - 0.5) + pixel_size/2],
+            [x - pixel_size/2, y],
+            [x + pixel_size/2, y]
           ])
         }
+
       }
     }
+
     p5.noFill()
+
+    // Center the Paths to the canvas
+    //*
+    let PathHelp = new PathHelper
+    let centered_path = new Array();
+    for (let c = 0; c < paths.length; c++) {
+      centered_path.push(
+        PathHelp.translatePath(
+          paths[c],
+          [
+            -(columns/rows) + pixel_size/2,
+            -1 + pixel_size/2
+          ]
+        )
+      )
+    }
+    paths = centered_path;
+    //*/
 
     return paths;
   }
 
   calcLines(imported_image) {
 
+    let PathHelp = new PathHelper;
+
     // Initialize drawing paths
     let paths = new Array();
 
     // Reduce the dimensions of the image
-    let downscale = 1/6;
+    let downscale = 1/2;
 
     // 2: 0 (black), 255 (white)
     // 4: 0 85, 170, 255 (Increments of 255/3)
@@ -135,8 +163,11 @@ class LineImage {
     // Reduce the number of tones in the image
     let image_array = this.posterize(imported_image, num_shades)
 
+    // console.log(image_array)
+
     // Render image pixels to paths
-    let scale = 2;
+    let scale = (5/3) * 2; // Where does this value come from??
+    let shift = 0 // -0.5
     let renderLines = new Array();
 
     // Horizontal lines
@@ -150,20 +181,32 @@ class LineImage {
           }
         } else {
           if (start_col !== null) {
-            renderLines.push([
-              [scale * ((start_col / imported_image.width) - 0.5),        scale * (row / imported_image.width - 0.5)],
-              [scale * ((col / imported_image.width) - 0.5), scale * (row / imported_image.width - 0.5)],
-            ]);
+
+            renderLines.push(
+              PathHelp.translatePath(
+                [
+                  [scale * ((start_col / imported_image.width)),        scale * (row / imported_image.width)],
+                  [scale * ((col / imported_image.width)), scale * (row / imported_image.width)],
+                ],
+                [-5/3, -1]
+              )
+            );
+
             start_col = null
           }
         }
 
         // Terminate line at the end of the row if a line has already been started
         if (start_col !== null && col == image_array[row].length - 1) {
-          renderLines.push([
-            [scale * ((start_col / imported_image.width) - 0.5),        scale * (row / imported_image.width - 0.5)],
-            [scale * ((col / imported_image.width) - 0.5), scale * (row / imported_image.width - 0.5)],
-          ]);
+          renderLines.push(
+              PathHelp.translatePath(
+                [
+                  [scale * ((start_col / imported_image.width)),        scale * (row / imported_image.width)],
+                  [scale * ((col / imported_image.width)), scale * (row / imported_image.width)],
+                ],
+                [-5/3, -1]
+              )
+            );
         }
       }
     }
@@ -171,7 +214,7 @@ class LineImage {
 
     // Vertical lines
     let verticalLines = new Array();
-    //*
+    /*
     for (let col = 0; col < image_array[0].length; col++) {
       let start_row = null
       for (let row = 0; row < image_array.length; row++) {
@@ -201,7 +244,7 @@ class LineImage {
     //*/
 
     // Combine vertical lines with the horizontal lines
-    renderLines = renderLines.concat(verticalLines)
+    // renderLines = renderLines.concat(verticalLines)
 
     paths = renderLines;
 
