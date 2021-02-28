@@ -14,17 +14,17 @@ class LineImage {
 
     // paths = this.calcLines(imported_image);
     // paths = this.calcOutlines(p5, imported_image);
-    paths = this.calcHash(p5, imported_image);
+    paths = this.calcHatch(p5, imported_image);
     // paths = this.fillPixels(p5, imported_image)
 
     return paths;
   }
 
-  calcHash(p5, imported_image) {
+  calcHatch(p5, imported_image) {
 
     let paths = new Array();
 
-    let downscale = 1/3;
+    let downscale = 1/5;
 
     // 2: 0 (black), 255 (white)
     // 4: 0 85, 170, 255 (Increments of 255/3)
@@ -93,7 +93,7 @@ class LineImage {
         )
         //*/
 
-        if (image_array[row][col] < 255 * 3/(num_shades-1)) {
+        if (image_array[row][col] < 255 * 4/(num_shades-1)) {
           // Hatch: Diagonal top-left to bottom-right
           paths.push([
             [x - pixel_size/2, y + pixel_size/2],
@@ -101,7 +101,7 @@ class LineImage {
           ])
         }
 
-        if (image_array[row][col] < 255 * 2/(num_shades-1)) {
+        if (image_array[row][col] < 255 * 3/(num_shades-1)) {
           // Hatch: Diagonal top-right to bottom-left
           paths.push([
             [x + pixel_size/2, y + pixel_size/2],
@@ -109,11 +109,19 @@ class LineImage {
           ])
         }
 
-        if (image_array[row][col] < 255 * 1/(num_shades-1)) {
+        if (image_array[row][col] < 255 * 2/(num_shades-1)) {
           // Hatch: Horizonal
           paths.push([
             [x - pixel_size/2, y],
             [x + pixel_size/2, y]
+          ])
+        }
+
+        if (image_array[row][col] < 255 * 1/(num_shades-1)) {
+          // Hatch: Vertical
+          paths.push([
+            [x, y - pixel_size/2],
+            [x, y + pixel_size/2]
           ])
         }
 
