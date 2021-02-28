@@ -39,3 +39,9 @@ but here is a command for Python 3.
 ```
 python -m http.server
 ```
+
+## License
+
+At this point I am not formally licensing this code. It's my intent for others to learn from 
+and use this code (otherwise I wouldn't share it publicly), but all art generated using this
+code as committed into this repository belongs to Mark Roland.
