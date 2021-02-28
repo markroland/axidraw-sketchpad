@@ -1,5 +1,7 @@
 # AxiDraw Drawing Canvas
 
+![Program Screenshot](assets/data/Program-Screenshot.png)
+
 [Use Now](https://markroland.github.io/axidraw-sketchpad/index.html)
 
 ## Dimensions / Format
