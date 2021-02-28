@@ -2,7 +2,25 @@
 
 ![Program Screenshot](assets/data/Program-Screenshot.png)
 
-[Use Now](https://markroland.github.io/axidraw-sketchpad/index.html)
+## Usage
+
+This is an active, personal code sketchbook and as such isn't optimized
+for others to start using easily, but I do hope people can find some
+value with it now or in the future when I've had a chance
+to make it more user friendly.
+
+The `js/axidraw.js` file is the entry point to the p5.js sketch. Near
+the top of the file is an object called `Patterns` that has key-value
+pairs for each of the drawing algorithms I've written. Below that,
+`selectedPattern` has the value of the currently active pattern. This
+value should be changed to one of the values from the `Patterns` object
+in order to explore other work.
+
+Beyond that, artwork is coded in the classes housed in the `js/patterns`
+folder. The `draw` method of these classes is called by `axidraw.js`, so
+that is your entry point for exploring the algorithm of the drawing.
+
+[View Now](https://markroland.github.io/axidraw-sketchpad/index.html)
 
 ## Dimensions / Format
 
