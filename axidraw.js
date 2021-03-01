@@ -169,6 +169,9 @@ let sketch = function(p) {
       );
       //*/
 
+      // Solid stroke
+      // p.stroke(0,128,255)
+
       p.beginShape();
       for (j = 0; j < paths[i].length; j++) {
 

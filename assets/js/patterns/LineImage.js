@@ -24,11 +24,18 @@ class LineImage {
 
     let paths = new Array();
 
-    let downscale = 1/5;
+    // 1: 480 x 288
+    // 1/2: 240 x 144
+    // 1/4: 120 x 72
+    // 1/8: 60 x 36
+    // 1/16: 30 x 18
+    // 1/32: 15 x 9
+    // 1/96: 5 x 3
+    let downscale = 1/4;
 
     // 2: 0 (black), 255 (white)
     // 4: 0 85, 170, 255 (Increments of 255/3)
-    let num_shades = 8;
+    let num_shades = 6;
 
     // Render Original Image
     // p5.image(imported_image, 48, 48);
@@ -68,11 +75,17 @@ class LineImage {
     // Render to paths
 
     let pixel_size = 2 / imported_image.height
-
-    let scale = 1;
+    // let pixel_size = 10/3 / imported_image.width
+    // console.log(pixel_size,imported_image.width)
 
     let rows = image_array.length
-    let columns = image_array[0].length - 1
+    let columns = image_array[0].length
+
+    // Initialize output arrays
+    let horizontal_hatches = new Array();
+    let vertical_hatches = new Array();
+    let forwardslash_hatches = new Array();
+    let backslash_hatches = new Array();
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < columns; col++) {
@@ -80,55 +93,369 @@ class LineImage {
         let x = col * pixel_size;
         let y = row * pixel_size;
 
+        // Initialize arrays to store each hatch direction
+        // This is used later to combine connect hatch pixels
+        if (horizontal_hatches[row] === undefined) {
+          horizontal_hatches[row] = new Array();
+        }
+        horizontal_hatches[row][col] = false;
+
+        if (vertical_hatches[row] === undefined) {
+          vertical_hatches[row] = new Array();
+        }
+        vertical_hatches[row][col] = false
+
+        if (forwardslash_hatches[row] === undefined) {
+          forwardslash_hatches[row] = new Array();
+        }
+        forwardslash_hatches[row][col] = false
+
+        if (backslash_hatches[row] === undefined) {
+          backslash_hatches[row] = new Array();
+        }
+        backslash_hatches[row][col] = false
+
         // Render in "p5 land"
         /*
         p5.noStroke();
-        p5.fill(image_array[a][b])
+        p5.fill(image_array[row][col])
         p5.rectMode(p5.CORNER);
         p5.rect(
-          48 + b * (1/downscale),
-          48 + a * (1/downscale),
+          48 + col * (1/downscale),
+          48 + row * (1/downscale),
           (1/downscale),
           (1/downscale)
         )
         //*/
 
+        // Darkest shade
         if (image_array[row][col] < 255 * 4/(num_shades-1)) {
           // Hatch: Diagonal top-left to bottom-right
-          paths.push([
-            [x - pixel_size/2, y + pixel_size/2],
-            [x + pixel_size/2, y - pixel_size/2]
-          ])
+          backslash_hatches[row][col] = true
+          // paths.push([
+          //   [x + pixel_size/2, y + pixel_size/2],
+          //   [x - pixel_size/2, y - pixel_size/2]
+          // ])
         }
 
         if (image_array[row][col] < 255 * 3/(num_shades-1)) {
           // Hatch: Diagonal top-right to bottom-left
-          paths.push([
-            [x + pixel_size/2, y + pixel_size/2],
-            [x - pixel_size/2, y - pixel_size/2]
-          ])
+          forwardslash_hatches[row][col] = true
+          // paths.push([
+          //   [x - pixel_size/2, y + pixel_size/2],
+          //   [x + pixel_size/2, y - pixel_size/2]
+          // ])
         }
 
         if (image_array[row][col] < 255 * 2/(num_shades-1)) {
-          // Hatch: Horizonal
-          paths.push([
-            [x - pixel_size/2, y],
-            [x + pixel_size/2, y]
-          ])
+          // Hatch: Horizontal
+          horizontal_hatches[row][col] = true
+          // paths.push([
+          //   [x - pixel_size/2, y],
+          //   [x + pixel_size/2, y]
+          // ])
         }
 
+        // Lightest Shade
         if (image_array[row][col] < 255 * 1/(num_shades-1)) {
           // Hatch: Vertical
-          paths.push([
-            [x, y - pixel_size/2],
-            [x, y + pixel_size/2]
-          ])
+          vertical_hatches[row][col] = true
+          // paths.push([
+          //   [x, y - pixel_size/2],
+          //   [x, y + pixel_size/2]
+          // ])
         }
 
       }
     }
 
+    // Array to hold hatch lines of all orientations
+    let renderLines = new Array();
+
+    // Horizontal Lines (-)
+    //*
+    renderLines = []
+    for (let row = 0; row < rows; row++) {
+      let start_line_pos = null
+
+      for (let col = 0; col < columns; col++) {
+
+        if (horizontal_hatches[row][col]) {
+          // Start a new line if the the row/column should be "active" and a line hasn't yet been started
+          if (start_line_pos === null) {
+            start_line_pos = col
+          }
+        } else if (start_line_pos !== null) {
+
+          // End of line, either by pixel value or end of row (last column)
+
+          // console.log("end: ", row, col)
+
+          // console.log("saving: ", row, col)
+
+          // Save path for rendering
+          renderLines.push([
+            [
+              col * pixel_size - pixel_size/2,
+              row * pixel_size
+            ],
+            [
+              start_line_pos * pixel_size - pixel_size/2,
+              row * pixel_size
+            ]
+          ]);
+
+          // Clear line start flag
+          start_line_pos = null
+        }
+
+        if ( start_line_pos !== null && col + 1 == columns) {
+
+          // End of line, either by pixel value or end of row (last column)
+
+          // console.log("end: ", row, col)
+
+          // console.log("saving: ", row, col)
+
+          // Save path for rendering
+          renderLines.push([
+            [
+              col * pixel_size - pixel_size/2,
+              row * pixel_size
+            ],
+            [
+              start_line_pos * pixel_size - pixel_size/2,
+              row * pixel_size
+            ]
+          ]);
+
+          // Clear line start flag
+          start_line_pos = null
+        }
+
+      }
+    }
+    paths = paths.concat(renderLines);
+    //*/
+
+    // Vertical Lines (|)
+    // console.log(vertical_hatches)
+    //*
+    renderLines = []
+    for (let col = 0; col < columns; col++) {
+      let start_line_pos = null
+      for (let row = 0; row < rows; row++) {
+
+        if (vertical_hatches[row][col]) {
+          // Start a new line if the the row/column should be "active" and a line hasn't yet been started
+          if (start_line_pos === null) {
+            start_line_pos = row
+          }
+        } else if (start_line_pos !== null) {
+
+          // End of line, either by pixel value or end of row (last column)
+
+          // Save path for rendering
+          renderLines.push([
+            [
+              col * pixel_size,
+              start_line_pos * pixel_size - pixel_size/2
+            ],
+            [
+              col * pixel_size,
+              row * pixel_size + pixel_size/2
+            ]
+          ]);
+
+          // Clear line start flag
+          start_line_pos = null
+        }
+
+        if (start_line_pos !== null && row + 1 == rows) {
+
+          // End of line, either by pixel value or end of row (last column)
+
+          // Save path for rendering
+          renderLines.push([
+            [
+              col * pixel_size,
+              start_line_pos * pixel_size - pixel_size/2
+            ],
+            [
+              col * pixel_size,
+              row * pixel_size + pixel_size/2
+            ]
+          ]);
+
+          // Clear line start flag
+          start_line_pos = null
+        }
+
+
+      }
+    }
+    paths = paths.concat(renderLines);
+    //*/
+
+    // Forward Slash Lines (/)
+    //*
+    renderLines = []
+    // https://www.jstips.co/en/javascript/flattening-multidimensional-arrays-in-javascript/
+    let forwardslash_hatches_1D = [].concat(...forwardslash_hatches);
+    for (let i = 0; i < forwardslash_hatches_1D.length; i++) {
+
+      // Skip to next pixel if current pixel not filled in
+      if (forwardslash_hatches_1D[i] == false) {
+        continue;
+      }
+
+      // Set the current pixel position as the line start position
+      let start_row = Math.floor(i/columns)
+      let start_col = i % columns;
+
+      // Loop through next eligibile pixels that could connect and extend this line
+      let active_line = true
+      let end_pos = i
+      let j = 1;
+      do {
+        // Set the array index of the pixel that is in the next position for the line
+        let next_pixel = i + (j * (columns - 1))
+
+        // Exit loop if the next pixel is past the end of available pixels
+        if (next_pixel > forwardslash_hatches_1D.length) {
+          break;
+        }
+
+        // If that pixel is a continuation of the line, then update the ending position
+        // but if it's not stop the loop
+        if (forwardslash_hatches_1D[next_pixel]) {
+          end_pos = next_pixel
+
+          // Hide the covered pixel from future iterations
+          forwardslash_hatches_1D[next_pixel] = false
+
+        } else {
+
+          // Next pixel is not active, so set flag to exit loop
+          active_line = false;
+        }
+
+        // Stop checking when the first column is reached
+        if (next_pixel % columns == 0) {
+          active_line = false
+        }
+
+        // Increment counter used to get the next pixel location
+        j++;
+
+      } while(active_line);
+
+      // Set the end row and column based on the ending pixel position
+      let end_row = Math.floor(end_pos/columns)
+      let end_col = end_pos % columns;
+
+      // Add the line to the paths
+      renderLines.push([
+        [
+          start_col * pixel_size + pixel_size/2,
+          start_row * pixel_size - pixel_size/2
+        ],
+        [
+          end_col * pixel_size - pixel_size/2,
+          end_row * pixel_size + pixel_size/2
+        ]
+      ]);
+
+    }
+    paths = paths.concat(renderLines);
+    //*/
+
+    // Back Slash Lines (\)
+    //*
+    renderLines = []
+    // https://www.jstips.co/en/javascript/flattening-multidimensional-arrays-in-javascript/
+    let backslash_hatches_1D = [].concat(...backslash_hatches);
+    for (let i = 0; i < backslash_hatches_1D.length; i++) {
+
+      // Set the current pixel position as the line start position
+      let start_row = Math.floor(i/columns)
+      let start_col = i % columns;
+
+      // Skip to next pixel if current pixel not filled in
+      if (backslash_hatches_1D[i] == false) {
+        continue;
+      }
+
+      // Loop through next eligibile pixels that could connect and extend this line
+      let active_line = true
+      let end_pos = i
+      let j = 1;
+      do {
+        // Set the array index of the pixel that is in the next position for the line
+        let next_pixel = i + (j * (columns + 1))
+
+        // Exit loop if the next pixel is past the end of available pixels
+        if (next_pixel > backslash_hatches_1D.length) {
+          break;
+        }
+
+        // Stop checking if the last column
+        if (end_pos % columns == (columns-1)) {
+          break;
+        }
+
+        // If that pixel is a continuation of the line, then update the ending position
+        // but if it's not stop the loop
+        if (backslash_hatches_1D[next_pixel]) {
+          end_pos = next_pixel
+
+          // Hide the covered pixel from future iterations
+          backslash_hatches_1D[next_pixel] = false
+
+        } else {
+
+          // Next pixel is not active, so set flag to exit loop
+          active_line = false;
+        }
+
+        // Increment counter used to get the next pixel location
+        j++;
+
+      } while(active_line);
+
+      // Set the end row and column based on the ending pixel position
+      let end_row = Math.floor(end_pos/columns)
+      let end_col = end_pos % columns;
+
+      // Add the line to the paths
+      renderLines.push([
+        [
+          start_col * pixel_size - pixel_size/2,
+          start_row * pixel_size - pixel_size/2
+        ],
+        [
+          end_col * pixel_size + pixel_size/2,
+          end_row * pixel_size + pixel_size/2
+        ]
+      ]);
+
+    }
+    paths = paths.concat(renderLines);
+    //*/
+
+    // Set for p5 rendering usage
     p5.noFill()
+
+    // Flip start/end points for alternate paths to reduce
+    // distance a plotter needs to move with the pen up
+    for (let i = 0; i < paths.length; i++) {
+      if (i % 2) {
+        paths[i] = [
+          paths[i][1],
+          paths[i][0]
+        ]
+      }
+    }
 
     // Center the Paths to the canvas
     //*
