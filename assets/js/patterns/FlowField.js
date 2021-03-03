@@ -87,7 +87,8 @@ class FlowField {
       for (var s = 0; s < s_max; s++) {
 
         // Get field value
-        let theta = this.getFieldValue(pos.x, pos.y);
+        // let theta = this.getFieldValue(pos.x, pos.y);
+        let theta = this.getNoiseValue(pos.x, pos.y);
 
         // Calculate position of new point
         pos.x = pos.x + segment_length * Math.cos(theta)
@@ -102,6 +103,14 @@ class FlowField {
     }
 
     return paths
+  }
+
+  getNoiseValue(x,y) {
+    let input_scale = 0.5;
+    let output_scale = 1.0;
+    let PathHelp = new PathHelper();
+    let value = output_scale * this.p5.noise(x * input_scale, y * input_scale)
+    return PathHelp.map(value, 0, 1, 0, 2 * Math.PI)
   }
 
   getFieldValue(x,y) {
