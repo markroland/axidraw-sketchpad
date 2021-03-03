@@ -8,7 +8,9 @@ class FlowField {
   }
 
   draw(p5) {
-    return this.drawField(12)
+    this.p5 = p5
+    // return this.drawField(12)
+    return this.drawFieldPaths(2000)
   }
 
   drawField(gridScale) {
@@ -37,9 +39,8 @@ class FlowField {
     for (let c = 0; c < columns; c++) {
       for (let r = 0; r < rows; r++) {
 
-        // randomly rotate path
-        // let theta = PathHelp.getRandom(0, 2 * Math.PI)
-        let theta = (c + r) * 0.01 * Math.PI * 2;
+        // Get field value
+        let theta = this.getFieldValue(c,r);
         path = PathHelp.rotatePath(line, theta)
 
         // Move to position on grid
@@ -59,6 +60,52 @@ class FlowField {
     paths = this.centerPaths(rows, columns, cell_width, paths);
 
     return paths
+  }
+
+  drawFieldPaths(count) {
+
+    let segment_length = 0.02
+    let min_length = 5;
+    let max_length = 20;
+
+    let PathHelp = new PathHelper();
+
+    let paths = new Array();
+    let path = new Array();
+
+    for(var i = 0; i < count; i++) {
+
+      // Select random point in field
+      let pos = {
+        "x": PathHelp.getRandom(-5/3, 5/3),
+        "y": PathHelp.getRandom(-1, 1)
+      }
+      let prev_pos = pos;
+
+      path = [[pos.x, pos.y]];
+      let s_max = PathHelp.map(Math.random(), 0, 1, min_length, max_length)
+      for (var s = 0; s < s_max; s++) {
+
+        // Get field value
+        let theta = this.getFieldValue(pos.x, pos.y);
+
+        // Calculate position of new point
+        pos.x = pos.x + segment_length * Math.cos(theta)
+        pos.y = pos.y + segment_length * Math.sin(theta)
+
+        // Add point to path
+        path.push([pos.x, pos.y]);
+      }
+
+      // Add path to all paths
+      paths.push(path)
+    }
+
+    return paths
+  }
+
+  getFieldValue(x,y) {
+    return (x + y) * 0.5 * Math.PI * 2;
   }
 
   centerPaths(rows, columns, cell_width, paths) {
