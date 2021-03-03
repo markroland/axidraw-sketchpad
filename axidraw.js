@@ -14,6 +14,7 @@ let sketch = function(p) {
     "cycloid": new Cycloid(),
     "extrusion": new Extrusion(),
     "fibonacci": new Fibonacci(),
+    "flowfield": new FlowField(),
     "genuary": new Genuary(),
     "grid": new Grid(),
     "heart": new Heart(),
@@ -26,7 +27,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "lineimage";
+  let selectedPattern = "flowfield";
 
   // Preload data
   p.preload = function() {
