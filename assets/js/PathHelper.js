@@ -224,4 +224,11 @@ class PathHelper {
     return path;
   }
 
+  sortPaths(paths) {
+    paths = paths.sort(function(a, b){
+      // Compare the X-position of the first point in the path
+      return a[0][0] - b[0][0]
+    });
+    return paths
+  }
 }
