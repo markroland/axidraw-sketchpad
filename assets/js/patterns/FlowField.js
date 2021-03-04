@@ -64,9 +64,9 @@ class FlowField {
 
   drawFieldPaths(count) {
 
-    let segment_length = 0.02
-    let min_length = 5;
-    let max_length = 20;
+    let segment_length = 0.01
+    let min_length = 10;
+    let max_length = 50;
 
     let PathHelp = new PathHelper();
 
@@ -88,11 +88,17 @@ class FlowField {
 
         // Get field value
         // let theta = this.getFieldValue(pos.x, pos.y);
-        let theta = this.getNoiseValue(pos.x, pos.y);
+        // let theta = this.getNoiseValue(pos.x, pos.y);
+        let theta = this.getGardenFence(pos.x, pos.y)
 
         // Calculate position of new point
         pos.x = pos.x + segment_length * Math.cos(theta)
         pos.y = pos.y + segment_length * Math.sin(theta)
+
+        // Stop path if too close to the edge (within 1/4")
+        if (Math.abs(pos.x) > 1.833 || Math.abs(pos.y) > 1.167) {
+          break;
+        }
 
         // Add point to path
         path.push([pos.x, pos.y]);
@@ -101,6 +107,9 @@ class FlowField {
       // Add path to all paths
       paths.push(path)
     }
+
+    // Sort paths for improved plotting efficiency
+    paths = PathHelp.sortPaths(paths)
 
     return paths
   }
@@ -111,6 +120,11 @@ class FlowField {
     let PathHelp = new PathHelper();
     let value = output_scale * this.p5.noise(x * input_scale, y * input_scale)
     return PathHelp.map(value, 0, 1, 0, 2 * Math.PI)
+  }
+
+  // Credit https://medium.com/@bit101/flow-fields-part-i-3ebebc688fd8
+  getGardenFence(x,y) {
+    return (Math.sin(x * 11.0) + Math.sin(y * 11.0)) * Math.PI * 2;
   }
 
   getFieldValue(x,y) {
