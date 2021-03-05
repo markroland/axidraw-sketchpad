@@ -187,7 +187,7 @@ class LineImage {
           }
         } else if (start_line_pos !== null) {
 
-          // End of line, either by pixel value or end of row (last column)
+          // End of line, either by pixel value
 
           // console.log("end: ", row, col)
 
@@ -211,16 +211,12 @@ class LineImage {
 
         if ( start_line_pos !== null && col + 1 == columns) {
 
-          // End of line, either by pixel value or end of row (last column)
-
-          // console.log("end: ", row, col)
-
-          // console.log("saving: ", row, col)
+          // End of line by end of row
 
           // Save path for rendering
           renderLines.push([
             [
-              col * pixel_size - pixel_size/2,
+              (col+1) * pixel_size - pixel_size/2,
               row * pixel_size
             ],
             [
@@ -318,6 +314,13 @@ class LineImage {
       let end_pos = i
       let j = 1;
       do {
+
+        // First pixel in column connects to self. No need for further analysis
+        if (start_col == 0) {
+          let active_line = false
+          break;
+        }
+
         // Set the array index of the pixel that is in the next position for the line
         let next_pixel = i + (j * (columns - 1))
 

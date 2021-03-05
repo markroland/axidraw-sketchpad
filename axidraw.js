@@ -27,7 +27,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "flowfield";
+  let selectedPattern = "lineimage";
 
   // Preload data
   p.preload = function() {
