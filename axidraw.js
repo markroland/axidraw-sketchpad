@@ -27,11 +27,11 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "lineimage";
+  let selectedPattern = "flowfield";
 
   // Preload data
   p.preload = function() {
-    if (selectedPattern == "lineimage") {
+    if (selectedPattern == "flowfield") {
       imported_image = p.loadImage("assets/data/landscape.jpg",
         success => { /* console.log('jpg success') */ },
         fail => { /* console.log('jpg fail') */ }

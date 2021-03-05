@@ -7,10 +7,11 @@ class FlowField {
     this.constrain = false
   }
 
-  draw(p5) {
+  draw(p5, imported_image) {
     this.p5 = p5
     // return this.drawField(12)
-    return this.drawFieldPaths(2000)
+    // return this.drawFieldPaths(2000)
+    return this.drawImageFieldPaths(20, imported_image)
   }
 
   drawField(gridScale) {
@@ -110,6 +111,82 @@ class FlowField {
 
     // Sort paths for improved plotting efficiency
     paths = PathHelp.sortPaths(paths)
+
+    return paths
+  }
+
+  drawImageFieldPaths(gridScale, imported_image) {
+
+    let PathHelp = new PathHelper();
+
+    let paths = new Array();
+
+    const y_max = 1;
+    const y_min = -1;
+
+    // Grid test
+    let rows = 3 * gridScale;
+    let columns = 5 * gridScale;
+
+    let cell_width = (y_max - y_min) * (1/rows);
+
+    let downscale = 1/4;
+
+    // Render Original Image
+    // p5.image(imported_image, 48, 48);
+
+    // Downscale original image
+    // imported_image.resize(imported_image.width * downscale, imported_image.height * downscale)
+    imported_image.resize(columns, rows)
+
+    // Sample Downscaled image
+    imported_image.loadPixels();
+    let pixelCount = imported_image.width * imported_image.height;
+    let image_array = new Array();
+    let x = 0;
+    let y = 0;
+    for (let i = 0; i < pixelCount; i++) {
+      let pixel_intensity = (imported_image.pixels[i*4 + 0] + imported_image.pixels[i*4 + 1] + imported_image.pixels[i*4 + 2]) / 3;
+      y = Math.floor(i / imported_image.width)
+      x = i % imported_image.width
+      if (image_array[y] == undefined) {
+        image_array[y] = new Array();
+      }
+      image_array[y][x] = pixel_intensity
+    }
+    imported_image.updatePixels();
+
+    // Define a path with it's own local origin
+    let line = [
+      [-cell_width/2, 0],
+      [cell_width/2, 0]
+    ]
+
+    // Loop through grid
+    let path = new Array();
+    for (let c = 0; c < columns; c++) {
+      for (let r = 0; r < rows; r++) {
+
+        // Get field value
+        let theta = (image_array[r][c]/255) * (2 * Math.PI);
+
+        path = PathHelp.rotatePath(line, theta)
+
+        // Move to position on grid
+        path = PathHelp.translatePath(
+          path,
+          [
+            2 * (columns/rows) * (c/columns),
+            2 * (r/rows)
+          ]
+        );
+
+        paths.push(path)
+      }
+    }
+
+    // Center the Paths to the canvas
+    paths = this.centerPaths(rows, columns, cell_width, paths);
 
     return paths
   }
