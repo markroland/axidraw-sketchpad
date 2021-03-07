@@ -12,6 +12,12 @@ class PathHelper {
   }
 
   map (value, in_min, in_max, out_min, out_max) {
+    // Shift negative values up into positive range
+    if (in_min < 0 || in_max < 0) {
+      in_max = in_max + -in_min
+      value = value + -in_min
+      in_min = in_min + -in_min
+    }
     return out_min + (out_max - out_min) * ((value - in_min) / (in_max - in_min))
   }
 
