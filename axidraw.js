@@ -1,4 +1,4 @@
-let sketch_title = ''
+let sketch_title = 'Flow    Field    from    Bitmap'
 
 let sketch = function(p) {
 

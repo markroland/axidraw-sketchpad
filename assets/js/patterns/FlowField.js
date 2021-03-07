@@ -11,7 +11,7 @@ class FlowField {
     this.p5 = p5
     // return this.drawField(12)
     // return this.drawFieldPaths(2000)
-    return this.drawImageFieldPaths(20, imported_image)
+    return this.drawImageFieldPaths(120, imported_image)
   }
 
   drawField(gridScale) {
@@ -156,37 +156,57 @@ class FlowField {
     }
     imported_image.updatePixels();
 
-    // Define a path with it's own local origin
-    let line = [
-      [-cell_width/2, 0],
-      [cell_width/2, 0]
-    ]
-
-    // Loop through grid
     let path = new Array();
-    for (let c = 0; c < columns; c++) {
-      for (let r = 0; r < rows; r++) {
+    let segment_length = 0.01
+    let min_length = 10;
+    let max_length = 40;
+    let num_lines = 1000
+    for(var i = 0; i < num_lines; i++) {
+
+      // Select random point in field
+      let pos = {
+        "x": PathHelp.getRandom(-5/3, 5/3),
+        "y": PathHelp.getRandom(-1, 1)
+      }
+      let prev_pos = pos;
+
+      path = [[pos.x, pos.y]];
+      // let s_max = PathHelp.map(Math.random(), 0, 1, min_length, max_length)
+      let y = parseInt(Math.floor(PathHelp.map(pos.y, -1, 1, 1, rows-2)))
+      let x = parseInt(Math.floor(PathHelp.map(pos.x, -5/3, 5/3, 1, columns-2)))
+      let s_max = PathHelp.map(255 - image_array[y][x], 0, 255, min_length, max_length)
+      for (var s = 0; s < s_max; s++) {
 
         // Get field value
-        let theta = (image_array[r][c]/255) * (2 * Math.PI);
+        // console.log(pos.y, pos.x)
+        y = parseInt(Math.floor(PathHelp.map(pos.y, -1, 1, 1, rows-2)))
+        x = parseInt(Math.floor(PathHelp.map(pos.x, -5/3, 5/3, 1, columns-2)))
+        // let y = Math.floor(this.p5.map(pos.y, -1, 1, 1, rows-2))
+        // let x = Math.floor(this.p5.map(pos.x, -5/3, 5/3, 1, columns-2))
+        // console.log(y, image_array[y])
+        let theta = (image_array[y][x]/255) * (2 * Math.PI);
+        // let theta = Math.random() * 2 * Math.PI
 
-        path = PathHelp.rotatePath(line, theta)
+        // Calculate position of new point
+        pos.x = pos.x + segment_length * Math.cos(theta)
+        pos.y = pos.y + segment_length * Math.sin(theta)
 
-        // Move to position on grid
-        path = PathHelp.translatePath(
-          path,
-          [
-            2 * (columns/rows) * (c/columns),
-            2 * (r/rows)
-          ]
-        );
+        // Stop path if too close to the edge (within 1/4")
+        if (Math.abs(pos.x) > 5/3 || Math.abs(pos.y) > 1) {
+          break;
+        }
 
-        paths.push(path)
+        // Add point to path
+        path.push([pos.x, pos.y]);
       }
+
+      // Add path to all paths
+      paths.push(path)
     }
 
+
     // Center the Paths to the canvas
-    paths = this.centerPaths(rows, columns, cell_width, paths);
+    // paths = this.centerPaths(rows, columns, cell_width, paths);
 
     return paths
   }
