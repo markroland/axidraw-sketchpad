@@ -1,4 +1,4 @@
-let sketch_title = 'Inkscape    SVG    Layer    Test'
+let sketch_title = ''
 
 let sketch = function(p) {
 
@@ -33,11 +33,11 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "extrusion";
+  let selectedPattern = "lineimage";
 
   // Preload data
   p.preload = function() {
-    if (selectedPattern == "flowfield") {
+    if (selectedPattern == "lineimage") {
       imported_image = p.loadImage("assets/data/landscape.jpg",
         success => { /* console.log('jpg success') */ },
         fail => { /* console.log('jpg fail') */ }
@@ -48,7 +48,10 @@ let sketch = function(p) {
   p.setup = function() {
 
     // Create SVG Canvas (6" x 4" @ 96pts/inch)
-    p.createCanvas(576, 384, p.SVG);
+    p.createCanvas(576, 384, p.SVG); // p.SVG
+
+    // Does not work with p.SVG Canvas
+    // p.blendMode(p.MULTIPLY)
 
     // Load the font JSON data
     $.getJSON('/assets/js/hersheytext.min.json', function(fonts){
@@ -106,9 +109,11 @@ let sketch = function(p) {
       //*/
 
       // Add SVG to document
-      document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:groupmode", "layer")
-      document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:label", "1 layer")
-      document.querySelector('#defaultCanvas0>svg>g').innerHTML = svg_text;
+      if (document.querySelector('#defaultCanvas0>svg>g')) {
+        document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:groupmode", "layer")
+        document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:label", "1 - labels")
+        document.querySelector('#defaultCanvas0>svg>g').innerHTML = svg_text;
+      }
 
       // Doesn't work
       /*
@@ -140,8 +145,7 @@ let sketch = function(p) {
     layers = Patterns[selectedPattern].draw(p, imported_image);
 
     // Convert legacy patterns to new format.
-    // "extrusion" uses the new format already
-    if (selectedPattern != "extrusion") {
+    if (layers[0].paths == undefined) {
       layers = [
         {
           "color": "black",
@@ -341,8 +345,7 @@ let sketch = function(p) {
     // layers.push(paths);
 
     // Convert legacy patterns to new format.
-    // "extrusion" uses the new format already
-    if (selectedPattern != "extrusion") {
+    if (layers[0].paths == undefined) {
       layers = [
         {
           "color": "black",
@@ -355,7 +358,7 @@ let sketch = function(p) {
 
       let layer = document.createElementNS("http://www.w3.org/2000/svg", "g");
         layer.setAttribute("inkscape:groupmode", "layer")
-        layer.setAttribute("inkscape:label", (l + 2) + " layer")
+        layer.setAttribute("inkscape:label", (l + 2) + " - " + layers[l].color)
         g1.setAttribute("transform", "scale(1,1) scale(1,1)");
         layer.setAttribute("transform", "translate(" + width/2 + "," + height/2 + ")");
 

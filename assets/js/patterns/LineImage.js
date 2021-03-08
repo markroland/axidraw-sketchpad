@@ -14,13 +14,48 @@ class LineImage {
 
     // paths = this.calcLines(imported_image);
     // paths = this.calcOutlines(p5, imported_image);
-    paths = this.calcHatch(p5, imported_image);
+    // paths = this.calcHatch(p5, imported_image);
     // paths = this.fillPixels(p5, imported_image)
 
-    return paths;
+    imported_image.resize(imported_image.width * 1/4, imported_image.height * 1/4)
+
+    let layers = new Array();
+
+    // CYMK
+    //*
+    layers.push({
+      "color": "cyan",
+      "paths": this.calcHatch(p5, imported_image, 'cyan')
+    });
+
+    layers.push({
+      "color": "magenta",
+      "paths": this.calcHatch(p5, imported_image, 'magenta')
+    });
+
+    layers.push({
+      "color": "yellow",
+      "paths": this.calcHatch(p5, imported_image, 'yellow')
+    });
+
+    layers.push({
+      "color": "black",
+      "paths": this.calcHatch(p5, imported_image, 'key')
+    });
+    //*/
+
+    // Single Color
+    /*
+    layers.push({
+      "color": "black",
+      "paths": this.calcHatch(p5, imported_image, "black")
+    });
+    //*/
+
+    return layers;
   }
 
-  calcHatch(p5, imported_image) {
+  calcHatch(p5, imported_image, color) {
 
     let paths = new Array();
 
@@ -41,7 +76,7 @@ class LineImage {
     // p5.image(imported_image, 48, 48);
 
     // Downscale original image
-    imported_image.resize(imported_image.width * downscale, imported_image.height * downscale)
+    // imported_image.resize(imported_image.width * downscale, imported_image.height * downscale)
 
     // Sample Downscaled image
     imported_image.loadPixels();
@@ -49,17 +84,42 @@ class LineImage {
     let image_array = new Array();
     let x = 0;
     let y = 0;
+    let intensity;
+    let clamped_intensity;
+    let key, cyan, magenta, yellow
+    let red, green, blue
     for (let i = 0; i < pixelCount; i++) {
 
-      // Get average intensity of RGB color channels
-      let average = (imported_image.pixels[i*4 + 0] + imported_image.pixels[i*4 + 1] + imported_image.pixels[i*4 + 2]) / 3;
-      let clamped_intensity = p5.round((average/255) * (num_shades-1)) * (255/(num_shades-1));
-      // console.log(average, clamped_intensity);
+      // Parse out RGB intensity
+      red = imported_image.pixels[i*4 + 0] / 255
+      green = imported_image.pixels[i*4 + 1] / 255
+      blue = imported_image.pixels[i*4 + 2] / 255
 
-      imported_image.pixels[i*4 + 0] = clamped_intensity;
-      imported_image.pixels[i*4 + 1] = clamped_intensity;
-      imported_image.pixels[i*4 + 2] = clamped_intensity;
-      imported_image.pixels[i*4 + 3] = 255;
+      // Set CYMK "Key" value
+      key = 1 - Math.max(red, green, blue)
+
+      // Get intensity from pixel
+      // https://www.rapidtables.com/convert/color/rgb-to-cmyk.html
+      if (color == "cyan") {
+        // intensity = (imported_image.pixels[i*4 + 1] + imported_image.pixels[i*4 + 2]) / 1;
+        cyan = (1 - red - key) / (1 - key)
+        intensity = Math.floor((1 - cyan) * 255)
+        clamped_intensity = p5.round((intensity/255) * (num_shades-1)) * (255/(num_shades-1));
+      } else if (color == "magenta") {
+        magenta = (1 - green - key) / (1 - key)
+        intensity = Math.floor((1 - magenta) * 255)
+        clamped_intensity = p5.round((intensity/255) * (num_shades-1)) * (255/(num_shades-1));
+      } else if (color == "yellow") {
+        yellow = (1 - blue - key) / (1 - key)
+        intensity = Math.floor((1 - yellow) * 255)
+        clamped_intensity = p5.round((intensity/255) * (num_shades-1)) * (255/(num_shades-1));
+      } else if (color == "key") {
+        intensity = Math.floor((1 - key) * 255)
+        clamped_intensity = p5.round((intensity/255) * (num_shades-1)) * (255/(num_shades-1));
+      } else {
+        intensity = Math.floor(((red + green + blue) / 3) * 255);
+        clamped_intensity = p5.round((intensity/255) * (num_shades-1)) * (255/(num_shades-1));
+      }
 
       y = Math.floor(i / imported_image.width)
       x = i % imported_image.width
@@ -70,14 +130,10 @@ class LineImage {
       }
       image_array[y][x] = clamped_intensity
     }
-    imported_image.updatePixels();
 
     // Render to paths
 
     let pixel_size = 2 / imported_image.height
-    // let pixel_size = 10/3 / imported_image.width
-    // console.log(pixel_size,imported_image.width)
-
     let rows = image_array.length
     let columns = image_array[0].length
 
@@ -620,13 +676,13 @@ class LineImage {
     return paths;
   }
 
-  calcOutlines(p5, imported_image) {
+  calcOutlines(p5, imported_image, color) {
 
     // Initialize drawing paths
     let paths = new Array();
 
     // Reduce the dimensions of the image
-    let downscale = 1/8;
+    let downscale = 1/4;
 
     let orig_width = imported_image.width;
     let orig_height = imported_image.height;
