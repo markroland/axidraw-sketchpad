@@ -13,8 +13,13 @@ class Grid {
     // return this.perspectiveGridWithNoise();
     // return this.grid1()
     // return this.TenPrint(12) // 12 Feels nice
-    // return this.hexGrid();
-    return this.hexGrid2(35, 37, 0.05, 0);
+
+    // Hex Grid
+    // Cell Count = (rows * columns)/2 + 1/2
+    let hex_columns = 33
+    let hex_rows = hex_columns
+    let hex_side = (5/3 - -5/3) / (3/2 * hex_columns + 0.5)
+    return this.hexGrid(hex_rows, hex_columns, hex_side, 0);
   }
 
   grid1() {
@@ -285,57 +290,7 @@ class Grid {
   /**
    * Build a grid of hexagons of desired dimension
    */
-  hexGrid() {
-
-    let paths = new Array();
-
-    let rows = 10;
-    let columns = 10;
-
-    let hex_radius = (5/3 - -5/3) / (2.85 * columns);
-    let hex_height = 2 * hex_radius * (Math.sqrt(3)/2)
-
-    let PathHelp = new PathHelper;
-
-    let hexagon = PathHelp.polygon(6, hex_radius)
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < columns; c++) {
-        paths.push(
-          PathHelp.translatePath(
-            hexagon,
-            [
-              c * (hex_radius * 3),
-              r * hex_height
-            ]
-          )
-        )
-        paths.push(
-          PathHelp.translatePath(
-            hexagon,
-            [
-              c * (hex_radius * 3) + 1.5 * hex_radius,
-              r * hex_height + (hex_height/2)
-            ]
-          )
-        )
-      }
-    }
-
-    // Center the Paths to the canvas
-    let centered_path = new Array();
-    for (let c = 0; c < paths.length; c++) {
-        centered_path.push(PathHelp.translatePath(paths[c], [-5/3, -1]))
-    }
-    paths = centered_path;
-
-    return paths
-  }
-
-  /**
-   * Build a grid of hexagons of desired dimension
-   */
-  hexGrid2(rows, columns, side_length, offset) {
+  hexGrid(rows, columns, side_length, offset) {
 
     let paths = new Array();
 
