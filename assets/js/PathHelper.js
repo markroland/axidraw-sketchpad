@@ -60,8 +60,67 @@ class PathHelper {
     return [x, y]
   }
 
+  // const arrayColumn = (arr, n) => arr.map(a => a[n]);
   arrayColumn(arr, n){
     return arr.map(a => a[n]);
+  }
+
+  /**
+   * Translate a group of paths to be centered around the origin
+   **/
+  centerPaths(paths) {
+
+    let x;
+    let x_min = 0;
+    let x_max = 0;
+    let y;
+    let y_min = 0;
+    let y_max = 0;
+
+    // Get the most extreme points (bounds) from all paths
+    for (let i = 0; i < paths.length; i++) {
+
+      // Get X coordinates as an 1-dimensional array
+      let x_coordinates = this.arrayColumn(paths[i], 0);
+
+      x = Math.min(...x_coordinates);
+      if (x < x_min) {
+        x_min = x
+      }
+
+      x_max = Math.max(...x_coordinates);
+      if (x > x_max) {
+        x_max = x
+      }
+
+      // Get Y coordinates as an 1-dimensional array
+      let y_coordinates = this.arrayColumn(paths[i], 1);
+
+      y = Math.min(...y_coordinates);
+      if (y < y_min) {
+        y_min = y
+      }
+
+      y = Math.max(...y_coordinates);
+      if (y > y_max) {
+        y_max = y
+      }
+    }
+
+    // Determine offset of X direction
+    let x_range = x_max - x_min;
+    let x_center_offset = x_min + x_range/2
+
+    // Determine offset of Y direction
+    let y_range = y_max - y_min;
+    let y_center_offset = y_min + y_range/2
+
+    // Translate each path
+    for (let i = 0; i < paths.length; i++) {
+      paths[i] = this.translatePath(paths[i], [-x_center_offset, -y_center_offset])
+    }
+
+    return paths
   }
 
   /*
