@@ -60,6 +60,78 @@ class PathHelper {
     return [x, y]
   }
 
+  distance(p1, p2) {
+    return Math.sqrt(Math.pow(p2[0] - p1[0], 2) + Math.pow(p2[1] - p1[1], 2))
+  }
+
+  perpendicularPath(p1, p2) {
+
+    // Slope "m"
+    let m = (p2[1] - p1[1]) / (p2[0] - p1[0])
+
+    // Y-intercept "b"
+    let b = p1[1] - m * p1[0]
+
+    // let distance = this.distance(p1, p2);
+
+    // Calculate slope and intercept of perpendicular line
+    let m_perp = -1/m;
+    let b_perp = p1[1] - m_perp * p1[0]
+
+    // Calculate the coordinates of the pependicular
+    let x3 = p1[0] - (p2[1] - p1[1])
+    let p3 = [
+      x3,
+      m_perp * x3 + b_perp
+    ]
+
+    // Return 2-point path for perpendicular line
+    return [p1, p3]
+  }
+
+  parallelPath(p1, p2, offset_amount) {
+
+    // Calculate the slope of the line AB as an angle
+    let delta_y = p2[1] - p1[1]
+    let delta_x = p2[0] - p1[0]
+    let theta = Math.atan2(delta_y, delta_x)
+
+    // Line A is a line perpendicular to the line AB, starting
+    // at point A
+    let line_A = [
+      p1,
+      [
+        p1[0] + offset_amount * Math.cos(theta + Math.PI/2),
+        p1[1] + offset_amount * Math.sin(theta + Math.PI/2)
+      ]
+    ]
+
+    // Line B is a line perpendicular to the line BA, starting
+    // at point B
+    let line_B = [
+      p2,
+      [
+        p2[0] + offset_amount * Math.cos(theta + Math.PI/2),
+        p2[1] + offset_amount * Math.sin(theta + Math.PI/2)
+      ]
+    ]
+
+    // Use the endpoints from Lines A and B to construct
+    // a new line that is parallel to AB
+    return [line_A[1], line_B[1]]
+  }
+
+  /**
+   * Returns objet representing Line equation.
+   * m = slope
+   * b = Y intercept
+   **/
+  lineSlopeIntercept(p1, p2) {
+    let m = (p2[1] - p1[1]) / (p2[0] - p1[0])
+    let b = p1[1] - m * p1[0]
+    return { "m": m, "b": b}
+  }
+
   // const arrayColumn = (arr, n) => arr.map(a => a[n]);
   arrayColumn(arr, n){
     return arr.map(a => a[n]);
@@ -150,10 +222,16 @@ class PathHelper {
    * scale A value from 0 to 1
    **/
   scalePath(path, scale) {
+    let scale_x = scale
+    let scale_y = scale;
+    if (scale.length !== undefined) {
+      scale_x = scale[0]
+      scale_y = scale[1]
+    }
     return path.map(function(a){
       return [
-        a[0] * scale,
-        a[1] * scale
+        a[0] * scale_x,
+        a[1] * scale_y
       ];
     });
   }
