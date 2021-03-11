@@ -16,7 +16,8 @@ class Bezier {
   draw(p5) {
     // this.p5Draw(p5, 30); return [];
     // return this.sketch1();
-    return this.sketch2();
+    // return this.sketch2();
+    return this.offsetCurves();
   }
 
   p5Draw(p5, segments) {
@@ -161,6 +162,88 @@ class Bezier {
     }
 
     return paths;
+  }
+
+  /*
+   * [Parallel Curve](https://en.wikipedia.org/wiki/Parallel_curve)
+   * [Tubular Neighborhood](https://en.wikipedia.org/wiki/Tubular_neighborhood)
+   * https://medium.com/@all2one/computing-offset-curves-for-cubic-splines-d3f968e5a2e0
+   */
+  offsetCurves() {
+
+    let PathHelp = new PathHelper;
+
+    let layers = new Array();
+
+    let paths = new Array();
+
+    // Set Control points. p1 and p4 are endpoints. p2 and p3 are control points
+    let p1 = [-1, -0.5]
+    let p2 = [-1.2, 0.3]
+    let p3 = [1.1, 1.1]
+    let p4 = [0.9, -0.6]
+
+    // Draw Bezier Control bounds
+    /*
+    layers.push({
+      "color": "cyan",
+      "paths": [[p1, p2, p3, p4]]
+    })
+    //*/
+
+    // Create curve
+    let curve = PathHelp.cubicBezierPath(p1, p2, p3, p4, 60)
+
+    // Draw curve
+    layers.push({
+      "color": "red",
+      "paths": [curve]
+    })
+
+    // Draw parallel paths
+    let num_parallels = 15
+    let offset = (1/50)
+    let parallel;
+    let parallel_segment;
+    parallel = new Array();
+    parallel_segment = new Array();
+    for (let o = 1; o < num_parallels; o++) {
+
+      // Outer
+      parallel = new Array();
+      for (let i = 0; i < curve.length-1; i++) {
+        parallel_segment = PathHelp.parallelPath(curve[i], curve[i+1], o * offset)
+        parallel.push(parallel_segment[0])
+      }
+
+      // Push the last point
+      parallel.push(parallel_segment[1])
+
+      layers.push({
+        "color": "blue",
+        "paths": [parallel]
+      })
+
+      // ---
+
+      // Inner
+      //*
+      parallel = new Array();
+      for (let i = 0; i < curve.length-1; i++) {
+        parallel_segment = PathHelp.parallelPath(curve[i], curve[i+1], o * -offset)
+        parallel.push(parallel_segment[0])
+      }
+      // Push the last point
+      parallel.push(parallel_segment[1])
+
+      layers.push({
+        "color": "green",
+        "paths": [parallel]
+      })
+      //*/
+    }
+
+    return layers;
   }
 
 }

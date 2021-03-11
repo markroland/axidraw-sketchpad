@@ -1,4 +1,4 @@
-let sketch_title = '545   Cell   Hex   Grid'
+let sketch_title = 'Parallel    Curves'
 
 let sketch = function(p) {
 
@@ -33,7 +33,7 @@ let sketch = function(p) {
     "spiral": new Spiral()
   }
 
-  let selectedPattern = "grid";
+  let selectedPattern = "bezier";
 
   // Preload data
   p.preload = function() {
