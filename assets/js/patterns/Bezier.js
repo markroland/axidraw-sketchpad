@@ -17,7 +17,11 @@ class Bezier {
     // this.p5Draw(p5, 30); return [];
     // return this.sketch1();
     // return this.sketch2();
-    return this.offsetCurves();
+    // return this.offsetCurves();
+
+    let layers = this.offsetCurvesCapped(3, 0.03)
+
+    return layers;
   }
 
   p5Draw(p5, segments) {
@@ -246,4 +250,88 @@ class Bezier {
     return layers;
   }
 
+  offsetCurvesCapped(num_traces, offset) {
+
+    let PathHelp = new PathHelper;
+
+    let layers = new Array();
+
+    let paths = new Array();
+
+    // Set Control points. p1 and p4 are endpoints. p2 and p3 are control points
+    let p1 = [PathHelp.getRandom(-1.0, -0.5), PathHelp.getRandom(-0.5,  0.0)]
+    let p2 = [PathHelp.getRandom(-1.0, -1.5), PathHelp.getRandom( 0.0,  0.5)]
+    let p3 = [PathHelp.getRandom( 0.5,  1.0), PathHelp.getRandom( 0.5,  1.0)]
+    let p4 = [PathHelp.getRandom( 0.0,  1.0), PathHelp.getRandom( 0.0, -1.0)]
+
+    // Create curve
+    let curve = PathHelp.cubicBezierPath(p1, p2, p3, p4, 60)
+
+    // Draw curve
+    /*
+    layers.push({
+      "color": "red",
+      "paths": [curve]
+    })
+    //*/
+
+    // Draw parallel paths
+    let parallel;
+    let parallel_segment;
+    let inner = new Array();
+    let outer = new Array();
+    parallel_segment = new Array();
+    for (let o = 1; o < num_traces + 1; o++) {
+
+      paths = new Array();
+
+      // Outer
+      outer = new Array();
+      for (let i = 0; i < curve.length-1; i++) {
+        parallel_segment = PathHelp.parallelPath(curve[i], curve[i+1], o * offset)
+        outer.push(parallel_segment[0])
+      }
+      outer.push(parallel_segment[1])
+
+      // Inner
+      inner = new Array();
+      for (let i = 0; i < curve.length-1; i++) {
+        parallel_segment = PathHelp.parallelPath(curve[i], curve[i+1], o * -offset)
+        inner.push(parallel_segment[0])
+      }
+      inner.push(parallel_segment[1])
+
+      // p1 Cap
+      let p1_cap = new Array()
+      let delta_y = outer[0][1] - curve[0][1]
+      let delta_x = outer[0][0] - curve[0][0]
+      let theta = Math.atan2(delta_y, delta_x)
+      for (let c = 0; c < 12; c++) {
+        p1_cap.push([
+          curve[0][0] + (o * offset) * Math.cos(theta + c/12 * Math.PI),
+          curve[0][1] + (o * offset) * Math.sin(theta + c/12 * Math.PI)
+        ])
+      }
+
+      // p4 Cap
+      let p4_cap = new Array()
+      let c_end = curve.length-1
+      delta_y = outer[outer.length-1][1] - curve[c_end][1]
+      delta_x = outer[outer.length-1][0] - curve[c_end][0]
+      theta = Math.atan2(delta_y, delta_x)
+      for (let c = 1; c < 12; c++) {
+        p4_cap.push([
+          curve[c_end][0] + (o * offset) * Math.cos(theta + Math.PI + c/12 * Math.PI),
+          curve[c_end][1] + (o * offset) * Math.sin(theta + Math.PI + c/12 * Math.PI)
+        ])
+      }
+
+      layers.push({
+        "color": "black",
+        "paths": [outer.concat(p4_cap.reverse()).concat(inner.reverse()).concat(p1_cap.reverse())]
+      })
+    }
+
+    return layers;
+  }
 }
