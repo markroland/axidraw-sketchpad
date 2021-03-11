@@ -53,8 +53,6 @@ class Extrusion {
       );
     }
 
-    console.log(layers);
-
     return layers;
   }
 
