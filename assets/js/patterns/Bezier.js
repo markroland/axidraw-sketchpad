@@ -19,7 +19,7 @@ class Bezier {
     // return this.sketch2();
     // return this.offsetCurves();
     // let layers = this.offsetCurvesCapped(3, 0.03)
-    let layers = this.offsetCurvesWind(2, 0.03)
+    let layers = this.offsetCurvesWind(10, 0.03)
 
     return layers;
   }
@@ -352,7 +352,7 @@ class Bezier {
     // Create curve
     let curve = PathHelp.cubicBezierPath(p1, p2, p3, p4, 60)
 
-    // Draw parallel paths
+    // Draw parallel paths to "curve"
     let parallel;
     let parallel_segment;
     let inner = new Array();
@@ -377,57 +377,114 @@ class Bezier {
       }
       inner.push(parallel_segment[1])
       paths.push(inner)
-
     }
 
     // --- Re-order paths to wind back and forth
 
+    /*
+      Path Indexing pattern
+      3 ------ (inner)
+      1 ------
+        ------ curve
+      0 ------
+      2 ------ (outer)
+    */
+
     let path = new Array()
     let i_max = paths.length
+    let turn_angle = -Math.PI
 
+    // Stitch "inner" curves
     for (let i = 0; i < i_max/2; i++) {
+
+      // Set the index
       let index = (i_max - i*2) - 1
-      console.log(index);
+
+      // Reverse every-other path
       if (i % 2 == 1) {
-        path = path.concat(paths[index])
-      } else {
-        path = path.concat(paths[index].reverse())
+        paths[index].reverse()
       }
+
+      // Add a turn-around at the end of the previous path.
+      // This is here because it knows the last point and the current point.
+      // The turn-around rotation must be flipped each time.
+      if (i > 0) {
+        turn_angle = turn_angle * -1
+        path = path.concat(this.arc(
+          path[path.length-1][0],
+          path[path.length-1][1],
+          paths[index][0][0],
+          paths[index][0][1],
+          turn_angle
+        ))
+      }
+
+      // Add to the final output path
+      path = path.concat(paths[index])
     }
 
-    // Draw "center" curve
+    // Reverse "center" curve if odd number of traces
     if (num_traces % 2 == 1) {
-      path = path.concat(curve)
-    } else {
-      path = path.concat(curve.reverse())
+      curve.reverse()
     }
 
+    // Add turn-around
+    turn_angle = turn_angle * -1
+    path = path.concat(this.arc(
+      path[path.length-1][0],
+      path[path.length-1][1],
+      curve[0][0],
+      curve[0][1],
+      turn_angle
+    ))
+
+    // Add central "source" Bezier curve
+    path = path.concat(curve)
+
+    // Add on the "outer" curves
+    // This is a little different in that he turn-arounds come first
     for (let i = 0; i < i_max/2; i++) {
+
+      // Set the index
       let index = (i*2 + 1) - 1
-      console.log(index);
-      if ((i + num_traces) % 2 == 1) {
-        path = path.concat(paths[index].reverse())
-      } else {
-        path = path.concat(paths[index])
+
+      // Reverse every-other path, taking into account previous paths
+      if ((i + num_traces) % 2 == 0) {
+        paths[index].reverse()
       }
+
+      // Turn around arc
+      turn_angle = turn_angle * -1
+      path = path.concat(this.arc(
+        path[path.length-1][0],
+        path[path.length-1][1],
+        paths[index][0][0],
+        paths[index][0][1],
+        turn_angle
+      ))
+
+      // Add path
+      path = path.concat(paths[index])
     }
 
+    // Add path to Layer
     layers.push({
       "color": "black",
       "paths": [path]
     })
-
 
     return layers;
   }
 
   arc(x1, y1, x2, y2, theta, segments = 12) {
     let path = new Array()
-    theta_0 = Math.atan2(y2 - y1, x2 - x1)
-    for (let c = 0; c <= segments; c++) {
+    let PathHelp = new PathHelper
+    let theta_0 = Math.atan2(y2 - y1, x2 - x1)
+    let distance = PathHelp.distance([x1, y1], [x2, y2])
+    for (let c = 1; c < segments; c++) {
       path.push([
-        curve[c_end][0] + (o * offset) * Math.cos(theta_0 + Math.PI + c/segments * theta),
-        curve[c_end][1] + (o * offset) * Math.sin(theta_0 + Math.PI + c/segments * theta)
+        x1 + (x2 - x1)/2 + distance/2 * Math.cos(theta_0 + Math.PI + c/segments * theta),
+        y1 + (y2 - y1)/2 + distance/2 * Math.sin(theta_0 + Math.PI + c/segments * theta)
       ])
     }
     return path
