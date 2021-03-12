@@ -63,6 +63,10 @@ let sketch = function(p) {
       if (sketch_title != '') {
         let svg_title;
         let font_size = 12;
+
+        // Temporary fix of spacing being too narrow on the Space character
+        sketch_title = sketch_title.replace(/\s+/g, '     ')
+
         let title_svg = renderText(sketch_title, {
           font: fonts['EMSTech'],
           pos: {x: 0, y: 0},
