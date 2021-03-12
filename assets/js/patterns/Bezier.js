@@ -18,8 +18,8 @@ class Bezier {
     // return this.sketch1();
     // return this.sketch2();
     // return this.offsetCurves();
-
-    let layers = this.offsetCurvesCapped(3, 0.03)
+    // let layers = this.offsetCurvesCapped(3, 0.03)
+    let layers = this.offsetCurvesWind(10, 0.03)
 
     return layers;
   }
@@ -333,5 +333,160 @@ class Bezier {
     }
 
     return layers;
+  }
+
+  offsetCurvesWind(num_traces, offset) {
+
+    let PathHelp = new PathHelper;
+
+    let layers = new Array();
+
+    let paths = new Array();
+
+    // Set Control points. p1 and p4 are endpoints. p2 and p3 are control points
+    let p1 = [PathHelp.getRandom(-1.0, -0.5), PathHelp.getRandom(-0.5,  0.0)]
+    let p2 = [PathHelp.getRandom(-1.0, -1.5), PathHelp.getRandom( 0.0,  0.5)]
+    let p3 = [PathHelp.getRandom( 0.5,  1.0), PathHelp.getRandom( 0.5,  1.0)]
+    let p4 = [PathHelp.getRandom( 0.0,  1.0), PathHelp.getRandom( 0.0, -1.0)]
+
+    // Create curve
+    let curve = PathHelp.cubicBezierPath(p1, p2, p3, p4, 60)
+
+    // Draw parallel paths to "curve"
+    let parallel;
+    let parallel_segment;
+    let inner = new Array();
+    let outer = new Array();
+    parallel_segment = new Array();
+    for (let o = 1; o < num_traces + 1; o++) {
+
+      // Outer
+      outer = new Array();
+      for (let i = 0; i < curve.length-1; i++) {
+        parallel_segment = PathHelp.parallelPath(curve[i], curve[i+1], o * offset)
+        outer.push(parallel_segment[0])
+      }
+      outer.push(parallel_segment[1])
+      paths.push(outer)
+
+      // Inner
+      inner = new Array();
+      for (let i = 0; i < curve.length-1; i++) {
+        parallel_segment = PathHelp.parallelPath(curve[i], curve[i+1], o * -offset)
+        inner.push(parallel_segment[0])
+      }
+      inner.push(parallel_segment[1])
+      paths.push(inner)
+    }
+
+    // --- Re-order paths to wind back and forth
+
+    /*
+      Path Indexing pattern
+      3 ------ (inner)
+      1 ------
+        ------ curve
+      0 ------
+      2 ------ (outer)
+    */
+
+    let path = new Array()
+    let i_max = paths.length
+    let turn_angle = -Math.PI
+
+    // Stitch "inner" curves
+    for (let i = 0; i < i_max/2; i++) {
+
+      // Set the index
+      let index = (i_max - i*2) - 1
+
+      // Reverse every-other path
+      if (i % 2 == 1) {
+        paths[index].reverse()
+      }
+
+      // Add a turn-around at the end of the previous path.
+      // This is here because it knows the last point and the current point.
+      // The turn-around rotation must be flipped each time.
+      if (i > 0) {
+        turn_angle = turn_angle * -1
+        path = path.concat(this.arc(
+          path[path.length-1][0],
+          path[path.length-1][1],
+          paths[index][0][0],
+          paths[index][0][1],
+          turn_angle
+        ))
+      }
+
+      // Add to the final output path
+      path = path.concat(paths[index])
+    }
+
+    // Reverse "center" curve if odd number of traces
+    if (num_traces % 2 == 1) {
+      curve.reverse()
+    }
+
+    // Add turn-around
+    turn_angle = turn_angle * -1
+    path = path.concat(this.arc(
+      path[path.length-1][0],
+      path[path.length-1][1],
+      curve[0][0],
+      curve[0][1],
+      turn_angle
+    ))
+
+    // Add central "source" Bezier curve
+    path = path.concat(curve)
+
+    // Add on the "outer" curves
+    // This is a little different in that he turn-arounds come first
+    for (let i = 0; i < i_max/2; i++) {
+
+      // Set the index
+      let index = (i*2 + 1) - 1
+
+      // Reverse every-other path, taking into account previous paths
+      if ((i + num_traces) % 2 == 0) {
+        paths[index].reverse()
+      }
+
+      // Turn around arc
+      turn_angle = turn_angle * -1
+      path = path.concat(this.arc(
+        path[path.length-1][0],
+        path[path.length-1][1],
+        paths[index][0][0],
+        paths[index][0][1],
+        turn_angle
+      ))
+
+      // Add path
+      path = path.concat(paths[index])
+    }
+
+    // Add path to Layer
+    layers.push({
+      "color": "black",
+      "paths": [path]
+    })
+
+    return layers;
+  }
+
+  arc(x1, y1, x2, y2, theta, segments = 12) {
+    let path = new Array()
+    let PathHelp = new PathHelper
+    let theta_0 = Math.atan2(y2 - y1, x2 - x1)
+    let distance = PathHelp.distance([x1, y1], [x2, y2])
+    for (let c = 1; c < segments; c++) {
+      path.push([
+        x1 + (x2 - x1)/2 + distance/2 * Math.cos(theta_0 + Math.PI + c/segments * theta),
+        y1 + (y2 - y1)/2 + distance/2 * Math.sin(theta_0 + Math.PI + c/segments * theta)
+      ])
+    }
+    return path
   }
 }
