@@ -1,4 +1,4 @@
-let sketch_title = 'Parallel    Curves    with     Caps'
+let sketch_title = 'Winding Parallel Curves'
 
 let sketch = function(p) {
 
