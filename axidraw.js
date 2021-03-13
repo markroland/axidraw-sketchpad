@@ -1,5 +1,5 @@
 let sketch_title = ''
-let selectedPattern = "bezier"
+let selectedPattern = "postcard"
 let orientation = 'landscape'
 let showDate = false
 let showSignature = false
@@ -30,6 +30,7 @@ let sketch = function(p) {
     "lineimage": new LineImage(),
     "lissajous": new Lissajous(),
     "negativespace": new NegativeSpace(),
+    "postcard": new Postcard(),
     "radiallines": new RadialLines(),
     "radiography": new Radiography(),
     "spiral": new Spiral()
