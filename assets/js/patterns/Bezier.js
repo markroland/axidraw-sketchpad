@@ -8,6 +8,8 @@ class Bezier {
     this.key = "bezier";
 
     this.name = "Bezier Curves";
+
+    this.constrain = false
   }
 
   /**
@@ -21,7 +23,7 @@ class Bezier {
     // return this.offsetCurves();
     // let layers = this.offsetCurvesCapped(3, 0.03)
     // let layers = this.offsetCurvesWind(5, 0.02, true)
-    let layers = this.radialBeziers(400)
+    let layers = this.radialBeziers(200)
 
     return layers;
   }
@@ -502,22 +504,46 @@ class Bezier {
 
     let path = new Array()
 
-
+    // Loop through number of lines requested
     for (let i = 0; i < num_lines; i++) {
-      let radius = PathHelp.getRandom(0, 1)
+
+      // Set basic line parameters
+      let radius = PathHelp.getRandom(0, 1.2)
       let theta = PathHelp.getRandom(0, Math.PI * 2)
-      let length = 0.5 * radius
-      path = [
-        [
-          radius * Math.cos(theta),
-          radius * Math.sin(theta),
-        ],
-        [
-          (radius - length) * Math.cos(theta),
-          (radius - length) * Math.sin(theta),
-        ]
+      let length = 0.25 * radius
+
+      // Start point
+      let p1 = [
+        radius * Math.cos(theta),
+        radius * Math.sin(theta),
       ]
-      paths.push(path)
+
+      // End point
+      let p4 = [
+        (radius - length) * Math.cos(theta),
+        (radius - length) * Math.sin(theta),
+      ]
+
+      // Control point for p1
+      let p2_theta = PathHelp.getRandom(0, Math.PI * 2)
+      let p2 = [
+        p1[0] + (PathHelp.getRandom(0, 0.2) * Math.cos(p2_theta)),
+        p1[1] + (PathHelp.getRandom(0, 0.2) * Math.sin(p2_theta))
+      ]
+
+      // Control point for p4
+      let p3_theta = PathHelp.getRandom(0, Math.PI * 2)
+      let p3 = [
+        p4[0] + (PathHelp.getRandom(0, 0.2) * Math.cos(p3_theta)),
+        p4[1] + (PathHelp.getRandom(0, 0.2) * Math.sin(p3_theta))
+      ]
+
+      // Add bezier path with control points
+      let curve = PathHelp.cubicBezierPath(p1, p2, p3, p4, 60)
+
+      paths.push(
+        curve
+      )
     }
 
     // Add path to Layer
