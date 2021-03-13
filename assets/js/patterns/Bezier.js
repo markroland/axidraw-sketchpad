@@ -545,7 +545,7 @@ class Bezier {
       let curve = PathHelp.cubicBezierPath(p1, p2, p3, p4, 60)
 
       // Expand Curve
-      let expanded_curve = PathHelp.expandPath(curve, width, 'flat')
+      let expanded_curve = PathHelp.expandPath(curve, width/2, width*2, 'round')
 
       // Add to paths
       paths.push(expanded_curve)
