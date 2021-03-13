@@ -121,6 +121,45 @@ class PathHelper {
     return [line_A[1], line_B[1]]
   }
 
+  expandPath(path, offset, capStyle = 'open') {
+
+    let parallels = new Array();
+    let parallel = new Array();
+    let parallel_segment
+
+    for (let o = 1; o < 2; o++) {
+
+      // Outer
+      parallel = new Array();
+      for (let i = 0; i < path.length-1; i++) {
+        parallel_segment = this.parallelPath(path[i], path[i+1], o * offset)
+        parallel.push(parallel_segment[0])
+      }
+      // Push the last point
+      parallel.push(parallel_segment[1])
+      parallels.push(parallel)
+
+      // Inner
+      parallel = new Array();
+      for (let i = 0; i < path.length-1; i++) {
+        parallel_segment = this.parallelPath(path[i], path[i+1], o * -offset)
+        parallel.push(parallel_segment[0])
+      }
+      // Push the last point
+      parallel.push(parallel_segment[1])
+      parallels.push(parallel)
+    }
+
+    switch (capStyle) {
+      case 'flat':
+        let output = parallels[0].concat(parallels[1].reverse())
+        output.push(parallels[0][0])
+        return output
+      default:
+        return parallels
+    }
+  }
+
   /**
    * Returns objet representing Line equation.
    * m = slope
