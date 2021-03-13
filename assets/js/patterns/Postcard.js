@@ -53,6 +53,29 @@ class Postcard {
       "paths": paths
     })
 
+    // Add SVG Text
+    let svg = '';
+    let margin = 48
+    let font_size = 12
+    let svg_font_text = renderText(
+      'Hello World' + "\n"
+        + 'Line Two',
+      {
+        font: fonts['EMSTech'],
+        pos: {x: 0, y: 0},
+        scale: 2,
+        charWidth: 8
+      }
+    );
+    let svg_group = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + svg_font_text + "</g>"
+    svg += svg_group
+
+    layers.push({
+      "color": "black",
+      "paths" : [],
+      "svg": svg
+    })
+
     return layers
   }
 }

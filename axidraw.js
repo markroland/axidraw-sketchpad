@@ -1,8 +1,8 @@
 let sketch_title = ''
 let selectedPattern = "postcard"
 let orientation = 'landscape'
-let showDate = true
-let showSignature = true
+let showDate = false
+let showSignature = false
 
 let fonts
 
@@ -40,6 +40,8 @@ let sketch = function(p) {
 
   // Preload data
   p.preload = function() {
+
+    // Pre-load an image
     if (selectedPattern == "lineimage") {
       imported_image = p.loadImage("assets/data/landscape.jpg",
         success => { /* console.log('jpg success') */ },
@@ -47,12 +49,8 @@ let sketch = function(p) {
       );
     }
 
+    // Pre-load Hershey Text font data
     fonts = p.loadJSON('/assets/js/hersheytext.min.json')
-
-    //
-    // fetch('/assets/js/hersheytext.min.json')
-      // .then(response => response.json())
-      // .then(data => {fonts = data; console.log(data)});
   }
 
   p.setup = function() {
@@ -201,16 +199,19 @@ let sketch = function(p) {
 
     p.stroke(0);
 
+    // Loop through Layers
     for (l = 0; l < layers.length; l++) {
 
-      // Solid stroke
+      // Set stroke color for the layer
       p.stroke(layers[l].color)
 
+      // Loop through all Paths in Layer
       let paths = layers[l].paths
-
       for (i = 0; i < paths.length; i++) {
 
         p.beginShape();
+
+        // Loop through each Point in Path
         for (j = 0; j < paths[i].length; j++) {
 
           // Reformat data
@@ -243,6 +244,26 @@ let sketch = function(p) {
 
         // TODO: "mode" should be defined by the path
         p.endShape();
+      }
+
+      // Directly insert SVG
+      if (layers[l].svg !== undefined) {
+
+        // Identify target element to append the new SVG content
+        let this_svg_layer = document.querySelector('#defaultCanvas0>svg>g:nth-child(3)>g')
+
+        // Create a new group in which to place the svg content
+        let layer_group_svg = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        layer_group_svg.setAttribute("inkscape:groupmode", "layer")
+        layer_group_svg.setAttribute("inkscape:label", "Text on Layer " + (l+1))
+        // g1.setAttribute("transform", "scale(1,1) scale(1,1)");
+        // g1.setAttribute("transform", "translate(" + width/2 + "," + height/2 + ")");
+
+        // Insert the svg content in to the SVG <g> element
+        layer_group_svg.innerHTML = layers[l].svg
+
+        // Add the SVG <g> element to the target group element
+        this_svg_layer.appendChild(layer_group_svg)
       }
     }
 
@@ -361,20 +382,9 @@ let sketch = function(p) {
       let layer = document.createElementNS("http://www.w3.org/2000/svg", "g");
         layer.setAttribute("inkscape:groupmode", "layer")
         layer.setAttribute("inkscape:label", (l + 2) + " - " + layers[l].color)
-        g1.setAttribute("transform", "scale(1,1) scale(1,1)");
-        layer.setAttribute("transform", "translate(" + width/2 + "," + height/2 + ")");
 
-      // Temporary: Alternate between Cyan, Magent, Yellow... for fun... because I can
-      // let stroke
-      // if (p1 % 3 == 0) {
-      //   stroke = "rgb(0,255,255)"
-      // }
-      // if (p1 % 3 == 1) {
-      //   stroke = "rgb(255,0,255)"
-      // }
-      // if (p1 % 3 == 2) {
-      //   stroke = "rgb(255,255,0)"
-      // }
+      g1.setAttribute("transform", "scale(1,1) scale(1,1)");
+        layer.setAttribute("transform", "translate(" + width/2 + "," + height/2 + ")");
 
       for (let p1 = 0; p1 < layers[l].paths.length; p1++) {
 
@@ -398,6 +408,14 @@ let sketch = function(p) {
           path.setAttribute("stroke-width", "1.42");
 
         layer.appendChild(path);
+      }
+
+      // Directly insert SVG
+      if (layers[l].svg !== undefined) {
+
+        // Load Content from existing DOM content
+        // Note: The "l + 2" bit may not be correct for different number of layers - only tested with 1
+        layer.appendChild(document.querySelector('#defaultCanvas0>svg>g:nth-child(' + (l + 2) + ')>g>g').cloneNode(true))
       }
 
       // g1.appendChild(layer)
