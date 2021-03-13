@@ -8,6 +8,8 @@ class Bezier {
     this.key = "bezier";
 
     this.name = "Bezier Curves";
+
+    this.constrain = false
   }
 
   /**
@@ -20,7 +22,8 @@ class Bezier {
     // return this.sketch2();
     // return this.offsetCurves();
     // let layers = this.offsetCurvesCapped(3, 0.03)
-    let layers = this.offsetCurvesWind(5, 0.02, true)
+    // let layers = this.offsetCurvesWind(5, 0.02, true)
+    let layers = this.radialBeziers(200)
 
     return layers;
   }
@@ -489,6 +492,72 @@ class Bezier {
     })
 
     return layers;
+  }
+
+  radialBeziers(num_lines) {
+
+    let PathHelp = new PathHelper;
+
+    let layers = new Array()
+
+    let paths = new Array()
+
+    let path = new Array()
+
+    // Loop through number of lines requested
+    for (let i = 0; i < num_lines; i++) {
+
+      // Set basic line parameters
+      let radius = PathHelp.getRandom(0.1, 1.2)
+      let theta = PathHelp.getRandom(0, Math.PI * 2)
+      let length = 0.25 * radius
+      let width = 0.005 + radius * 0.005
+
+      // Start point
+      let p1 = [
+        radius * Math.cos(theta),
+        radius * Math.sin(theta),
+      ]
+
+      // End point
+      let p4 = [
+        (radius - length) * Math.cos(theta),
+        (radius - length) * Math.sin(theta),
+      ]
+
+      // Control point for p1
+      let p2_theta_start = Math.atan2(p4[1] - p1[1], p4[0] - p1[0])
+      let p2_theta = PathHelp.getRandom(-Math.PI/2, Math.PI/2)
+      let p2 = [
+        p1[0] + (PathHelp.getRandom(0, 0.2) * Math.cos(p2_theta_start + p2_theta)),
+        p1[1] + (PathHelp.getRandom(0, 0.2) * Math.sin(p2_theta_start + p2_theta))
+      ]
+
+      // Control point for p4
+      let p3_theta_start = Math.atan2(p4[1] - p1[1], p4[0] - p1[0])
+      let p3_theta = PathHelp.getRandom(-Math.PI/2, Math.PI/2)
+      let p3 = [
+        p4[0] + (PathHelp.getRandom(0, 0.2) * Math.cos(p3_theta)),
+        p4[1] + (PathHelp.getRandom(0, 0.2) * Math.sin(p3_theta))
+      ]
+
+      // Add bezier path with control points
+      let curve = PathHelp.cubicBezierPath(p1, p2, p3, p4, 60)
+
+      // Expand Curve
+      let expanded_curve = PathHelp.expandPath(curve, width/2, width*2, 'round')
+
+      // Add to paths
+      paths.push(expanded_curve)
+    }
+
+    // Add path to Layer
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers
   }
 
   arc(x1, y1, x2, y2, theta, segments = 12) {

@@ -121,6 +121,94 @@ class PathHelper {
     return [line_A[1], line_B[1]]
   }
 
+  expandPath(path, offset_start, offset_end, capStyle = 'open', ) {
+
+    let parallels = new Array();
+    let parallel = new Array();
+    let parallel_segment;
+    let offset = offset_start
+    let i_max = path.length-1
+
+    // Outer
+    parallel = new Array();
+    for (let i = 0; i < i_max; i++) {
+      offset = offset_end + (offset_start - offset_end) * (i/(i_max + 1))
+      parallel_segment = this.parallelPath(path[i], path[i+1], offset)
+      parallel.push(parallel_segment[0])
+    }
+    // Push the last point
+    parallel.push(parallel_segment[1])
+    parallels.push(parallel)
+
+    // Inner
+    parallel = new Array();
+    for (let i = 0; i < i_max; i++) {
+      offset = offset_end + (offset_start - offset_end) * (i/(i_max + 1))
+      parallel_segment = this.parallelPath(path[i], path[i+1], -offset)
+      parallel.push(parallel_segment[0])
+    }
+    // Push the last point
+    parallel.push(parallel_segment[1])
+    parallels.push(parallel)
+
+    let output
+    switch (capStyle) {
+      case 'flat':
+        output = parallels[0].concat(parallels[1].reverse())
+        output.push(parallels[0][0])
+        return output
+      case 'round':
+        parallels[1].reverse()
+
+        output = parallels[0]
+
+        // Cap
+        output = output.concat(this.arc(
+            parallels[0][parallels[0].length-1][0],
+            parallels[0][parallels[0].length-1][1],
+            parallels[1][0][0],
+            parallels[1][0][1],
+            -Math.PI,
+            6
+          )
+        )
+
+        output = output.concat(parallels[1])
+
+        // Cap
+        output = output.concat(this.arc(
+            parallels[1][parallels[1].length-1][0],
+            parallels[1][parallels[1].length-1][1],
+            parallels[0][0][0],
+            parallels[0][0][1],
+            -Math.PI,
+            6
+          )
+        )
+
+        // Last point
+        output.push(parallels[0][0])
+
+        return output
+      default:
+        return parallels
+    }
+  }
+
+  arc(x1, y1, x2, y2, theta, segments = 12) {
+    let path = new Array()
+    let PathHelp = new PathHelper
+    let theta_0 = Math.atan2(y2 - y1, x2 - x1)
+    let distance = PathHelp.distance([x1, y1], [x2, y2])
+    for (let c = 1; c < segments; c++) {
+      path.push([
+        x1 + (x2 - x1)/2 + distance/2 * Math.cos(theta_0 + Math.PI + c/segments * theta),
+        y1 + (y2 - y1)/2 + distance/2 * Math.sin(theta_0 + Math.PI + c/segments * theta)
+      ])
+    }
+    return path
+  }
+
   /**
    * Returns objet representing Line equation.
    * m = slope

@@ -1,8 +1,8 @@
-let sketch_title = 'Winding Parallel Curves with Noise'
+let sketch_title = ''
+let selectedPattern = "bezier";
+let orientation = 'landscape'
 
 let sketch = function(p) {
-
-  let orientation = 'landscape'
 
   // Set sketch margin in inches
   let margin = 0.25 * 96;
@@ -32,8 +32,6 @@ let sketch = function(p) {
     "radiography": new Radiography(),
     "spiral": new Spiral()
   }
-
-  let selectedPattern = "bezier";
 
   // Preload data
   p.preload = function() {
