@@ -1,6 +1,8 @@
 let sketch_title = ''
-let selectedPattern = "bezier";
+let selectedPattern = "bezier"
 let orientation = 'landscape'
+let showDate = false
+let showSignature = false
 
 let sketch = function(p) {
 
@@ -26,8 +28,8 @@ let sketch = function(p) {
     "heart": new Heart(),
     "lindenmayer": new Lindenmayer(),
     "lineimage": new LineImage(),
-    "negativespace": new NegativeSpace(),
     "lissajous": new Lissajous(),
+    "negativespace": new NegativeSpace(),
     "radiallines": new RadialLines(),
     "radiography": new Radiography(),
     "spiral": new Spiral()
@@ -77,41 +79,41 @@ let sketch = function(p) {
       //*/
 
       // Date
-      //*
-      let svg_date
-      font_size = 8;
-      let now = new Date();
-      let date_svg = renderText(
-        (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear(),
-        {
-          font: fonts['EMSTech'],
-          pos: {x: 0, y: 0},
-          scale: 2,
-          charWidth: 8,
-        }
-      );
-      svg_date = '<g transform="translate(' + margin + ',' + ((p.height - 2 * margin) + ((2 * margin - font_size)/2)) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + date_svg + "</g>"
-      svg_text += svg_date
-      //*/
+      if (showDate) {
+        let svg_date
+        font_size = 8;
+        let now = new Date();
+        let date_svg = renderText(
+          (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear(),
+          {
+            font: fonts['EMSTech'],
+            pos: {x: 0, y: 0},
+            scale: 2,
+            charWidth: 8,
+          }
+        );
+        svg_date = '<g transform="translate(' + margin + ',' + ((p.height - 2 * margin) + ((2 * margin - font_size)/2)) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + date_svg + "</g>"
+        svg_text += svg_date
+      }
 
       // Initials
-      //*
-      let svg_signature
-      let initials_rotation = "0";
-      let initials_position = '542,354';
-      if (orientation == "portrait") {
-        initials_rotation = "-90";
-        initials_position = '532,30';
+      if (showSignature) {
+        let svg_signature
+        let initials_rotation = "0";
+        let initials_position = '542,354';
+        if (orientation == "portrait") {
+          initials_rotation = "-90";
+          initials_position = '532,30';
+        }
+        svg_signature  = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">'
+        svg_signature += '<path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42" d="M 0.52831513,9.9326943 2.8794102,-0.05945861 4.0549577,6.1121658 6.6999395,0.52831513 5.5243921,11.108241" id="path1421" /><path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42"  d="m 7.3002589,10.146612 0.458014,-9.61829687 c 0,0 3.7857471,0.3053972 4.1221261,1.83205677 0.336379,1.5266596 -3.2060981,3.6641137 -3.2060981,3.6641137 L 13.712455,10.37562" id="path1423" />';
+        svg_signature += '</g>'
+        svg_text += svg_signature
+        // document.querySelector('#defaultCanvas0>svg>g').innerHTML = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">' + initials + "</g>";
       }
-      svg_signature  = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">'
-      svg_signature += '<path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42" d="M 0.52831513,9.9326943 2.8794102,-0.05945861 4.0549577,6.1121658 6.6999395,0.52831513 5.5243921,11.108241" id="path1421" /><path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42"  d="m 7.3002589,10.146612 0.458014,-9.61829687 c 0,0 3.7857471,0.3053972 4.1221261,1.83205677 0.336379,1.5266596 -3.2060981,3.6641137 -3.2060981,3.6641137 L 13.712455,10.37562" id="path1423" />';
-      svg_signature += '</g>'
-      svg_text += svg_signature
-      // document.querySelector('#defaultCanvas0>svg>g').innerHTML = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">' + initials + "</g>";
-      //*/
 
       // Add SVG to document
-      if (document.querySelector('#defaultCanvas0>svg>g')) {
+      if (svg_text != '' && document.querySelector('#defaultCanvas0>svg>g')) {
         document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:groupmode", "layer")
         document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:label", "1 - labels")
         document.querySelector('#defaultCanvas0>svg>g').innerHTML = svg_text;
