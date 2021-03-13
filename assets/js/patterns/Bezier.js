@@ -14,12 +14,13 @@ class Bezier {
    * Draw path
    */
   draw(p5) {
+    this.p5 = p5
     // this.p5Draw(p5, 30); return [];
     // return this.sketch1();
     // return this.sketch2();
     // return this.offsetCurves();
     // let layers = this.offsetCurvesCapped(3, 0.03)
-    let layers = this.offsetCurvesWind(10, 0.03)
+    let layers = this.offsetCurvesWind(5, 0.02, true)
 
     return layers;
   }
@@ -335,7 +336,7 @@ class Bezier {
     return layers;
   }
 
-  offsetCurvesWind(num_traces, offset) {
+  offsetCurvesWind(num_traces, offset, noise) {
 
     let PathHelp = new PathHelper;
 
@@ -415,7 +416,8 @@ class Bezier {
           path[path.length-1][1],
           paths[index][0][0],
           paths[index][0][1],
-          turn_angle
+          turn_angle,
+          6
         ))
       }
 
@@ -435,7 +437,8 @@ class Bezier {
       path[path.length-1][1],
       curve[0][0],
       curve[0][1],
-      turn_angle
+      turn_angle,
+      6
     ))
 
     // Add central "source" Bezier curve
@@ -460,11 +463,23 @@ class Bezier {
         path[path.length-1][1],
         paths[index][0][0],
         paths[index][0][1],
-        turn_angle
+        turn_angle,
+        6
       ))
 
       // Add path
       path = path.concat(paths[index])
+    }
+
+    // Add noise
+    if (noise) {
+      for (let i = 0; i < path.length; i++) {
+        let noise = 0.5 * this.p5.noise(i * 0.0009)
+        path[i] = [
+          path[i][0] + noise,
+          path[i][1] + noise
+        ]
+      }
     }
 
     // Add path to Layer

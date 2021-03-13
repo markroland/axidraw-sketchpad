@@ -1,4 +1,4 @@
-let sketch_title = 'Winding Parallel Curves'
+let sketch_title = 'Winding Parallel Curves with Noise'
 
 let sketch = function(p) {
 
