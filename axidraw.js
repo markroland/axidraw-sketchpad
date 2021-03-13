@@ -1,4 +1,5 @@
-let sketch_title = 'Winding Parallel Curves with Noise'
+let sketch_title = ''
+let selectedPattern = "bezier";
 let orientation = 'landscape'
 
 let sketch = function(p) {

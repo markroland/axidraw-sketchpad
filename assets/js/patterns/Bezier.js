@@ -20,7 +20,8 @@ class Bezier {
     // return this.sketch2();
     // return this.offsetCurves();
     // let layers = this.offsetCurvesCapped(3, 0.03)
-    let layers = this.offsetCurvesWind(5, 0.02, true)
+    // let layers = this.offsetCurvesWind(5, 0.02, true)
+    let layers = this.radialBeziers(400)
 
     return layers;
   }
@@ -489,6 +490,43 @@ class Bezier {
     })
 
     return layers;
+  }
+
+  radialBeziers(num_lines) {
+
+    let PathHelp = new PathHelper;
+
+    let layers = new Array()
+
+    let paths = new Array()
+
+    let path = new Array()
+
+
+    for (let i = 0; i < num_lines; i++) {
+      let radius = PathHelp.getRandom(0, 1)
+      let theta = PathHelp.getRandom(0, Math.PI * 2)
+      let length = 0.5 * radius
+      path = [
+        [
+          radius * Math.cos(theta),
+          radius * Math.sin(theta),
+        ],
+        [
+          (radius - length) * Math.cos(theta),
+          (radius - length) * Math.sin(theta),
+        ]
+      ]
+      paths.push(path)
+    }
+
+    // Add path to Layer
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers
   }
 
   arc(x1, y1, x2, y2, theta, segments = 12) {
