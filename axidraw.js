@@ -1,8 +1,10 @@
 let sketch_title = ''
 let selectedPattern = "postcard"
 let orientation = 'landscape'
-let showDate = false
-let showSignature = false
+let showDate = true
+let showSignature = true
+
+let fonts
 
 let sketch = function(p) {
 
@@ -44,6 +46,13 @@ let sketch = function(p) {
         fail => { /* console.log('jpg fail') */ }
       );
     }
+
+    fonts = p.loadJSON('/assets/js/hersheytext.min.json')
+
+    //
+    // fetch('/assets/js/hersheytext.min.json')
+      // .then(response => response.json())
+      // .then(data => {fonts = data; console.log(data)});
   }
 
   p.setup = function() {
@@ -54,82 +63,70 @@ let sketch = function(p) {
     // Does not work with p.SVG Canvas
     // p.blendMode(p.MULTIPLY)
 
-    // Load the font JSON data
-    $.getJSON('/assets/js/hersheytext.min.json', function(fonts){
+    // --- Start of Title, Date and Sign
 
-      let svg_text = ''
+    let svg_text = ''
 
-      // Title
-      //*
-      if (sketch_title != '') {
-        let svg_title;
-        let font_size = 12;
+    // Title
+    if (sketch_title != '') {
+      let svg_title;
+      let font_size = 12;
 
-        // Temporary fix of spacing being too narrow on the Space character
-        sketch_title = sketch_title.replace(/\s+/g, '     ')
+      // Temporary fix of spacing being too narrow on the Space character
+      sketch_title = sketch_title.replace(/\s+/g, '     ')
 
-        let title_svg = renderText(sketch_title, {
+      let title_svg = renderText(sketch_title, {
+        font: fonts['EMSTech'],
+        pos: {x: 0, y: 0},
+        scale: 2,
+        charWidth: 8,
+      });
+      svg_title = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + title_svg + "</g>"
+      svg_text += svg_title
+    }
+
+    // Date
+    if (showDate) {
+      let svg_date
+      font_size = 8;
+      let now = new Date();
+      let date_svg = renderText(
+        (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear(),
+        {
           font: fonts['EMSTech'],
           pos: {x: 0, y: 0},
           scale: 2,
           charWidth: 8,
-        });
-        svg_title = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + title_svg + "</g>"
-        svg_text += svg_title
-      }
-      //*/
-
-      // Date
-      if (showDate) {
-        let svg_date
-        font_size = 8;
-        let now = new Date();
-        let date_svg = renderText(
-          (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear(),
-          {
-            font: fonts['EMSTech'],
-            pos: {x: 0, y: 0},
-            scale: 2,
-            charWidth: 8,
-          }
-        );
-        svg_date = '<g transform="translate(' + margin + ',' + ((p.height - 2 * margin) + ((2 * margin - font_size)/2)) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + date_svg + "</g>"
-        svg_text += svg_date
-      }
-
-      // Initials
-      if (showSignature) {
-        let svg_signature
-        let initials_rotation = "0";
-        let initials_position = '542,354';
-        if (orientation == "portrait") {
-          initials_rotation = "-90";
-          initials_position = '532,30';
         }
-        svg_signature  = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">'
-        svg_signature += '<path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42" d="M 0.52831513,9.9326943 2.8794102,-0.05945861 4.0549577,6.1121658 6.6999395,0.52831513 5.5243921,11.108241" id="path1421" /><path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42"  d="m 7.3002589,10.146612 0.458014,-9.61829687 c 0,0 3.7857471,0.3053972 4.1221261,1.83205677 0.336379,1.5266596 -3.2060981,3.6641137 -3.2060981,3.6641137 L 13.712455,10.37562" id="path1423" />';
-        svg_signature += '</g>'
-        svg_text += svg_signature
-        // document.querySelector('#defaultCanvas0>svg>g').innerHTML = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">' + initials + "</g>";
+      );
+      svg_date = '<g transform="translate(' + margin + ',' + ((p.height - 2 * margin) + ((2 * margin - font_size)/2)) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + date_svg + "</g>"
+      svg_text += svg_date
+    }
+
+    // Initials
+    if (showSignature) {
+      let svg_signature
+      let initials_rotation = "0";
+      let initials_position = '542,354';
+      if (orientation == "portrait") {
+        initials_rotation = "-90";
+        initials_position = '532,30';
       }
+      svg_signature  = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">'
+      svg_signature += '<path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42" d="M 0.52831513,9.9326943 2.8794102,-0.05945861 4.0549577,6.1121658 6.6999395,0.52831513 5.5243921,11.108241" id="path1421" /><path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42"  d="m 7.3002589,10.146612 0.458014,-9.61829687 c 0,0 3.7857471,0.3053972 4.1221261,1.83205677 0.336379,1.5266596 -3.2060981,3.6641137 -3.2060981,3.6641137 L 13.712455,10.37562" id="path1423" />';
+      svg_signature += '</g>'
+      svg_text += svg_signature
+      // document.querySelector('#defaultCanvas0>svg>g').innerHTML = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">' + initials + "</g>";
+    }
 
-      // Add SVG to document
-      if (svg_text != '' && document.querySelector('#defaultCanvas0>svg>g')) {
-        document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:groupmode", "layer")
-        document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:label", "1 - labels")
-        document.querySelector('#defaultCanvas0>svg>g').innerHTML = svg_text;
-      }
+    // Add SVG to document
+    if (svg_text != '' && document.querySelector('#defaultCanvas0>svg>g')) {
+      document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:groupmode", "layer")
+      document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:label", "1 - labels")
+      document.querySelector('#defaultCanvas0>svg>g').innerHTML = svg_text;
+    }
 
-      // Doesn't work
-      /*
-      var node = document.createElement('g');
-      node.innerHTML = svg_test;
-      // let node_paths = document.createElement(svg_test)
-      // node.appendChild(node_paths)
-      document.querySelector('#defaultCanvas0>svg').appendChild(node);
-      //*/
-
-    });
+    // --- END of Title, Date and Sign
 
     p.noLoop();
 
