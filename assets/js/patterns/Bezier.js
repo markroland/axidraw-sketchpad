@@ -508,9 +508,10 @@ class Bezier {
     for (let i = 0; i < num_lines; i++) {
 
       // Set basic line parameters
-      let radius = PathHelp.getRandom(0, 1.2)
+      let radius = PathHelp.getRandom(0.1, 1.2)
       let theta = PathHelp.getRandom(0, Math.PI * 2)
       let length = 0.25 * radius
+      let width = 0.005 + radius * 0.005
 
       // Start point
       let p1 = [
@@ -525,14 +526,16 @@ class Bezier {
       ]
 
       // Control point for p1
-      let p2_theta = PathHelp.getRandom(0, Math.PI * 2)
+      let p2_theta_start = Math.atan2(p4[1] - p1[1], p4[0] - p1[0])
+      let p2_theta = PathHelp.getRandom(-Math.PI/2, Math.PI/2)
       let p2 = [
-        p1[0] + (PathHelp.getRandom(0, 0.2) * Math.cos(p2_theta)),
-        p1[1] + (PathHelp.getRandom(0, 0.2) * Math.sin(p2_theta))
+        p1[0] + (PathHelp.getRandom(0, 0.2) * Math.cos(p2_theta_start + p2_theta)),
+        p1[1] + (PathHelp.getRandom(0, 0.2) * Math.sin(p2_theta_start + p2_theta))
       ]
 
       // Control point for p4
-      let p3_theta = PathHelp.getRandom(0, Math.PI * 2)
+      let p3_theta_start = Math.atan2(p4[1] - p1[1], p4[0] - p1[0])
+      let p3_theta = PathHelp.getRandom(-Math.PI/2, Math.PI/2)
       let p3 = [
         p4[0] + (PathHelp.getRandom(0, 0.2) * Math.cos(p3_theta)),
         p4[1] + (PathHelp.getRandom(0, 0.2) * Math.sin(p3_theta))
@@ -541,9 +544,11 @@ class Bezier {
       // Add bezier path with control points
       let curve = PathHelp.cubicBezierPath(p1, p2, p3, p4, 60)
 
-      paths.push(
-        curve
-      )
+      // Expand Curve
+      let expanded_curve = PathHelp.expandPath(curve, width, 'flat')
+
+      // Add to paths
+      paths.push(expanded_curve)
     }
 
     // Add path to Layer
