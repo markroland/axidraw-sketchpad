@@ -31,36 +31,55 @@ function renderText(s, options) {
     const offset = { left: 0, top: 0 };
     options.scale = options.scale ? options.scale : 1;
 
-    // Initial Line container
-    let lineCount = 0;
+    // Move through each line
+    const lines = s.split("\n");
+    for(let l in lines) {
 
-    // Move through each word
-    const words = s.split(' ');
-    for(let w in words) {
-      const word = words[w];
+      // Move through each word
+      const words = lines[l].split(' ');
+      for(let w in words) {
 
-      // Move through each letter
-      for(let i in word) {
-        const index = word.charCodeAt(i) - 33;
+        const word = words[w];
 
         // Only print in range chars
         let charOffset = options.charWidth;
-        if (font[index]){
-          charOffset = font[index].o;
 
-          svg_string += '<path d="' + font[index].d + '" fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.5" style="stroke:rgb(0,0,0); fill:none;" transform="translate(' + offset.left + ', ' + offset.top + ')" />' + "\n";
+        // Wrap line if word goes over width
+        if (options.wrapWidth) {
+          if (offset.left + word.length * charOffset > options.wrapWidth) {
+            offset.left = 0;
+            offset.top += options.charHeight
+          }
         }
 
-        // Add space between letters
-        offset.left+= charOffset + options.charWidth;
+        // Move through each letter
+        for(let i in word) {
+
+          // Font library character position
+          let ascii_code = word.charCodeAt(i)
+          const index = ascii_code - 33;
+
+          if (font[index]){
+            charOffset = font[index].o;
+
+            svg_string += '<path d="' + font[index].d + '" fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.5" style="stroke:rgb(0,0,0); fill:none;" transform="translate(' + offset.left + ', ' + offset.top + ')" />' + "\n";
+          }
+
+          // Add space between letters
+          offset.left += charOffset + options.charWidth;
+        }
+
+        // Add space between words
+        offset.left += options.charWidth * 2;
       }
 
-      // Add space between words
-      offset.left += options.charWidth/2;
+      // Adjust position to beginning of next line
+      offset.left = 0;
+      offset.top += options.charHeight
     }
   } catch(e) {
     console.error(e);
-    return false; // Error!
+    return false;
   }
 
   return svg_string;
