@@ -462,4 +462,12 @@ class PathHelper {
     });
     return paths
   }
+
+  polarToRect(radius, theta) {
+    return [
+      radius * Math.cos(theta),
+      radius * Math.sin(theta)
+    ]
+  }
+
 }
