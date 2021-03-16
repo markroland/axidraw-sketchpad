@@ -1,5 +1,5 @@
 let sketch_title = ''
-let selectedPattern = "postcard"
+let selectedPattern = "cassinioval"
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {
@@ -29,6 +29,7 @@ let sketch = function(p) {
 
   var Patterns = {
     "bezier": new Bezier(),
+    "cassinioval": new CassiniOval(),
     "cycloid": new Cycloid(),
     "extrusion": new Extrusion(),
     "fibonacci": new Fibonacci(),
