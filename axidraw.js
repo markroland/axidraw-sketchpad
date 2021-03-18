@@ -25,6 +25,8 @@ let sketch = function(p) {
   let svg_date
   let svg_signature
 
+  let draw_count = 0;
+
   var Patterns = {
     "bezier": new Bezier(),
     "cycloid": new Cycloid(),
@@ -103,6 +105,26 @@ let sketch = function(p) {
   }
 
   p.draw = function() {
+
+    console.log('Draw Count: ', draw_count)
+
+    // Clear SVG
+    if (draw_count > 0) {
+
+      // 3/17/21 - This should work, but it's not working
+      // See https://zenozeng.github.io/p5.js-svg/examples/#basic
+      // p.clear();
+
+      // document.querySelector('#defaultCanvas0>svg>g:nth-child(3)>g').remove()
+      // document.querySelector('#defaultCanvas0>svg>g:nth-child(3)>g').innerHTML = '';
+      // console.log('A');
+
+      // This works on first change, but then fails on subsequent
+      console.log(document.querySelector('#defaultCanvas0>svg>g:nth-of-type(2)>g'))
+      // document.querySelector('#defaultCanvas0>svg>g:nth-of-type(2)>g').innerHTML = '';
+      document.querySelector('#defaultCanvas0>svg>g:nth-child(3)>g').innerHTML = '';
+      console.log(document.querySelector('#defaultCanvas0>svg>g'))
+    }
 
     // Get artwork from Pattern class
     layers = Patterns[selectedPattern].draw(p, imported_image);
@@ -204,6 +226,8 @@ let sketch = function(p) {
 
     p.pop();
 
+    // Count how many times draw() has run
+    draw_count++
   }
 
   function draw_title_date_sign() {
