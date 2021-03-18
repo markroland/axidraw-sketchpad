@@ -365,13 +365,6 @@ let sketch = function(p) {
     // Load Title, Date and Signature from DOM
     svg.appendChild(document.querySelector('#defaultCanvas0>svg>g').cloneNode(true))
 
-    let g1 = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      g1.setAttribute("transform", "scale(1,1) scale(1,1)");
-      g1.setAttribute("transform", "translate(" + width/2 + "," + height/2 + ")");
-
-    // let layers = new Array();
-    // layers.push(paths);
-
     // Convert legacy patterns to new format.
     if (layers[0].paths == undefined) {
       layers = [
@@ -387,8 +380,6 @@ let sketch = function(p) {
       let layer = document.createElementNS("http://www.w3.org/2000/svg", "g");
         layer.setAttribute("inkscape:groupmode", "layer")
         layer.setAttribute("inkscape:label", (l + 2) + " - " + layers[l].color)
-
-      g1.setAttribute("transform", "scale(1,1) scale(1,1)");
         layer.setAttribute("transform", "translate(" + width/2 + "," + height/2 + ")");
 
       for (let p1 = 0; p1 < layers[l].paths.length; p1++) {
@@ -423,7 +414,6 @@ let sketch = function(p) {
         layer.appendChild(document.querySelector('#defaultCanvas0>svg>g:nth-child(' + (l + 2) + ')>g>g').cloneNode(true))
       }
 
-      // g1.appendChild(layer)
       svg.appendChild(layer)
     }
 
