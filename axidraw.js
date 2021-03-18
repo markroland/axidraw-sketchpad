@@ -213,8 +213,6 @@ let sketch = function(p) {
         let layer_group_svg = document.createElementNS("http://www.w3.org/2000/svg", "g");
         layer_group_svg.setAttribute("inkscape:groupmode", "layer")
         layer_group_svg.setAttribute("inkscape:label", "Text on Layer " + (l+1))
-        // g1.setAttribute("transform", "scale(1,1) scale(1,1)");
-        // g1.setAttribute("transform", "translate(" + width/2 + "," + height/2 + ")");
 
         // Insert the svg content in to the SVG <g> element
         layer_group_svg.innerHTML = layers[l].svg
@@ -229,6 +227,15 @@ let sketch = function(p) {
     // Count how many times draw() has run
     draw_count++
   }
+
+  // p.keyPressed = function() {
+  //   console.log("keyPressed");
+  //   p.redraw()
+  // }
+
+  // p.mouseClicked = function() {
+  //   console.log("mouseClicked");
+  // }
 
   function draw_title_date_sign() {
 
