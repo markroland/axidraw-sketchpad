@@ -102,6 +102,13 @@ let sketch = function(p) {
     downloadButton = p.createButton('Download SVG')
       .parent('download');
     downloadButton.mousePressed(download);
+
+    // Load configs and build menus
+    if (Patterns[selectedPattern].config !== undefined) {
+      const configs = Object.entries(Patterns[selectedPattern].config);
+      buildConfigControls(configs)
+    }
+
   }
 
   p.draw = function() {
@@ -336,6 +343,87 @@ let sketch = function(p) {
     location.reload();
   }
 
+  function buildConfigControls(configs) {
+    for (const [key, val] of configs) {
+
+      // Create a new object
+      var control = new Object();
+
+      // Create the div that contains the control
+      control.div = p.createDiv('<label>' + val.name + '</label>')
+        .parent('sketch-controls')
+        .addClass('sketch-control');
+
+      // Create the control form input
+      if (val.input.type == "createSelect") {
+        control.input = p.createSelect()
+          .attribute('name', key)
+          .parent(control.div)
+          .addClass(val.input.class);
+        const entries = Object.entries(val.input.options)
+        for (const [key, object] of entries) {
+          control.input.option(object, key);
+        }
+        if (val.value) {
+          control.input.selected(val.value);
+        }
+      } else if (val.input.type == "createSlider") {
+        control.input = p.createSlider(
+          val.input.params[0],
+          val.input.params[1],
+          val.value ? val.value : val.input.params[2],
+          val.input.params[3]
+        )
+        .attribute('name', key)
+        .parent(control.div)
+        .addClass(val.input.class);
+      } else if (val.input.type == "createCheckbox") {
+        // control.input = createInput(val.input.params[0], "checkbox") // Should it be this?
+        control.input = p.createInput(
+          val.input.params[0],
+          val.input.params[1],
+          val.input.params[2]
+        )
+        .attribute("type", "checkbox")
+        .attribute('name', key)
+        .attribute('checkbox', null)
+        .parent(control.div);
+        if (val.input.params[2] == 1) {
+          control.input.attribute('checked', 'checked');
+        } else if (val.value) {
+          control.input.attribute('checked', 'checked');
+        }
+      } else if (val.input.type == "createInput") {
+        control.input = p.createInput(
+          val.value ? val.value : val.input.params[0],
+          val.input.params[1]
+        )
+        .attribute('name', key)
+        .parent(control.div);
+      } else if (val.input.type == "createTextarea") {
+        control.input = p.createElement(
+          "textarea",
+          val.value ? val.value : val.input.value,
+        )
+        .attribute("rows", val.input.attributes.rows)
+        .attribute("cols", val.input.attributes.cols)
+        .attribute('name', key)
+        .parent(control.div);
+      }
+
+      // Add change event handler
+      // TODO: This doesn't work well for Textareas
+      control.input.changed(function(){
+        p.redraw()
+      });
+
+      // Create a span element to display the current input's value (useful for Sliders)
+      if (val.input.displayValue) {
+        let radius_value = p.createSpan('0')
+          .parent(control.div);
+      }
+    }
+  }
 
   function trim_path(x0, y0, x1, y1) {
     let x = x1;
