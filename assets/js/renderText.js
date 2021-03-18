@@ -27,6 +27,7 @@ function renderText(s, options) {
     const font = options.font.chars;
     options.charWidth = options.charWidth ? options.charWidth : 10;
     options.charHeight = options.charHeight ? options.charHeight : 28;
+    options.lineHeight = 1.25;
 
     const offset = { left: 0, top: 0 };
     options.scale = options.scale ? options.scale : 1;
@@ -48,7 +49,7 @@ function renderText(s, options) {
         if (options.wrapWidth) {
           if (offset.left + word.length * charOffset > options.wrapWidth) {
             offset.left = 0;
-            offset.top += options.charHeight
+            offset.top += options.charHeight * options.lineHeight
           }
         }
 
@@ -75,7 +76,7 @@ function renderText(s, options) {
 
       // Adjust position to beginning of next line
       offset.left = 0;
-      offset.top += options.charHeight
+      offset.top += options.charHeight * options.lineHeight
     }
   } catch(e) {
     console.error(e);
