@@ -98,36 +98,8 @@ let sketch = function(p) {
     p.push();
     p.translate(p.width/2, p.height/2)
 
-    // Draw Border
-    /*
-    p.stroke(255, 0, 128);
-    p.beginShape();
-    p.vertex(-p.width/2 + margin, p.height/2 - margin)
-    p.vertex(p.width/2 - margin, p.height/2 - margin)
-    p.vertex(p.width/2 - margin, -p.height/2 + margin)
-    p.vertex(-p.width/2 + margin, -p.height/2 + margin)
-    p.vertex(-p.width/2 + margin, p.height/2 - margin)
-    p.endShape();
-    //*/
-
-    // Draw Area
-    /*
-    p.stroke(0, 128, 255);
-    p.beginShape();
-    p.vertex(-p.width/2 + 2 * margin, p.height/2 - 2 * margin)
-    p.vertex(p.width/2 - 2 * margin, p.height/2 - 2 * margin)
-    p.vertex(p.width/2 - 2 * margin, -p.height/2 + 2 * margin)
-    p.vertex(-p.width/2 + 2 * margin, -p.height/2 + 2 * margin)
-    p.vertex(-p.width/2 + 2 * margin, p.height/2 - 2 * margin)
-    p.endShape();
-    //*/
-
-    // Draw axis
-    /*
-    p.stroke(0, 255, 128);
-    p.line(0,p.height/2,0, -p.height/2)
-    p.line(-p.width/2, 0, p.width/2, 0)
-    //*/
+    // Draw Margins, Padding and Axis. Useful for debugging or formatting art
+    // draw_helper_grid()
 
     let constrain = false;
     if (Patterns[selectedPattern].constrain !== undefined) {
@@ -271,6 +243,34 @@ let sketch = function(p) {
       document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:label", "1 - labels")
       document.querySelector('#defaultCanvas0>svg>g').innerHTML = svg_text;
     }
+  }
+
+  function draw_helper_grid() {
+
+    // Draw Border
+    p.stroke(255, 0, 128);
+    p.beginShape();
+    p.vertex(-p.width/2 + margin, p.height/2 - margin)
+    p.vertex(p.width/2 - margin, p.height/2 - margin)
+    p.vertex(p.width/2 - margin, -p.height/2 + margin)
+    p.vertex(-p.width/2 + margin, -p.height/2 + margin)
+    p.vertex(-p.width/2 + margin, p.height/2 - margin)
+    p.endShape();
+
+    // Draw Area
+    p.stroke(0, 128, 255);
+    p.beginShape();
+    p.vertex(-p.width/2 + 2 * margin, p.height/2 - 2 * margin)
+    p.vertex(p.width/2 - 2 * margin, p.height/2 - 2 * margin)
+    p.vertex(p.width/2 - 2 * margin, -p.height/2 + 2 * margin)
+    p.vertex(-p.width/2 + 2 * margin, -p.height/2 + 2 * margin)
+    p.vertex(-p.width/2 + 2 * margin, p.height/2 - 2 * margin)
+    p.endShape();
+
+    // Draw axis
+    p.stroke(0, 255, 128);
+    p.line(0,p.height/2,0, -p.height/2)
+    p.line(-p.width/2, 0, p.width/2, 0)
   }
 
   }
