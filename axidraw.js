@@ -1,5 +1,11 @@
 let sketch_title = ''
 let selectedPattern = "postcard"
+
+// Select sketch from Hash in URL
+if (window.location.hash != "") {
+  selectedPattern = window.location.hash.replace('#', '')
+}
+
 let orientation = 'landscape'
 let showDate = false
 let showSignature = false
@@ -61,9 +67,25 @@ let sketch = function(p) {
     // Does not work with p.SVG Canvas
     // p.blendMode(p.MULTIPLY)
 
+    // Pattern selector
+    var pattern_select_div = p.createDiv('<label>Sketch</label>')
+      .parent('sketch-selector');
+    pattern_select = p.createSelect()
+      .parent(pattern_select_div)
+      .attribute("name", "pattern");
+
+    // Add patterns from object
+    var pattern_select_menu = document.querySelector('#sketch-selector > div > select');
+    const entries = Object.entries(Patterns)
+    for (const [pattern_key, pattern_object] of entries) {
+      pattern_select.option(pattern_object.name, pattern_object.key);
     }
 
+    // Set default selected pattern
+    pattern_select.selected(selectedPattern);
 
+    // Add change event handler
+    pattern_select.changed(patternSelectEvent);
 
     draw_title_date_sign()
 
@@ -181,6 +203,9 @@ let sketch = function(p) {
     }
 
     p.pop();
+
+  }
+
   function draw_title_date_sign() {
 
     let svg_text = ''
@@ -273,7 +298,13 @@ let sketch = function(p) {
     p.line(-p.width/2, 0, p.width/2, 0)
   }
 
+  function patternSelectEvent() {
+    selectedPattern = document.querySelector('#sketch-selector > div > select').value
+    console.log('patternSelectEvent. selectedPattern: ', selectedPattern)
+    location.href = 'http://localhost:8000/#' + selectedPattern;
+    location.reload();
   }
+
 
   function trim_path(x0, y0, x1, y1) {
     let x = x1;
