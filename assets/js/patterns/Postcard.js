@@ -23,7 +23,24 @@ class Postcard {
             "astrology": "astrology",
             "cursive": "cursive",
             "cyrillic": "cyrillic",
-            "EMSTech": "EMS Tech",
+            "EMSAllure": "EMSAllure",
+            "EMSElfin": "EMSElfin",
+            "EMSFelix": "EMSFelix",
+            "EMSNixish": "EMSNixish",
+            "EMSNixishItalic": "EMSNixishItalic",
+            "EMSOsmotron": "EMSOsmotron",
+            "EMSReadability": "EMSReadability",
+            "EMSReadabilityItalic": "EMSReadabilityItalic",
+            "EMSTech": "EMSTech",
+            "HersheyGothEnglish": "HersheyGothEnglish",
+            "HersheySans1": "HersheySans1",
+            "HersheySansMed": "HersheySansMed",
+            "HersheyScript1": "HersheyScript1",
+            "HersheyScriptMed": "HersheyScriptMed",
+            "HersheySerifBold": "HersheySerifBold",
+            "HersheySerifBoldItalic": "HersheySerifBoldItalic",
+            "HersheySerifMed": "HersheySerifMed",
+            "HersheySerifMedItalic": "HersheySerifMedItalic",
             "futural": "futural",
             "futuram": "futuram",
             "gothiceng": "gothiceng",
@@ -157,12 +174,20 @@ class Postcard {
     // Display selected value(s)
     document.querySelector('#sketch-controls > div:nth-child(2) > span').innerHTML = font_size;
 
-    // This converts the desired font_size input (ideally as Points (pts)) to a
-    const font_size_factor = 1/21;
+    // This scales the font source data to the requested font size input.
+    // This is still a rough estimate based on what works with the current font data
+    let font_size_factor = 1/20
+    if (font_face.match(/^(EMS|Hershey)/)) {
+      font_size_factor *= 1/30;
+    }
+
+    // Set the line weight. Most pens for plotting are specified in millimeters
+    let line_weight_mm = 0.5;
+    let line_weight_px = line_weight_mm * 3.78; // 1mm = 3.78 pixels
 
     // Font parameters in Points (pts)
     let charWidth = font_size; // This is still somewhat arbitrary
-    let charHeight = font_size * 4; // This is still somewhat arbitrary
+    let charHeight = (1/font_size_factor); // font_size * 4; // This is still somewhat arbitrary
 
     let svg_group
 
@@ -181,11 +206,11 @@ class Postcard {
         font: fonts[font_face],
         charWidth: charWidth,
         charHeight: charHeight,
-        lineHeight: 1.25
+        lineHeight: 2.0
       }
     );
     // let svg_group = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + address_font_svg + "</g>"
-    svg_group = '<g transform="translate(' + 24 + ',' + -24 + ') scale(' + (font_size * font_size_factor) + ',' + (font_size * font_size_factor) + ')">' + address_font_svg + "</g>"
+    svg_group = '<g transform="translate(' + 24 + ',' + -24 + ') scale(' + (font_size * font_size_factor) + ',' + (font_size * font_size_factor) + ')" stroke-width="' + (line_weight_px / (font_size * font_size_factor)) + '">' + address_font_svg + "</g>"
     svg += svg_group
 
     // Message SVG Text
@@ -205,14 +230,14 @@ class Postcard {
         font: fonts[font_face],
         // charWidth: charWidth,
         charHeight: charHeight,
-        lineHeight: 1.25,
+        lineHeight: 2.0,
         wrapWidth: (text_box_width/font_size_factor) / font_size // font: 6 -> 820, 8 -> 600, 10 -> 500, 12 -> 400
       }
     );
 
     // Wrap the rendered text in an SVG group at translate it into position using P5 Coordinates
     // -p5.width/2 + margin, -p5.height/2 + margin
-    svg_group = '<g transform="translate(' + (-288 + 24) + ',' + (-192 + 24) + ') scale(' + (font_size * font_size_factor) + ',' + (font_size * font_size_factor) + ')">' + svg_font_text + "</g>"
+    svg_group = '<g transform="translate(' + (-288 + 24) + ',' + (-192 + 24) + ') scale(' + (font_size * font_size_factor) + ',' + (font_size * font_size_factor) + ')" stroke-width="' + (line_weight_px / (font_size * font_size_factor )) + '">' + svg_font_text + "</g>"
     svg += svg_group
 
     layers.push({

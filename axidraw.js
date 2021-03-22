@@ -58,7 +58,7 @@ let sketch = function(p) {
     }
 
     // Pre-load Hershey Text font data
-    fonts = p.loadJSON('/assets/js/hersheytext.min.json')
+    fonts = p.loadJSON('/assets/js/hersheytext.json')
   }
 
   p.setup = function() {

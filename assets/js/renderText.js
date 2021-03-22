@@ -73,8 +73,8 @@ function renderText(s, options) {
               + ' paint-order="fill stroke markers"'
               + ' stroke-opacity="1"'
               + ' stroke-linecap="round"'
-              + ' stroke-miterlimit="10" '
-              + ' stroke-width="2.5" '
+              // + ' stroke-miterlimit="10" '
+              // + ' stroke-width="20.5" '
               + ' style="stroke:rgb(0,0,0); fill:none;" '
               + ' transform="translate(' + offset.left + ', ' + offset.top + ')" />'
               + "\n";
