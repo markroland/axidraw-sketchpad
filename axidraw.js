@@ -127,10 +127,10 @@ let sketch = function(p) {
       // console.log('A');
 
       // This works on first change, but then fails on subsequent
-      console.log(document.querySelector('#defaultCanvas0>svg>g:nth-of-type(2)>g'))
+      // console.log(document.querySelector('#defaultCanvas0>svg>g:nth-of-type(2)>g'))
       // document.querySelector('#defaultCanvas0>svg>g:nth-of-type(2)>g').innerHTML = '';
       document.querySelector('#defaultCanvas0>svg>g:nth-child(3)>g').innerHTML = '';
-      console.log(document.querySelector('#defaultCanvas0>svg>g'))
+      // console.log(document.querySelector('#defaultCanvas0>svg>g'))
     }
 
     // Get artwork from Pattern class
