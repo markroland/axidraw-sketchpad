@@ -116,6 +116,8 @@ class Postcard {
    */
   draw() {
 
+    let PathHelp = new PathHelper();
+
     let address = {
       "name": "First Last",
       "street": "Street Number",
@@ -212,6 +214,29 @@ class Postcard {
     // let svg_group = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + address_font_svg + "</g>"
     svg_group = '<g transform="translate(' + 24 + ',' + -24 + ') scale(' + (font_size * font_size_factor) + ',' + (font_size * font_size_factor) + ')" stroke-width="' + (line_weight_px / (font_size * font_size_factor)) + '">' + address_font_svg + "</g>"
     svg += svg_group
+
+    // Render text to coordinate points
+    let address_paths = renderText(
+      address_string,
+      {
+        font: fonts[font_face],
+        charWidth: charWidth,
+        charHeight: charHeight,
+        lineHeight: 2.0
+      },
+      'paths'
+    )
+
+    // Reposition on canvas
+    for(let p in address_paths) {
+      address_paths[p] = PathHelp.translatePath(address_paths[p], [.16, -.165])
+    }
+
+    // Save to layers
+    layers.push({
+      "color": "red",
+      "paths": address_paths
+    })
 
     // Message SVG Text
     let message = "Dear friend," + "\n\n"
