@@ -190,6 +190,8 @@ class Postcard {
     svg += svg_group
 
     // Render text to coordinate points
+    // Under Development
+    /*
     let address_paths = renderText(
       address_string,
       {
@@ -203,7 +205,10 @@ class Postcard {
 
     // Reposition on canvas
     for(let p in address_paths) {
-      address_paths[p] = PathHelp.translatePath(address_paths[p], [.16, -.165])
+      address_paths[p] = PathHelp.translatePath(
+        address_paths[p],
+        [.16, -.165]
+      )
     }
 
     // Save to layers
@@ -211,6 +216,7 @@ class Postcard {
       "color": "red",
       "paths": address_paths
     })
+    //*/
 
     // Message SVG Text
     let message = "Dear friend," + "\n\n"
@@ -221,7 +227,7 @@ class Postcard {
     message = document.querySelector('#sketch-controls > div:nth-child(4) > textarea').value;
 
     // Text Box width in Pixels
-    let text_box_width = 440 * message_width;
+    let text_box_width = 280;
 
     let svg_font_text = renderText(
       message,
