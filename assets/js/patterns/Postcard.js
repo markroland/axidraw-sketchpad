@@ -164,7 +164,7 @@ class Postcard {
 
     let address_position = {
       "x": 24 + (220 * (message_width - 0.5)),
-      "y": -24
+      "y": -24 + parseInt(font_size)
     }
 
     // Address SVG Text
@@ -186,7 +186,7 @@ class Postcard {
       }
     );
     // let svg_group = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + address_font_svg + "</g>"
-    svg_group = '<g transform="translate(' + 24 + ',' + -24 + ') scale(' + (font_size * font_size_factor) + ',' + (font_size * font_size_factor) + ')" stroke-width="' + (line_weight_px / (font_size * font_size_factor)) + '">' + address_font_svg + "</g>"
+    svg_group = '<g transform="translate(' + address_position.x + ',' + address_position.y + ') scale(' + (font_size * font_size_factor) + ',' + (font_size * font_size_factor) + ')" stroke-width="' + (line_weight_px / (font_size * font_size_factor)) + '">' + address_font_svg + "</g>"
     svg += svg_group
 
     // Render text to coordinate points
@@ -236,7 +236,7 @@ class Postcard {
 
     // Wrap the rendered text in an SVG group at translate it into position using P5 Coordinates
     // -p5.width/2 + margin, -p5.height/2 + margin
-    svg_group = '<g transform="translate(' + (-288 + 24) + ',' + (-192 + 24) + ') scale(' + (font_size * font_size_factor) + ',' + (font_size * font_size_factor) + ')" stroke-width="' + (line_weight_px / (font_size * font_size_factor )) + '">' + svg_font_text + "</g>"
+    svg_group = '<g transform="translate(' + (-288 + 24) + ',' + (-192 + 24 + parseInt(font_size)) + ') scale(' + (font_size * font_size_factor) + ',' + (font_size * font_size_factor) + ')" stroke-width="' + (line_weight_px / (font_size * font_size_factor )) + '">' + svg_font_text + "</g>"
     svg += svg_group
 
     layers.push({
