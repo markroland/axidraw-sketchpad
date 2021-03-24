@@ -140,7 +140,7 @@ class Postcard {
     let font_size = document.querySelector('#sketch-controls > div:nth-child(2) > input').value
 
     // Width of message as percentage of drawing area
-    let message_width = 0.5
+    let message_width = 0.75
 
     // Display selected value(s)
     document.querySelector('#sketch-controls > div:nth-child(2) > span').innerHTML = font_size;
