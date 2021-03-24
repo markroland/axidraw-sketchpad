@@ -131,40 +131,6 @@ class Postcard {
 
     let paths = new Array();
 
-    // Center Divider Line
-    paths.push([
-      [0, -1],
-      [0, 1]
-    ])
-
-    // Message bounding box
-    /*
-    paths.push([
-      [-5/3, -1],
-      [0, -1],
-      [0, 1],
-      [-5/3, 1],
-      [-5/3, -1]
-    ]);
-    //*/
-
-    // Address bounding box
-    /*
-    paths.push([
-      [0.25, -0.25],
-      [0.25,  0.5],
-      [ 5/3,   0.5],
-      [ 5/3, -0.25],
-      [0.25, -0.25]
-    ])
-    //*/
-
-    // Add Paths to Layer
-    layers.push({
-      "color": "black",
-      "paths": paths
-    })
-
     let svg = '';
 
     // Set margin in pixels
@@ -172,6 +138,9 @@ class Postcard {
 
     let font_face = document.querySelector('#sketch-controls > div:nth-child(1) > select').value
     let font_size = document.querySelector('#sketch-controls > div:nth-child(2) > input').value
+
+    // Width of message as percentage of drawing area
+    let message_width = 0.5
 
     // Display selected value(s)
     document.querySelector('#sketch-controls > div:nth-child(2) > span').innerHTML = font_size;
@@ -192,6 +161,11 @@ class Postcard {
     let charHeight = (1/font_size_factor); // font_size * 4; // This is still somewhat arbitrary
 
     let svg_group
+
+    let address_position = {
+      "x": 24 + (220 * (message_width - 0.5)),
+      "y": -24
+    }
 
     // Address SVG Text
     let address_string = address.name + "\n"
@@ -247,7 +221,7 @@ class Postcard {
     message = document.querySelector('#sketch-controls > div:nth-child(4) > textarea').value;
 
     // Text Box width in Pixels
-    let text_box_width = 220;
+    let text_box_width = 440 * message_width;
 
     let svg_font_text = renderText(
       message,
@@ -269,6 +243,40 @@ class Postcard {
       "color": "black",
       "paths" : [],
       "svg": svg
+    })
+
+    // Center Divider Line
+    paths.push([
+      [0 + (5/3) * (message_width - 0.5), -1],
+      [0 + (5/3) * (message_width - 0.5), 1]
+    ])
+
+    // Message bounding box
+    /*
+    paths.push([
+      [-5/3, -1],
+      [0, -1],
+      [0, 1],
+      [-5/3, 1],
+      [-5/3, -1]
+    ]);
+    //*/
+
+    // Address bounding box
+    /*
+    paths.push([
+      [0.25, -0.25],
+      [0.25,  0.5],
+      [ 5/3,   0.5],
+      [ 5/3, -0.25],
+      [0.25, -0.25]
+    ])
+    //*/
+
+    // Add Paths to Layer
+    layers.push({
+      "color": "black",
+      "paths": paths
     })
 
     return layers
