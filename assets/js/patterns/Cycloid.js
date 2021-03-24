@@ -16,6 +16,8 @@ class Cycloid {
    */
   draw() {
 
+    let layers = new Array()
+
     // Calculate the path
     let path = this.calc(
       29,
@@ -23,7 +25,12 @@ class Cycloid {
       31
     );
 
-    return [path];
+    layers.push({
+      "color": "blue",
+      "paths": [path]
+    })
+
+    return layers;
   }
 
   /**

@@ -1,6 +1,16 @@
 let sketch_title = ''
-let selectedPattern = "bezier";
+let selectedPattern = "postcard"
+
+// Select sketch from Hash in URL
+if (window.location.hash != "") {
+  selectedPattern = window.location.hash.replace('#', '')
+}
+
 let orientation = 'landscape'
+let showDate = false
+let showSignature = false
+
+let fonts
 
 let sketch = function(p) {
 
@@ -15,6 +25,8 @@ let sketch = function(p) {
   let svg_date
   let svg_signature
 
+  let draw_count = 0;
+
   var Patterns = {
     "bezier": new Bezier(),
     "cycloid": new Cycloid(),
@@ -26,8 +38,9 @@ let sketch = function(p) {
     "heart": new Heart(),
     "lindenmayer": new Lindenmayer(),
     "lineimage": new LineImage(),
-    "negativespace": new NegativeSpace(),
     "lissajous": new Lissajous(),
+    "negativespace": new NegativeSpace(),
+    "postcard": new Postcard(),
     "radiallines": new RadialLines(),
     "radiography": new Radiography(),
     "spiral": new Spiral()
@@ -35,12 +48,17 @@ let sketch = function(p) {
 
   // Preload data
   p.preload = function() {
+
+    // Pre-load an image
     if (selectedPattern == "lineimage") {
       imported_image = p.loadImage("assets/data/landscape.jpg",
         success => { /* console.log('jpg success') */ },
         fail => { /* console.log('jpg fail') */ }
       );
     }
+
+    // Pre-load Hershey Text font data
+    fonts = p.loadJSON('/assets/js/hersheytext.json')
   }
 
   p.setup = function() {
@@ -51,82 +69,27 @@ let sketch = function(p) {
     // Does not work with p.SVG Canvas
     // p.blendMode(p.MULTIPLY)
 
-    // Load the font JSON data
-    $.getJSON('/assets/js/hersheytext.min.json', function(fonts){
+    // Pattern selector
+    var pattern_select_div = p.createDiv('<label>Sketch</label>')
+      .parent('sketch-selector');
+    pattern_select = p.createSelect()
+      .parent(pattern_select_div)
+      .attribute("name", "pattern");
 
-      let svg_text = ''
+    // Add patterns from object
+    var pattern_select_menu = document.querySelector('#sketch-selector > div > select');
+    const entries = Object.entries(Patterns)
+    for (const [pattern_key, pattern_object] of entries) {
+      pattern_select.option(pattern_object.name, pattern_object.key);
+    }
 
-      // Title
-      //*
-      if (sketch_title != '') {
-        let svg_title;
-        let font_size = 12;
+    // Set default selected pattern
+    pattern_select.selected(selectedPattern);
 
-        // Temporary fix of spacing being too narrow on the Space character
-        sketch_title = sketch_title.replace(/\s+/g, '     ')
+    // Add change event handler
+    pattern_select.changed(patternSelectEvent);
 
-        let title_svg = renderText(sketch_title, {
-          font: fonts['EMSTech'],
-          pos: {x: 0, y: 0},
-          scale: 2,
-          charWidth: 8,
-        });
-        svg_title = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + title_svg + "</g>"
-        svg_text += svg_title
-      }
-      //*/
-
-      // Date
-      //*
-      let svg_date
-      font_size = 8;
-      let now = new Date();
-      let date_svg = renderText(
-        (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear(),
-        {
-          font: fonts['EMSTech'],
-          pos: {x: 0, y: 0},
-          scale: 2,
-          charWidth: 8,
-        }
-      );
-      svg_date = '<g transform="translate(' + margin + ',' + ((p.height - 2 * margin) + ((2 * margin - font_size)/2)) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + date_svg + "</g>"
-      svg_text += svg_date
-      //*/
-
-      // Initials
-      //*
-      let svg_signature
-      let initials_rotation = "0";
-      let initials_position = '542,354';
-      if (orientation == "portrait") {
-        initials_rotation = "-90";
-        initials_position = '532,30';
-      }
-      svg_signature  = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">'
-      svg_signature += '<path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42" d="M 0.52831513,9.9326943 2.8794102,-0.05945861 4.0549577,6.1121658 6.6999395,0.52831513 5.5243921,11.108241" id="path1421" /><path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42"  d="m 7.3002589,10.146612 0.458014,-9.61829687 c 0,0 3.7857471,0.3053972 4.1221261,1.83205677 0.336379,1.5266596 -3.2060981,3.6641137 -3.2060981,3.6641137 L 13.712455,10.37562" id="path1423" />';
-      svg_signature += '</g>'
-      svg_text += svg_signature
-      // document.querySelector('#defaultCanvas0>svg>g').innerHTML = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">' + initials + "</g>";
-      //*/
-
-      // Add SVG to document
-      if (document.querySelector('#defaultCanvas0>svg>g')) {
-        document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:groupmode", "layer")
-        document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:label", "1 - labels")
-        document.querySelector('#defaultCanvas0>svg>g').innerHTML = svg_text;
-      }
-
-      // Doesn't work
-      /*
-      var node = document.createElement('g');
-      node.innerHTML = svg_test;
-      // let node_paths = document.createElement(svg_test)
-      // node.appendChild(node_paths)
-      document.querySelector('#defaultCanvas0>svg').appendChild(node);
-      //*/
-
-    });
+    draw_title_date_sign()
 
     p.noLoop();
 
@@ -139,9 +102,36 @@ let sketch = function(p) {
     downloadButton = p.createButton('Download SVG')
       .parent('download');
     downloadButton.mousePressed(download);
+
+    // Load configs and build menus
+    if (Patterns[selectedPattern].config !== undefined) {
+      const configs = Object.entries(Patterns[selectedPattern].config);
+      buildConfigControls(configs)
+    }
+
   }
 
   p.draw = function() {
+
+    console.log('Draw Count: ', draw_count)
+
+    // Clear SVG
+    if (draw_count > 0) {
+
+      // 3/17/21 - This should work, but it's not working
+      // See https://zenozeng.github.io/p5.js-svg/examples/#basic
+      // p.clear();
+
+      // document.querySelector('#defaultCanvas0>svg>g:nth-child(3)>g').remove()
+      // document.querySelector('#defaultCanvas0>svg>g:nth-child(3)>g').innerHTML = '';
+      // console.log('A');
+
+      // This works on first change, but then fails on subsequent
+      // console.log(document.querySelector('#defaultCanvas0>svg>g:nth-of-type(2)>g'))
+      // document.querySelector('#defaultCanvas0>svg>g:nth-of-type(2)>g').innerHTML = '';
+      document.querySelector('#defaultCanvas0>svg>g:nth-child(3)>g').innerHTML = '';
+      // console.log(document.querySelector('#defaultCanvas0>svg>g'))
+    }
 
     // Get artwork from Pattern class
     layers = Patterns[selectedPattern].draw(p, imported_image);
@@ -159,36 +149,8 @@ let sketch = function(p) {
     p.push();
     p.translate(p.width/2, p.height/2)
 
-    // Draw Border
-    /*
-    p.stroke(255, 0, 128);
-    p.beginShape();
-    p.vertex(-p.width/2 + margin, p.height/2 - margin)
-    p.vertex(p.width/2 - margin, p.height/2 - margin)
-    p.vertex(p.width/2 - margin, -p.height/2 + margin)
-    p.vertex(-p.width/2 + margin, -p.height/2 + margin)
-    p.vertex(-p.width/2 + margin, p.height/2 - margin)
-    p.endShape();
-    //*/
-
-    // Draw Area
-    /*
-    p.stroke(0, 128, 255);
-    p.beginShape();
-    p.vertex(-p.width/2 + 2 * margin, p.height/2 - 2 * margin)
-    p.vertex(p.width/2 - 2 * margin, p.height/2 - 2 * margin)
-    p.vertex(p.width/2 - 2 * margin, -p.height/2 + 2 * margin)
-    p.vertex(-p.width/2 + 2 * margin, -p.height/2 + 2 * margin)
-    p.vertex(-p.width/2 + 2 * margin, p.height/2 - 2 * margin)
-    p.endShape();
-    //*/
-
-    // Draw axis
-    /*
-    p.stroke(0, 255, 128);
-    p.line(0,p.height/2,0, -p.height/2)
-    p.line(-p.width/2, 0, p.width/2, 0)
-    //*/
+    // Draw Margins, Padding and Axis. Useful for debugging or formatting art
+    // draw_helper_grid()
 
     let constrain = false;
     if (Patterns[selectedPattern].constrain !== undefined) {
@@ -201,16 +163,19 @@ let sketch = function(p) {
 
     p.stroke(0);
 
+    // Loop through Layers
     for (l = 0; l < layers.length; l++) {
 
-      // Solid stroke
+      // Set stroke color for the layer
       p.stroke(layers[l].color)
 
+      // Loop through all Paths in Layer
       let paths = layers[l].paths
-
       for (i = 0; i < paths.length; i++) {
 
         p.beginShape();
+
+        // Loop through each Point in Path
         for (j = 0; j < paths[i].length; j++) {
 
           // Reformat data
@@ -244,9 +209,220 @@ let sketch = function(p) {
         // TODO: "mode" should be defined by the path
         p.endShape();
       }
+
+      // Directly insert SVG
+      if (layers[l].svg !== undefined) {
+
+        // Identify target element to append the new SVG content
+        let this_svg_layer = document.querySelector('#defaultCanvas0>svg>g:nth-child(3)>g')
+
+        // Create a new group in which to place the svg content
+        let layer_group_svg = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        layer_group_svg.setAttribute("inkscape:groupmode", "layer")
+        layer_group_svg.setAttribute("inkscape:label", "Text on Layer " + (l+1))
+
+        // Insert the svg content in to the SVG <g> element
+        layer_group_svg.innerHTML = layers[l].svg
+
+        // Add the SVG <g> element to the target group element
+        this_svg_layer.appendChild(layer_group_svg)
+      }
     }
 
     p.pop();
+
+    // Count how many times draw() has run
+    draw_count++
+  }
+
+  // p.keyPressed = function() {
+  //   console.log("keyPressed");
+  //   p.redraw()
+  // }
+
+  // p.mouseClicked = function() {
+  //   console.log("mouseClicked");
+  // }
+
+  function draw_title_date_sign() {
+
+    let svg_text = ''
+
+    // Title
+    if (sketch_title != '') {
+      let svg_title;
+      let font_size = 12;
+
+      // Temporary fix of spacing being too narrow on the Space character
+      // sketch_title = sketch_title.replace(/\s+/g, '     ')
+
+      let title_svg = renderText(sketch_title, {
+        font: fonts['EMSTech'],
+        pos: {x: 0, y: 0},
+        scale: 2,
+        charWidth: 8,
+      });
+      svg_title = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + title_svg + "</g>"
+      svg_text += svg_title
+    }
+
+    // Date
+    if (showDate) {
+      let svg_date
+      font_size = 8;
+      let now = new Date();
+      let date_svg = renderText(
+        (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear(),
+        {
+          font: fonts['EMSTech'],
+          pos: {x: 0, y: 0},
+          scale: 2,
+          charWidth: 8,
+        }
+      );
+      svg_date = '<g transform="translate(' + margin + ',' + ((p.height - 2 * margin) + ((2 * margin - font_size)/2)) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + date_svg + "</g>"
+      svg_text += svg_date
+    }
+
+    // Initials
+    if (showSignature) {
+      let svg_signature
+      let initials_rotation = "0";
+      let initials_position = '542,354';
+      if (orientation == "portrait") {
+        initials_rotation = "-90";
+        initials_position = '532,30';
+      }
+      svg_signature  = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">'
+      svg_signature += '<path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42" d="M 0.52831513,9.9326943 2.8794102,-0.05945861 4.0549577,6.1121658 6.6999395,0.52831513 5.5243921,11.108241" id="path1421" /><path fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.42"  d="m 7.3002589,10.146612 0.458014,-9.61829687 c 0,0 3.7857471,0.3053972 4.1221261,1.83205677 0.336379,1.5266596 -3.2060981,3.6641137 -3.2060981,3.6641137 L 13.712455,10.37562" id="path1423" />';
+      svg_signature += '</g>'
+      svg_text += svg_signature
+      // document.querySelector('#defaultCanvas0>svg>g').innerHTML = '<g transform="translate(' + initials_position + ') rotate(' + initials_rotation + ' 5 5)">' + initials + "</g>";
+    }
+
+    // Add SVG to document
+    if (svg_text != '' && document.querySelector('#defaultCanvas0>svg>g')) {
+      document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:groupmode", "layer")
+      document.querySelector('#defaultCanvas0>svg>g').setAttribute("inkscape:label", "1 - labels")
+      document.querySelector('#defaultCanvas0>svg>g').innerHTML = svg_text;
+    }
+  }
+
+  function draw_helper_grid() {
+
+    // Draw Border
+    p.stroke(255, 0, 128);
+    p.beginShape();
+    p.vertex(-p.width/2 + margin, p.height/2 - margin)
+    p.vertex(p.width/2 - margin, p.height/2 - margin)
+    p.vertex(p.width/2 - margin, -p.height/2 + margin)
+    p.vertex(-p.width/2 + margin, -p.height/2 + margin)
+    p.vertex(-p.width/2 + margin, p.height/2 - margin)
+    p.endShape();
+
+    // Draw Area
+    p.stroke(0, 128, 255);
+    p.beginShape();
+    p.vertex(-p.width/2 + 2 * margin, p.height/2 - 2 * margin)
+    p.vertex(p.width/2 - 2 * margin, p.height/2 - 2 * margin)
+    p.vertex(p.width/2 - 2 * margin, -p.height/2 + 2 * margin)
+    p.vertex(-p.width/2 + 2 * margin, -p.height/2 + 2 * margin)
+    p.vertex(-p.width/2 + 2 * margin, p.height/2 - 2 * margin)
+    p.endShape();
+
+    // Draw axis
+    p.stroke(0, 255, 128);
+    p.line(0,p.height/2,0, -p.height/2)
+    p.line(-p.width/2, 0, p.width/2, 0)
+  }
+
+  function patternSelectEvent() {
+    selectedPattern = document.querySelector('#sketch-selector > div > select').value
+    console.log('patternSelectEvent. selectedPattern: ', selectedPattern)
+    location.href = 'http://localhost:8000/#' + selectedPattern;
+    location.reload();
+  }
+
+  function buildConfigControls(configs) {
+    for (const [key, val] of configs) {
+
+      // Create a new object
+      var control = new Object();
+
+      // Create the div that contains the control
+      control.div = p.createDiv('<label>' + val.name + '</label>')
+        .parent('sketch-controls')
+        .addClass('sketch-control');
+
+      // Create the control form input
+      if (val.input.type == "createSelect") {
+        control.input = p.createSelect()
+          .attribute('name', key)
+          .parent(control.div)
+          .addClass(val.input.class);
+        const entries = Object.entries(val.input.options)
+        for (const [key, object] of entries) {
+          control.input.option(object, key);
+        }
+        if (val.value) {
+          control.input.selected(val.value);
+        }
+      } else if (val.input.type == "createSlider") {
+        control.input = p.createSlider(
+          val.input.params[0],
+          val.input.params[1],
+          val.value ? val.value : val.input.params[2],
+          val.input.params[3]
+        )
+        .attribute('name', key)
+        .parent(control.div)
+        .addClass(val.input.class);
+      } else if (val.input.type == "createCheckbox") {
+        // control.input = createInput(val.input.params[0], "checkbox") // Should it be this?
+        control.input = p.createInput(
+          val.input.params[0],
+          val.input.params[1],
+          val.input.params[2]
+        )
+        .attribute("type", "checkbox")
+        .attribute('name', key)
+        .attribute('checkbox', null)
+        .parent(control.div);
+        if (val.input.params[2] == 1) {
+          control.input.attribute('checked', 'checked');
+        } else if (val.value) {
+          control.input.attribute('checked', 'checked');
+        }
+      } else if (val.input.type == "createInput") {
+        control.input = p.createInput(
+          val.value ? val.value : val.input.params[0],
+          val.input.params[1]
+        )
+        .attribute('name', key)
+        .parent(control.div);
+      } else if (val.input.type == "createTextarea") {
+        control.input = p.createElement(
+          "textarea",
+          val.value ? val.value : val.input.value,
+        )
+        .attribute("rows", val.input.attributes.rows)
+        .attribute("cols", val.input.attributes.cols)
+        .attribute('name', key)
+        .parent(control.div);
+      }
+
+      // Add change event handler
+      // TODO: This doesn't work well for Textareas
+      control.input.changed(function(){
+        p.redraw()
+      });
+
+      // Create a span element to display the current input's value (useful for Sliders)
+      if (val.input.displayValue) {
+        let radius_value = p.createSpan('0')
+          .parent(control.div);
+      }
+    }
   }
 
   function trim_path(x0, y0, x1, y1) {
@@ -339,13 +515,6 @@ let sketch = function(p) {
     // Load Title, Date and Signature from DOM
     svg.appendChild(document.querySelector('#defaultCanvas0>svg>g').cloneNode(true))
 
-    let g1 = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      g1.setAttribute("transform", "scale(1,1) scale(1,1)");
-      g1.setAttribute("transform", "translate(" + width/2 + "," + height/2 + ")");
-
-    // let layers = new Array();
-    // layers.push(paths);
-
     // Convert legacy patterns to new format.
     if (layers[0].paths == undefined) {
       layers = [
@@ -361,20 +530,7 @@ let sketch = function(p) {
       let layer = document.createElementNS("http://www.w3.org/2000/svg", "g");
         layer.setAttribute("inkscape:groupmode", "layer")
         layer.setAttribute("inkscape:label", (l + 2) + " - " + layers[l].color)
-        g1.setAttribute("transform", "scale(1,1) scale(1,1)");
         layer.setAttribute("transform", "translate(" + width/2 + "," + height/2 + ")");
-
-      // Temporary: Alternate between Cyan, Magent, Yellow... for fun... because I can
-      // let stroke
-      // if (p1 % 3 == 0) {
-      //   stroke = "rgb(0,255,255)"
-      // }
-      // if (p1 % 3 == 1) {
-      //   stroke = "rgb(255,0,255)"
-      // }
-      // if (p1 % 3 == 2) {
-      //   stroke = "rgb(255,255,0)"
-      // }
 
       for (let p1 = 0; p1 < layers[l].paths.length; p1++) {
 
@@ -400,7 +556,14 @@ let sketch = function(p) {
         layer.appendChild(path);
       }
 
-      // g1.appendChild(layer)
+      // Directly insert SVG
+      if (layers[l].svg !== undefined) {
+
+        // Load Content from existing DOM content
+        // Note: The "l + 2" bit may not be correct for different number of layers - only tested with 1
+        layer.appendChild(document.querySelector('#defaultCanvas0>svg>g:nth-child(' + (l + 2) + ')>g>g').cloneNode(true))
+      }
+
       svg.appendChild(layer)
     }
 

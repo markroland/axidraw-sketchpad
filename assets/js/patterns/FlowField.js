@@ -4,14 +4,19 @@
 class FlowField {
 
   constructor(p5) {
+
+    this.key = "flowfield";
+
+    this.name = "Flow Field";
+
     this.constrain = false
   }
 
   draw(p5, imported_image) {
     this.p5 = p5
     // return this.drawField(12)
-    // return this.drawFieldPaths(2000)
-    return this.drawImageFieldPaths(120, imported_image)
+    return this.drawFieldPaths(2000)
+    // return this.drawImageFieldPaths(120, imported_image)
   }
 
   drawField(gridScale) {

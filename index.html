@@ -5,186 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="assets/css/style.css" rel="stylesheet">
 
-  <script type="text/javascript" src="assets/js/libraries/jquery-3.5.1.min.js"></script>
+  <!-- P5.js -->
+  <script type="text/javascript" src="assets/js/libraries/p5.min.js"></script>
+  <script type="text/javascript" src="assets/js/libraries/p5.marching.js"></script>
+  <script type="text/javascript" src="assets/js/libraries/p5.svg.js"></script>
 
-  <script type="text/javascript">
-
-    /**
-     * Render a string of text in a Hershey engraving font to a given SVG element
-     *
-     * @param {string} s
-     *   Text string to be rendered
-     * @param {object} options
-     *   Object of named options:
-     *    font {obj}: [Required] Font object containing path elements for font
-     *    id {string}: [Required] ID to give the final g(roup) SVG DOM object
-     *    pos {object}: [Required] {X, Y} object of where to place the final object within the SVG
-     *    charWidth {int}: [Optional] Base width given to each character
-     *    charHeight {int}: [Optional] Base height given to each character (when wrapping)
-     *    scale {int}: [Optional] Scale to multiply size of everything by
-     *    wrapWidth {int}: [Optional] Max line size at which to wrap to the next line
-     *    centerWidth {int}: [Optional] Width to center multiline text inside of
-     *    centerHeight {int}: [Optional] Height to center text inside of vertically
-     *
-     * @returns {boolean}
-     *   Operates directly on the given target given in options, returns false if
-     *   required option missing or other failure.
-     */
-    function renderText(s, options) {
-
-      let svg_string = '';
-
-      try {
-        const font = options.font.chars;
-        options.charWidth = options.charWidth ? options.charWidth : 10;
-        options.charHeight = options.charHeight ? options.charHeight : 28;
-
-        const offset = { left: 0, top: 0 };
-        options.scale = options.scale ? options.scale : 1;
-
-        // Create central group
-        // const $group = $('<g>').attr({
-        //   id: options.id,
-        //   style: 'stroke:#000000; fill:none;',
-        //   transform:
-        //     'scale(' + options.scale + ') ' +
-        //     'translate(' + options.pos.x + ',' + options.pos.y + ')'
-        // });
-        // $(options.target).prepend($group);
-
-        // Initial Line container
-        let lineCount = 0;
-        // let $groupLine = $('<g>').attr('id', options.id + '-line-' + lineCount);
-        // $group.prepend($groupLine);
-
-        // Move through each word
-        const words = s.split(' ');
-        for(let w in words) {
-          const word = words[w];
-
-          // Move through each letter
-          for(let i in word) {
-            const index = word.charCodeAt(i) - 33;
-
-            // Only print in range chars
-            let charOffset = options.charWidth;
-            if (font[index]){
-              charOffset = font[index].o;
-
-              svg_string += '<path d="' + font[index].d + '" fill="none" stroke="rgb(0,0,0)" paint-order="fill stroke markers" stroke-opacity="1" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.5" style="stroke:rgb(0,0,0); fill:none;" transform="translate(' + offset.left + ', ' + offset.top + ')" />' + "\n";
-
-              // Add the char to the DOM
-              // $groupLine.prepend(
-              //   $('<path>').attr({
-              //     d: font[index].d,
-              //     style: 'stroke:#000000; fill:none;',
-              //     fill: 'none',
-              //     transform: 'translate(' + offset.left + ', ' + offset.top + ')'
-              //   })
-              // );
-            }
-
-            // Add space between letters
-            offset.left+= charOffset + options.charWidth;
-          }
-
-          // Add space between words
-          offset.left += options.charWidth/2;
-
-
-
-          // Wrap words to width
-         //  if (options.wrapWidth) {
-         //     if (offset.left > options.wrapWidth) {
-         //       if (options.centerWidth) {
-         //         const c = (options.centerWidth / 2) - (offset.left / 2);
-         //         $groupLine.attr('transform', 'translate(' + c + ',0)');
-         //       }
-
-         //       offset.left = 0;
-         //       offset.top += options.charHeight;
-
-         //       // New Line container
-         //       lineCount++;
-         //       $groupLine = $('<g>').attr('id', options.id + '-line-' + lineCount);
-         //       $group.prepend($groupLine);
-         //     } else {
-         //       offset.left += options.charWidth*2; // Add regular space
-         //     }
-         //   } else {
-         //     offset.left += options.charWidth*2; // Add regular space
-         //   }
-         // }
-
-        // if (options.centerWidth) {
-        //   const c = (options.centerWidth / 2) - (offset.left / 2);
-        //   $groupLine.attr('transform', 'translate(' + c + ',0)');
-        // }
-
-        // if (options.centerHeight) {
-        //   const c = (options.centerHeight / 2) - ((options.charHeight*(lineCount+1)) / 2) + options.pos.y;
-        //   $group.attr({
-        //     transform:
-        //     'scale(' + options.scale + ') ' +
-        //     'translate(' + options.pos.x + ',' + c + ')'
-        //   });
-        }
-      } catch(e) {
-        console.error(e);
-        return false; // Error!
-      }
-
-      return svg_string;
-    }
-
-  </script>
-
-  <!-- P5JS: PLEASE NO CHANGES BELOW THIS LINE (UNTIL I SAY SO) -->
-  <script language="javascript" type="text/javascript" src="assets/js/libraries/p5.min.js"></script>
-  <!-- OK, YOU CAN MAKE CHANGES BELOW THIS LINE AGAIN -->
-
-  <script language="javascript" type="text/javascript" src="assets/js/libraries/p5.marching.js"></script>
-
-  <!-- P5 SVG -->
-  <script language="javascript" type="text/javascript" src="assets/js/libraries/p5.svg.js"></script>
-
-  <script language="javascript" type="text/javascript" src="assets/js/PathHelper.js"></script>
+  <!-- Sketch Helpers -->
+  <script type="text/javascript" src="assets/js/renderText.js"></script>
+  <script type="text/javascript" src="assets/js/PathHelper.js"></script>
 
   <!-- Drawing Classes -->
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Cycloid.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Bezier.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Extrusion.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Fibonacci.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/FlowField.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Genuary.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Gravity.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Grid.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Heart.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Lindenmayer.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/LineImage.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Lissajous.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/NegativeSpace.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/RadialLines.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Radiography.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Spiral.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/ShapeMorph.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/Superellipse.js"></script>
-  <script language="javascript" type="text/javascript" src="assets/js/patterns/WolframRules.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Cycloid.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Bezier.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Extrusion.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Fibonacci.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/FlowField.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Genuary.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Gravity.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Grid.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Heart.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Lindenmayer.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/LineImage.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Lissajous.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/NegativeSpace.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Postcard.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/RadialLines.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Radiography.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Spiral.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/ShapeMorph.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/Superellipse.js"></script>
+  <script type="text/javascript" src="assets/js/patterns/WolframRules.js"></script>
 </head>
 <body>
-  <div class="wrapper">
+
+  <header>
     <h1>AxiDraw MiniKit Canvas</h1>
+  </header>
 
-    <div id="pattern-selector"></div>
+  <div class="wrapper">
 
-    <div id="p5js-canvas"></div>
+    <div class="sketch_container">
 
-    <div id="download" class="DownloadButton"></div>
-    <div id="redraw" class="RedrawButton"></div>
+      <div id="p5js-canvas"></div>
 
-    <script language="javascript" type="text/javascript" src="axidraw.js"></script>
+      <div id="sketch-controls-container">
+        <h2>Sketch Controls</h2>
+        <div id="sketch-selector"></div>
+        <div id="sketch-controls"></div>
+      </div>
+
+    </div>
+
   </div>
-  <footer><p><a href="https://shop.evilmadscientist.com/productsmenu/924" target="_blank" rel="noreferrer noopener">Built for the AxiDraw MiniKit v2</a> &mdash; <a href="https://github.com/markroland/axidraw-sketchpad" target="_blank" rel="noreferrer noopener">View Source on GitHub</a></p></footer>
+
+  <footer>
+    <p>
+      <div id="download" class="DownloadButton"></div>
+      <div id="redraw" class="RedrawButton"></div>
+    </p>
+    <p>
+      <a href="https://markroland.com" target="_blank" rel="noreferrer noopener">Created by Mark Roland</a>
+      &mdash; <a href="https://shop.evilmadscientist.com/productsmenu/924" target="_blank" rel="noreferrer noopener">Built for the AxiDraw MiniKit v2</a>
+      &mdash; <a href="https://github.com/markroland/axidraw-sketchpad" target="_blank" rel="noreferrer noopener">View Source on GitHub</a>
+    </p>
+  </footer>
+
+  <script type="text/javascript" src="axidraw.js"></script>
 
 </body>
 </html>
