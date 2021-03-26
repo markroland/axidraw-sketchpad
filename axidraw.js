@@ -9,6 +9,7 @@ if (window.location.hash != "") {
 let orientation = 'landscape'
 let showDate = true
 let showSignature = true
+let debugPenDownUp = true
 
 let fonts
 
@@ -174,6 +175,20 @@ let sketch = function(p) {
       let paths = layers[l].paths
       for (i = 0; i < paths.length; i++) {
 
+        // Indicate where the path starts
+        if (debugPenDownUp) {
+          p.fill(0,255,0, 128)
+          p.noStroke();
+          p.ellipse(
+            paths[i][0][0] * canvas_unit,
+            paths[i][0][1] * canvas_unit,
+            5,
+            5
+          )
+          p.noFill();
+          p.stroke(layers[l].color)
+        }
+
         p.beginShape();
 
         // Loop through each Point in Path
@@ -209,6 +224,20 @@ let sketch = function(p) {
 
         // TODO: "mode" should be defined by the path
         p.endShape();
+
+        // Indicate where the path stops
+        if (debugPenDownUp) {
+          p.fill(255,0,0, 128)
+          p.noStroke();
+          p.ellipse(
+            paths[i][paths[i].length-1][0] * canvas_unit,
+            paths[i][paths[i].length-1][1] * canvas_unit,
+            5,
+            5
+          )
+          p.noFill();
+          p.stroke(layers[l].color)
+        }
       }
 
       // Directly insert SVG
