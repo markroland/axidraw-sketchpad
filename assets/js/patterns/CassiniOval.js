@@ -35,7 +35,7 @@ class CassiniOval {
     let a = 0.6;
     let b = 1;
     let r = 1;
-    let increment = 0.1
+    let increment = 0.04
     let sign = new Array();
 
     // b/a < 1
@@ -81,6 +81,10 @@ class CassiniOval {
             path.push(coordinates)
           }
         }
+
+        // Rotate points to control the pen up/down position
+        path = PathHelp.shiftPath(path, 0.5 * segments)
+
         // Close the shape with the first point
         path.push(path[0])
 
@@ -129,7 +133,7 @@ class CassiniOval {
     for (b = a + increment; b < 2 * a; b += increment) {
       path = Array();
       for (let i = -0.5 * segments; i <= 0.5 * segments; i++) {
-        let theta = ((i/segments) * Math.PI * 2) + Math.PI/2
+        let theta = ((i/segments) * Math.PI * 2)
         r = a * Math.pow(
           Math.cos(n * theta) + Math.sqrt(
             Math.pow(b/a, 4) - Math.pow(Math.sin(n * theta),2)
@@ -141,7 +145,7 @@ class CassiniOval {
       }
 
       // Add some more points so the pen up position goes beyond the pen down position
-      path = path.concat(path.slice(0,10))
+      path = path.concat(path.slice(0, (0.5 * segments) + 1))
 
       paths.push(path)
     }
