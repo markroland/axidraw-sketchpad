@@ -1,4 +1,4 @@
-let sketch_title = ''
+let sketch_title = 'Cassini Oval'
 let selectedPattern = "cassinioval"
 
 // Select sketch from Hash in URL
@@ -7,8 +7,8 @@ if (window.location.hash != "") {
 }
 
 let orientation = 'landscape'
-let showDate = false
-let showSignature = false
+let showDate = true
+let showSignature = true
 
 let fonts
 
