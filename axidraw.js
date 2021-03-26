@@ -249,21 +249,39 @@ let sketch = function(p) {
 
     let svg_text = ''
 
+    font_face = 'EMSTech'
+
+    // This scales the font source data to the requested font size input.
+    // This is still a rough estimate based on what works with the current font data
+    let font_size_factor = 1/20
+    if (font_face.match(/^(EMS|Hershey)/)) {
+      font_size_factor *= 1/30;
+    }
+
+    // Font parameters in Points (pts)
+    let charHeight = (1/font_size_factor); // font_size * 4; // This is still somewhat arbitrary
+
+    // Set the line weight. Most pens for plotting are specified in millimeters
+    let line_weight_mm = 0.5;
+    let line_weight_px = line_weight_mm * 3.78; // 1mm = 3.78 pixels
+
+
     // Title
     if (sketch_title != '') {
       let svg_title;
       let font_size = 12;
 
-      // Temporary fix of spacing being too narrow on the Space character
-      // sketch_title = sketch_title.replace(/\s+/g, '     ')
-
       let title_svg = renderText(sketch_title, {
-        font: fonts['EMSTech'],
-        pos: {x: 0, y: 0},
-        scale: 2,
-        charWidth: 8,
+        font: fonts[font_face],
+        charWidth: 12,
+        charHeight: charHeight
       });
-      svg_title = '<g transform="translate(' + margin + ',' + ((2 * margin - font_size)/2) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + title_svg + "</g>"
+
+      svg_title = '<g transform="translate(' + margin + ',' + (margin + font_size/2) + ')'
+          + ' scale(' + (font_size * font_size_factor).toFixed(6)  + ',' + (font_size * font_size_factor).toFixed(6)  + ')"'
+          + ' stroke-width="' + (line_weight_px / (font_size * font_size_factor)).toFixed(2) + '"'
+        + '>' + title_svg + "</g>"
+
       svg_text += svg_title
     }
 
@@ -275,13 +293,17 @@ let sketch = function(p) {
       let date_svg = renderText(
         (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear(),
         {
-          font: fonts['EMSTech'],
-          pos: {x: 0, y: 0},
-          scale: 2,
+          font: fonts[font_face],
           charWidth: 8,
+          charHeight: charHeight
         }
       );
-      svg_date = '<g transform="translate(' + margin + ',' + ((p.height - 2 * margin) + ((2 * margin - font_size)/2)) + ') scale(' + (font_size/21) + ',' + (font_size/21) + ')">' + date_svg + "</g>"
+
+      svg_date = '<g transform="translate(' + margin + ',' + ((p.height - margin) + font_size/2) + ')'
+          + ' scale(' + (font_size * font_size_factor).toFixed(6) + ',' + (font_size * font_size_factor).toFixed(6) + ')"'
+          + ' stroke-width="' + (line_weight_px / (font_size * font_size_factor)).toFixed(2) + '"'
+        + '>' + date_svg + "</g>";
+
       svg_text += svg_date
     }
 
