@@ -350,6 +350,23 @@ class PathHelper {
   }
 
   /**
+   * Shift and wrap the elements in the array
+   * https://javascript.plainenglish.io/algorithms-101-rotate-array-in-javascript-three-solutions-260fbc923b64
+   */
+  shiftPath(path, k) {
+    if (path.length > k) {
+        path.unshift( ...path.splice(-k))
+    } else {
+      let i = 0
+      while(i < k){
+        path.unshift(path.splice(-1))
+        i++
+      }
+    }
+    return path
+  }
+
+  /**
    * Split each segment of the source path into 2 parts and return the result
    **/
   subdividePath(path) {
