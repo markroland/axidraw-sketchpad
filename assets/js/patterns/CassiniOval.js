@@ -30,6 +30,7 @@ class CassiniOval {
     let segments = 240;
 
     let n = 2
+    let r
 
     // a > 1
     for (let a = 1.1; a < 5; a += 0.5) {
@@ -42,7 +43,7 @@ class CassiniOval {
         // Cassini Oval
         // https://www.2dcurves.com/higher/highercc.html
         // https://mathworld.wolfram.com/CassiniOvals.html
-        let r = Math.pow(
+        r = Math.pow(
           Math.cos(n * theta) + Math.sqrt(a - Math.pow(Math.sin(n * theta),2)),
           1/n
         );
@@ -68,7 +69,25 @@ class CassiniOval {
       // Cassini Oval
       // https://www.2dcurves.com/higher/highercc.html
       // https://mathworld.wolfram.com/CassiniOvals.html
-      let r = Math.pow(
+      r = Math.pow(
+        Math.cos(n * theta) + Math.sqrt(a - Math.pow(Math.sin(n * theta),2)),
+        1/n
+      );
+      // r = r * 0.5
+      let coordinates = PathHelp.polarToRect(r, theta);
+      path.push(coordinates)
+    }
+    paths.push(path)
+
+    path = Array();
+    for (let i = -0.5 * segments; i <= 0.5 * segments; i++) {
+
+      let theta = (i/(0.5 * segments)) * 0.5 * Math.asin(Math.pow(a,2))
+
+      // Cassini Oval
+      // https://www.2dcurves.com/higher/highercc.html
+      // https://mathworld.wolfram.com/CassiniOvals.html
+      r = - Math.pow(
         Math.cos(n * theta) + Math.sqrt(a - Math.pow(Math.sin(n * theta),2)),
         1/n
       );
@@ -79,19 +98,13 @@ class CassiniOval {
     paths.push(path)
 
 
-
     // a < 1
+    //*
     for (let a = 0.1; a < 1.0; a += 0.5) {
-
       path = Array();
       for (let i = -0.5 * segments; i <= 0.5 * segments; i++) {
-
         let theta = (i/(0.5 * segments)) * 0.5 * Math.asin(Math.pow(a,2))
-
-        // Cassini Oval
-        // https://www.2dcurves.com/higher/highercc.html
-        // https://mathworld.wolfram.com/CassiniOvals.html
-        let r = Math.pow(
+        r = + Math.pow(
           Math.cos(n * theta) + Math.sqrt(a - Math.pow(Math.sin(n * theta),2)),
           1/n
         );
@@ -101,10 +114,49 @@ class CassiniOval {
       }
       paths.push(path)
     }
-
-
-
-
+    for (let a = 0.1; a < 1.0; a += 0.5) {
+      path = Array();
+      for (let i = -0.5 * segments; i <= 0.5 * segments; i++) {
+        let theta = (i/(0.5 * segments)) * 0.5 * Math.asin(Math.pow(a,2))
+        r = + Math.pow(
+          Math.cos(n * theta) - Math.sqrt(a - Math.pow(Math.sin(n * theta),2)),
+          1/n
+        );
+        // r = r * 0.5
+        let coordinates = PathHelp.polarToRect(r, theta);
+        path.push(coordinates)
+      }
+      paths.push(path)
+    }
+    for (let a = 0.1; a < 1.0; a += 0.5) {
+      path = Array();
+      for (let i = -0.5 * segments; i <= 0.5 * segments; i++) {
+        let theta = (i/(0.5 * segments)) * 0.5 * Math.asin(Math.pow(a,2))
+        r = - Math.pow(
+          Math.cos(n * theta) - Math.sqrt(a - Math.pow(Math.sin(n * theta),2)),
+          1/n
+        );
+        // r = r * 0.5
+        let coordinates = PathHelp.polarToRect(r, theta);
+        path.push(coordinates)
+      }
+      paths.push(path)
+    }
+    for (let a = 0.1; a < 1.0; a += 0.5) {
+      path = Array();
+      for (let i = -0.5 * segments; i <= 0.5 * segments; i++) {
+        let theta = (i/(0.5 * segments)) * 0.5 * Math.asin(Math.pow(a,2))
+        r = - Math.pow(
+          Math.cos(n * theta) + Math.sqrt(a - Math.pow(Math.sin(n * theta),2)),
+          1/n
+        );
+        // r = r * 0.5
+        let coordinates = PathHelp.polarToRect(r, theta);
+        path.push(coordinates)
+      }
+      paths.push(path)
+    }
+    //*/
 
     layers.push({
       "color": "black",
