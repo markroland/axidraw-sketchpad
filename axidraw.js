@@ -1,5 +1,5 @@
-let sketch_title = 'Isolines'
-let selectedPattern = "isolines"
+let sketch_title = 'Truchet Tiling'
+let selectedPattern = "truchet"
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {
@@ -46,7 +46,8 @@ let sketch = function(p) {
     "postcard": new Postcard(),
     "radiallines": new RadialLines(),
     "radiography": new Radiography(),
-    "spiral": new Spiral()
+    "spiral": new Spiral(),
+    "truchet": new Truchet(),
   }
 
   // Preload data
