@@ -29,10 +29,19 @@ class Isolines {
     // Scale the data to pixel ranges
     let scaledData = this.scaleData(data, min, max, 0, 255)
 
+    // TODO: Upsample
+
+    // Blur the data
+    let blurredData = this.blurFilter(scaledData, 1/9)
+
+    // Set a new variable so that the rendering can be toggled
+    // to different stages (i.e. data, scaledData, blurredData, etc.)
+    let renderData = blurredData;
+
     // Render image in "p5 land"
     //*
-    const rows = scaledData.length;
-    const columns = scaledData[0].length;
+    const rows = renderData.length;
+    const columns = renderData[0].length;
     const y_axis_pixel_range = 288
     let scale = y_axis_pixel_range/rows
 
@@ -40,7 +49,7 @@ class Isolines {
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < columns; col++) {
         p5.noStroke();
-        p5.fill(scaledData[row][col])
+        p5.fill(renderData[row][col])
         p5.rectMode(p5.CORNER);
         p5.rect(
           48 + col * scale,
@@ -54,9 +63,9 @@ class Isolines {
 
     let layers = new Array();
 
-    let paths = this.calcOutlines(p5, scaledData, 0.0315, 32) // I'm not sure where this 0.0315 number is coming from (about 1/32)
-
-    console.log(paths);
+    // Create isolines
+    let paths = new Array();
+    paths = this.calcOutlines(p5, renderData, 0.0315, 16) // I'm not sure where this 0.0315 number is coming from (about 1/32)
 
     layers.push({
       "color": "red",
@@ -64,6 +73,66 @@ class Isolines {
     })
 
     return layers;
+  }
+
+  /*
+   * Gaussian Blur Filter
+   * Interpreted from https://processing.org/examples/blur.html and https://p5js.org/examples/image-blur.html
+   */
+  blurFilter(data, coefficient) {
+
+    let filteredData = new Array();
+
+    const v = coefficient;
+    const kernel = [
+      [v,v,v],
+      [v,v,v],
+      [v,v,v]
+    ]
+
+    const rows = data.length;
+    const columns = data[0].length;
+    for (let row = 0; row < rows; row++) {
+
+      for (let col = 0; col < columns; col++) {
+
+        // Initialize array
+        if (filteredData[row] === undefined) {
+          filteredData[row] = new Array();
+        }
+
+        // kernel sum for the current pixel starts as 0
+        let sum = 0;
+
+        // Do not blur edges (top row, bottom row, left column, right column)
+        if ((row == 0 || row == rows-1) || (col == 0 || col == columns-1)) {
+          filteredData[row][col] = sum
+          continue;
+        }
+
+        for (let ky = -1; ky <= 1; ky++) {
+          for (let kx = -1; kx <= 1; kx++) {
+            let x_pos = col + kx
+            let y_pos = row + ky
+
+            let val = data[y_pos][x_pos]
+
+            // accumulate the  kernel sum
+            // kernel is a 3x3 matrix
+            // kx and ky have values -1, 0, 1
+            // if we add 1 to kx and ky, we get 0, 1, 2
+            // with that we can use it to iterate over kernel
+            // and calculate the accumulated sum
+            // sum += kernel[kx+1][ky+1] * val;
+            sum += kernel[ky+1][kx+1] * val;
+          }
+        }
+
+        filteredData[row][col] = sum
+      }
+    }
+
+    return filteredData;
   }
 
   calcOutlines(p5, data, scale, num_steps) {
