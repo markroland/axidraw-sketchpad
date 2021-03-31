@@ -30,6 +30,7 @@ class Isolines {
     let scaledData = this.scaleData(data, min, max, 0, 255)
 
     // Render image in "p5 land"
+    //*
     const rows = scaledData.length;
     const columns = scaledData[0].length;
     const y_axis_pixel_range = 288
@@ -49,19 +50,57 @@ class Isolines {
         )
       }
     }
+    //*/
 
     let layers = new Array();
 
-    let paths = new Array();
+    let paths = this.calcOutlines(p5, scaledData, 0.0315, 32) // I'm not sure where this 0.0315 number is coming from (about 1/32)
 
-    let path = new Array();
+    console.log(paths);
 
     layers.push({
-      "color": "black",
+      "color": "red",
       "paths": paths
     })
 
     return layers;
+  }
+
+  calcOutlines(p5, data, scale, num_steps) {
+
+    let paths = new Array();
+
+    // Reduce the number of tones in the image
+    // let data = this.posterize(data, 16)
+
+    // Contour "Marching Squares"
+    let lines = new Array();
+    for (let i = 1; i < num_steps; i++) {
+
+      // Log progress to console since this is slow
+      console.log('Marching Squares Step:', i, 'of', (num_steps - 1))
+
+      let threshold = i * (256/num_steps);
+      lines = lines.concat(p5.marchingSquares(data, threshold));
+    }
+
+    for (let l = 0; l < lines.length; l++) {
+
+      // TODO: Identity closed paths and join as single shape
+
+      paths.push([
+        [
+          lines[l][0] * scale - 5/3,
+          lines[l][1] * scale - 1
+        ],
+        [
+          lines[l][2] * scale - 5/3,
+          lines[l][3] * scale - 1
+        ]
+      ])
+    }
+
+    return paths;
   }
 
   // Get minimum value from 2-dimentionsal array
