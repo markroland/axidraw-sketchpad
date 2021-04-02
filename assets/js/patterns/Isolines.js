@@ -177,45 +177,77 @@ class Isolines {
 
     let PathHelp = new PathHelper();
 
-    // console.log('Iteration:', iteration)
-
-    // Stop if the first and last points of the first path coincide
-    // let distance = PathHelp.distance(paths[0][0], paths[0][paths[0].length-1])
-    // if (distance < threshold) {
-    //   return paths;
-    // }
-
     // Bail if iterations exceeded
-    /*
     iteration++
+    console.log('---------------------')
+    console.log('Iteration:', iteration)
+    /*
     if (iteration > paths.length) {
     // if (iteration > 10) {
       return paths;
     }
     //*/
 
-    let overlap_count = 0
-
     // console.log('new_paths', new_paths)
 
     // console.log('paths.length', paths.length)
 
-    // Last point of first path of source paths
-    // let p1 = paths[paths.length-1][1];
-    let p1 = paths[0][paths[0].length - 1];
+    let path_index = 0
+    let distance
+
+    // Check for completion of multiple closed loops
+    for (let i = 0; i < paths.length; i++) {
+      let path_closed = false
+      console.log('path_index:', path_index)
+
+      // Calculate distance between first and last point of target path
+      distance = PathHelp.distance(paths[path_index][0], paths[path_index][paths[path_index].length-1])
+
+      // If distance is below threshold, then the path should be considered a closed loop
+      if (distance < threshold) {
+        path_closed = true
+      }
+
+      if (path_index == 1) {
+
+      }
+
+      // If the path is a closed loop, then increment the index to look at the next path
+      // as the target path
+      if (path_closed) {
+        console.log('Path ' + path_index + ' closed.')
+        path_index++
+        console.log('New Path Index: ' + path_index)
+        continue
+      }
+      break
+    }
+
+    console.log('selected path_index:', path_index)
+    console.log('paths.length:', paths.length)
+
+    // Exit function if the last path is closed
+    // TODO: maybe should be paths.length
+    if (path_index == paths.length) {
+      return paths;
+    }
+
+    // Last point of the target path on which to join other paths
+    let last_point = paths[path_index][paths[path_index].length - 1];
 
     // Check remaining paths
     // console.log('paths.length', paths.length)
-    for (let i = 1; i < paths.length; i++) {
+    let overlap_count = 0
+    for (let i = path_index + 1; i < paths.length; i++) {
 
       // Compare each point in the path to check for coincident points
-      let distance = PathHelp.distance(p1, paths[i][0])
+      distance = PathHelp.distance(last_point, paths[i][0])
 
       if (distance < threshold) {
-        // console.log(p1, paths[i][0], distance, paths[i]);
+        // console.log(last_point, paths[i][0], distance, paths[i]);
         overlap_count++
         // console.log('before:', paths[0])
-        paths[0] = paths[0].concat(paths[i].slice(1))
+        paths[path_index] = paths[path_index].concat(paths[i].slice(1))
         // console.log('after:', paths[0])
 
         // remove from paths
@@ -230,12 +262,12 @@ class Isolines {
 
       // Reverse path and try again
       // paths[i].reverse()
-      distance = PathHelp.distance(p1, paths[i][paths[i].length-1])
-      // console.log(p1, paths[i][0], distance);
+      distance = PathHelp.distance(last_point, paths[i][paths[i].length-1])
+      // console.log(last_point, paths[i][0], distance);
       if (distance < threshold) {
-        // console.log(p1, paths[i][0], distance);
+        // console.log(last_point, paths[i][0], distance);
         overlap_count++
-        paths[0] = paths[0].concat(paths[i].reverse().slice(1))
+        paths[path_index] = paths[path_index].concat(paths[i].reverse().slice(1))
 
         // remove from paths
         paths.splice(i, 1);
