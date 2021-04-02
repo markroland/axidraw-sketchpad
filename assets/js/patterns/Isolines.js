@@ -143,7 +143,7 @@ class Isolines {
 
     // Contour "Marching Squares"
     let lines = new Array();
-    for (let i = 7; i < 8; i++) {
+    for (let i = 2; i < 3; i++) {
 
       // Log progress to console since this is slow
       console.log('Marching Squares Step:', i, 'of', (num_steps - 1))
@@ -167,55 +167,89 @@ class Isolines {
     }
 
     // Identity connected paths and join as single path
-    let joinedPath = this.joinPaths(paths[0], paths.slice(1)); paths = [joinedPath]
-
-    console.log('done')
+    paths = this.joinPaths(paths, 0.01);
+    console.log('joinPaths complete')
 
     return paths;
   }
 
-  joinPaths(joinedPath, paths, threshold = 0.01) {
+  joinPaths(paths, threshold = 0.01, iteration = 0) {
 
     let PathHelp = new PathHelper();
 
+    // console.log('Iteration:', iteration)
+
+    // Stop if the first and last points of the first path coincide
+    // let distance = PathHelp.distance(paths[0][0], paths[0][paths[0].length-1])
+    // if (distance < threshold) {
+    //   return paths;
+    // }
+
+    // Bail if iterations exceeded
+    /*
+    iteration++
+    if (iteration > paths.length) {
+    // if (iteration > 10) {
+      return paths;
+    }
+    //*/
+
     let overlap_count = 0
 
-    // Last point of first segment of source paths
-    let p1 = joinedPath[joinedPath.length-1];
+    // console.log('new_paths', new_paths)
+
+    // console.log('paths.length', paths.length)
+
+    // Last point of first path of source paths
+    // let p1 = paths[paths.length-1][1];
+    let p1 = paths[0][paths[0].length - 1];
 
     // Check remaining paths
-    for (let i = 0; i < paths.length; i++) {
+    // console.log('paths.length', paths.length)
+    for (let i = 1; i < paths.length; i++) {
 
       // Compare each point in the path to check for coincident points
       let distance = PathHelp.distance(p1, paths[i][0])
 
       if (distance < threshold) {
-        console.log(p1, paths[i][0], distance);
+        // console.log(p1, paths[i][0], distance, paths[i]);
         overlap_count++
-        joinedPath = joinedPath.concat(paths[i].slice(1))
-      }
-      // else {
+        // console.log('before:', paths[0])
+        paths[0] = paths[0].concat(paths[i].slice(1))
+        // console.log('after:', paths[0])
 
-      //   // Reverse path and try again
-      //   // paths[i].reverse()
-      //   distance = PathHelp.distance(p1, paths[i][paths[i].length-1])
-      //   console.log(p1, paths[i][0], distance);
-      //   if (distance < threshold) {
-      //     console.log(p1, paths[i][0], distance);
-      //     overlap_count++
-      //     joinedPath = joinedPath.concat(paths[i].reverse().slice(1))
-      //   }
-      // }
+        // remove from paths
+        paths.splice(i, 1);
+        // let index = paths.indexOf(i);
+        // if (index > -1) {
+        //   paths.splice(index, 1);
+        // }
+
+        break
+      }
+
+      // Reverse path and try again
+      // paths[i].reverse()
+      distance = PathHelp.distance(p1, paths[i][paths[i].length-1])
+      // console.log(p1, paths[i][0], distance);
+      if (distance < threshold) {
+        // console.log(p1, paths[i][0], distance);
+        overlap_count++
+        paths[0] = paths[0].concat(paths[i].reverse().slice(1))
+
+        // remove from paths
+        paths.splice(i, 1);
+      }
 
     }
 
-    console.log("Overlap Count", overlap_count)
+    // console.log("Overlap Count", overlap_count)
 
     if (overlap_count > 0) {
-      joinedPath = this.joinPaths(joinedPath, paths, threshold)
+      paths = this.joinPaths(paths, threshold, iteration)
     }
 
-    return joinedPath
+    return paths
   }
 
   // Get minimum value from 2-dimentionsal array
