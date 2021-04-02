@@ -112,7 +112,7 @@ class Isolines {
   }
 
   /*
-   * Gaussian Blur Filter
+   * Blur Filter
    * Interpreted from https://processing.org/examples/blur.html and https://p5js.org/examples/image-blur.html
    */
   blurFilter(data, coefficient) {

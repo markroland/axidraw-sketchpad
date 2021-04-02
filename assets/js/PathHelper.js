@@ -425,12 +425,6 @@ class PathHelper {
     iteration++
     if (debug) { console.log('---------------------') }
     if (debug) { console.log('Iteration:', iteration) }
-    /*
-    if (iteration > paths.length) {
-    // if (iteration > 10) {
-      return paths;
-    }
-    //*/
 
     // console.log('new_paths', new_paths)
 
@@ -440,6 +434,7 @@ class PathHelper {
     let distance
 
     // Check for completion of multiple closed loops
+    // Note: This is highly inefficient because it re-checks paths already known to be closed
     for (let i = 0; i < paths.length; i++) {
       let path_closed = false
       if (debug) { console.log('path_index:', path_index) }
@@ -471,7 +466,6 @@ class PathHelper {
     if (debug) { console.log('paths.length:', paths.length) }
 
     // Exit function if the last path is closed
-    // TODO: maybe should be paths.length
     if (path_index == paths.length) {
       return paths;
     }
