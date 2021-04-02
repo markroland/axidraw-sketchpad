@@ -18,18 +18,24 @@ class Isolines {
    */
   draw(p5) {
 
+    let PathHelp = new PathHelper();
+
     // Load data
     const data = this.getData()
 
-    // Get min and max values
-    let min = this.getDataMin(data)
-    let max = this.getDataMax(data)
-    // console.log('Min: ', min); console.log('Max: ', max)
-
-    // Scale the data to pixel ranges
-    let scaledData = this.scaleData(data, min, max, 0, 255)
-
-    // TODO: Upsample
+    // Upsample Data
+    let upsample_scale = 2
+    let scaledData
+    if (upsample_scale > 1) {
+      let upsampledData = this.upsampleData(data, upsample_scale)
+      let min = this.getDataMin(upsampledData)
+      let max = this.getDataMax(upsampledData)
+      scaledData = this.scaleData(upsampledData, min, max, 0, 255)
+    } else {
+      let min = this.getDataMin(data)
+      let max = this.getDataMax(data)
+      scaledData = this.scaleData(data, min, max, 0, 255)
+    }
 
     // Blur the data
     let blurredData = this.blurFilter(scaledData, 1/9)
@@ -61,13 +67,13 @@ class Isolines {
     }
     //*/
 
-    let PathHelp = new PathHelper();
-
     let layers = new Array();
 
     // Create isolines
     let paths = new Array();
-    paths = this.calcOutlines(p5, renderData, 0.0315, 16) // I'm not sure where this 0.0315 number is coming from (about 1/32)
+    // Note: I'm not sure where this 0.0315 (about 1/32) factor is coming from
+    paths = this.calcOutlines(p5, renderData, 0.0315/upsample_scale, 16)
+
 
     layers.push({
       "color": "red",
@@ -75,6 +81,30 @@ class Isolines {
     })
 
     return layers;
+  }
+
+  upsampleData(data, scale) {
+
+    let newData = new Array();
+
+    const rows = data.length;
+    const columns = data[0].length;
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+        for (let y = 0; y < scale; y++) {
+          if (newData[row*scale + y] == undefined) {
+            newData[row*scale + y] = new Array()
+          }
+          for (let x = 0; x < scale; x++) {
+            newData[row*scale + y].push(
+              data[row][col] + (data[row][col+1] - data[row][col]) * (x/scale)
+            )
+          }
+        }
+      }
+    }
+
+    return newData;
   }
 
   /*
