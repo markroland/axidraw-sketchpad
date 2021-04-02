@@ -168,7 +168,7 @@ class Isolines {
 
     // Identity connected paths and join as single path
     paths = this.joinPaths(paths, 0.01);
-    console.log('joinPaths complete')
+    // console.log('joinPaths complete')
 
     return paths;
   }
@@ -177,10 +177,12 @@ class Isolines {
 
     let PathHelp = new PathHelper();
 
+    let debug = false
+
     // Bail if iterations exceeded
     iteration++
-    console.log('---------------------')
-    console.log('Iteration:', iteration)
+    if (debug) { console.log('---------------------') }
+    if (debug) { console.log('Iteration:', iteration) }
     /*
     if (iteration > paths.length) {
     // if (iteration > 10) {
@@ -198,7 +200,7 @@ class Isolines {
     // Check for completion of multiple closed loops
     for (let i = 0; i < paths.length; i++) {
       let path_closed = false
-      console.log('path_index:', path_index)
+      if (debug) { console.log('path_index:', path_index) }
 
       // Calculate distance between first and last point of target path
       distance = PathHelp.distance(paths[path_index][0], paths[path_index][paths[path_index].length-1])
@@ -215,16 +217,16 @@ class Isolines {
       // If the path is a closed loop, then increment the index to look at the next path
       // as the target path
       if (path_closed) {
-        console.log('Path ' + path_index + ' closed.')
+        if (debug) { console.log('Path ' + path_index + ' closed.') }
         path_index++
-        console.log('New Path Index: ' + path_index)
+        if (debug) { console.log('New Path Index: ' + path_index) }
         continue
       }
       break
     }
 
-    console.log('selected path_index:', path_index)
-    console.log('paths.length:', paths.length)
+    if (debug) { console.log('selected path_index:', path_index) }
+    if (debug) { console.log('paths.length:', paths.length) }
 
     // Exit function if the last path is closed
     // TODO: maybe should be paths.length
