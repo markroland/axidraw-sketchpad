@@ -74,6 +74,10 @@ class Isolines {
     // Note: I'm not sure where this 0.0315 (about 1/32) factor is coming from
     paths = this.calcOutlines(p5, renderData, 0.0315/upsample_scale, 16)
 
+    // Smooth with an averaging filter
+    for (let p = 0; p < paths.length-1; p++) {
+      paths[p] = PathHelp.smoothPath(paths[p])
+    }
 
     layers.push({
       "color": "red",

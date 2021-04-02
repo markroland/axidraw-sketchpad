@@ -528,6 +528,23 @@ class PathHelper {
     return paths
   }
 
+  smoothPath(path) {
+    let newData = new Array();
+    newData.push(path[0])
+    let v = 1/3
+    const kernel = [v,v,v]
+    for (let p = 1; p < path.length-1; p++) {
+      let sum = [0,0];
+      for (let k = -1; k <= 1; k++) {
+        sum[0] += path[p+k][0] * kernel[k+1]
+        sum[1] += path[p+k][1] * kernel[k+1]
+      }
+      newData.push(sum)
+    }
+    newData.push(path[path.length-1])
+    return newData
+  }
+
   quadraticBezierPath(p1, p2, p3, segments) {
     let path = new Array();
     for (let i = 0; i < segments; i++) {
