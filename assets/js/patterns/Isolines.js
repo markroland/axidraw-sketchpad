@@ -142,33 +142,35 @@ class Isolines {
     let paths = new Array();
 
     // Contour "Marching Squares"
-    let lines = new Array();
-    for (let i = 2; i < 3; i++) {
+    for (let i = 0; i < num_steps; i++) {
+
+      let lines = new Array();
 
       // Log progress to console since this is slow
       console.log('Marching Squares Step:', i, 'of', (num_steps - 1))
 
       let threshold = i * (256/num_steps);
       lines = lines.concat(p5.marchingSquares(data, threshold));
-    }
 
-    // Combine the 4-point lines sets (x1, y1, x2, y2) into paths
-    for (let l = 0; l < lines.length; l++) {
-      paths.push([
-        [
-          lines[l][0] * scale - 5/3,
-          lines[l][1] * scale - 1
-        ],
-        [
-          lines[l][2] * scale - 5/3,
-          lines[l][3] * scale - 1
-        ]
-      ])
-    }
+      // Combine the 4-point lines sets (x1, y1, x2, y2) into paths
+      let isoline_paths = new Array();
+      for (let l = 0; l < lines.length; l++) {
+        isoline_paths.push([
+          [
+            lines[l][0] * scale - 5/3,
+            lines[l][1] * scale - 1
+          ],
+          [
+            lines[l][2] * scale - 5/3,
+            lines[l][3] * scale - 1
+          ]
+        ])
+      }
 
-    // Identity connected paths and join as single path
-    paths = this.joinPaths(paths, 0.01);
-    // console.log('joinPaths complete')
+      isoline_paths = this.joinPaths(isoline_paths, 0.01);
+
+      paths = paths.concat(isoline_paths)
+    }
 
     return paths;
   }
