@@ -39,7 +39,7 @@ class Isolines {
     let renderData = blurredData;
 
     // Render image in "p5 land"
-    //*
+    /*
     const rows = renderData.length;
     const columns = renderData[0].length;
     const y_axis_pixel_range = 288
@@ -61,6 +61,8 @@ class Isolines {
     }
     //*/
 
+    let PathHelp = new PathHelper();
+
     let layers = new Array();
 
     // Create isolines
@@ -69,7 +71,7 @@ class Isolines {
 
     layers.push({
       "color": "red",
-      "paths": paths
+      "paths": PathHelp.centerPaths(paths)
     })
 
     return layers;
