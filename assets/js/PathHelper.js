@@ -415,6 +415,130 @@ class PathHelper {
     return divided_path;
   }
 
+  joinPaths(paths, threshold = 0.01, iteration = 0) {
+
+    let PathHelp = new PathHelper();
+
+    let debug = false
+
+    // Bail if iterations exceeded
+    iteration++
+    if (debug) { console.log('---------------------') }
+    if (debug) { console.log('Iteration:', iteration) }
+
+    // console.log('new_paths', new_paths)
+
+    // console.log('paths.length', paths.length)
+
+    let path_index = 0
+    let distance
+
+    // Check for completion of multiple closed loops
+    // Note: This is highly inefficient because it re-checks paths already known to be closed
+    for (let i = 0; i < paths.length; i++) {
+      let path_closed = false
+      if (debug) { console.log('path_index:', path_index) }
+
+      // Calculate distance between first and last point of target path
+      distance = PathHelp.distance(paths[path_index][0], paths[path_index][paths[path_index].length-1])
+
+      // If distance is below threshold, then the path should be considered a closed loop
+      if (distance < threshold) {
+        path_closed = true
+      }
+
+      if (path_index == 1) {
+
+      }
+
+      // If the path is a closed loop, then increment the index to look at the next path
+      // as the target path
+      if (path_closed) {
+        if (debug) { console.log('Path ' + path_index + ' closed.') }
+        path_index++
+        if (debug) { console.log('New Path Index: ' + path_index) }
+        continue
+      }
+      break
+    }
+
+    if (debug) { console.log('selected path_index:', path_index) }
+    if (debug) { console.log('paths.length:', paths.length) }
+
+    // Exit function if the last path is closed
+    if (path_index == paths.length) {
+      return paths;
+    }
+
+    // Last point of the target path on which to join other paths
+    let last_point = paths[path_index][paths[path_index].length - 1];
+
+    // Check remaining paths
+    // console.log('paths.length', paths.length)
+    let overlap_count = 0
+    for (let i = path_index + 1; i < paths.length; i++) {
+
+      // Compare each point in the path to check for coincident points
+      distance = PathHelp.distance(last_point, paths[i][0])
+
+      if (distance < threshold) {
+        // console.log(last_point, paths[i][0], distance, paths[i]);
+        overlap_count++
+        // console.log('before:', paths[0])
+        paths[path_index] = paths[path_index].concat(paths[i].slice(1))
+        // console.log('after:', paths[0])
+
+        // remove from paths
+        paths.splice(i, 1);
+        // let index = paths.indexOf(i);
+        // if (index > -1) {
+        //   paths.splice(index, 1);
+        // }
+
+        break
+      }
+
+      // Reverse path and try again
+      // paths[i].reverse()
+      distance = PathHelp.distance(last_point, paths[i][paths[i].length-1])
+      // console.log(last_point, paths[i][0], distance);
+      if (distance < threshold) {
+        // console.log(last_point, paths[i][0], distance);
+        overlap_count++
+        paths[path_index] = paths[path_index].concat(paths[i].reverse().slice(1))
+
+        // remove from paths
+        paths.splice(i, 1);
+      }
+
+    }
+
+    // console.log("Overlap Count", overlap_count)
+
+    if (overlap_count > 0) {
+      paths = this.joinPaths(paths, threshold, iteration)
+    }
+
+    return paths
+  }
+
+  smoothPath(path) {
+    let newData = new Array();
+    newData.push(path[0])
+    let v = 1/3
+    const kernel = [v,v,v]
+    for (let p = 1; p < path.length-1; p++) {
+      let sum = [0,0];
+      for (let k = -1; k <= 1; k++) {
+        sum[0] += path[p+k][0] * kernel[k+1]
+        sum[1] += path[p+k][1] * kernel[k+1]
+      }
+      newData.push(sum)
+    }
+    newData.push(path[path.length-1])
+    return newData
+  }
+
   quadraticBezierPath(p1, p2, p3, segments) {
     let path = new Array();
     for (let i = 0; i < segments; i++) {

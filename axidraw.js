@@ -1,5 +1,5 @@
-let sketch_title = 'Cassini Oval'
-let selectedPattern = "cassinioval"
+let sketch_title = 'Isolines'
+let selectedPattern = "isolines"
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {
@@ -9,7 +9,7 @@ if (window.location.hash != "") {
 let orientation = 'landscape'
 let showDate = true
 let showSignature = true
-let debugPenDownUp = false
+let debugPenDownUp = true
 
 let fonts
 
@@ -38,6 +38,7 @@ let sketch = function(p) {
     "genuary": new Genuary(),
     "grid": new Grid(),
     "heart": new Heart(),
+    "isolines": new Isolines(),
     "lindenmayer": new Lindenmayer(),
     "lineimage": new LineImage(),
     "lissajous": new Lissajous(),
