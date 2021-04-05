@@ -509,6 +509,23 @@ class PathHelper {
         paths.splice(i, 1);
         break
       }
+
+      // Check first point of target path against first point of other paths
+      distance = PathHelp.distance(paths[path_index][0], paths[i][0])
+      if (distance < threshold) {
+        overlap_count++
+        paths[path_index] = paths[i].reverse().concat(paths[path_index])
+        paths.splice(i, 1);
+        break
+      }
+
+      // Check first point of target path against last point of other paths
+      distance = PathHelp.distance(paths[path_index][0], paths[i][paths[i].length-1])
+      if (distance < threshold) {
+        overlap_count++
+        paths[path_index] = paths[i].concat(paths[path_index])
+        paths.splice(i, 1);
+        break
       }
 
     }
@@ -518,6 +535,65 @@ class PathHelper {
     // Exit function if the last path is closed
     if (path_index == paths.length) {
       return paths;
+    }
+
+    // Check to see if either end of the current path terminates on
+    // the edge of the drawing area
+    let first_point = paths[path_index][0];
+    last_point = paths[path_index][paths[path_index].length - 1];
+    let on_border = false;
+    if (!on_border) {
+      distance = PathHelp.distance(last_point, [-5/3, last_point[1]])
+      if (distance < threshold) {
+        on_border = true
+      }
+    }
+    if (!on_border) {
+      distance = PathHelp.distance(last_point, [5/3, last_point[1]])
+      if (distance < threshold) {
+        on_border = true
+      }
+    }
+    if (!on_border) {
+      distance = PathHelp.distance(last_point, [last_point[0], -1])
+      if (distance < threshold) {
+        on_border = true
+      }
+    }
+    if (!on_border) {
+      distance = PathHelp.distance(last_point, [last_point[0], 1])
+      if (distance < threshold) {
+        on_border = true
+      }
+    }
+    if (!on_border) {
+      distance = PathHelp.distance(first_point, [-5/3, first_point[1]])
+      if (distance < threshold) {
+        on_border = true
+      }
+    }
+    if (!on_border) {
+      distance = PathHelp.distance(first_point, [5/3, first_point[1]])
+      if (distance < threshold) {
+        on_border = true
+      }
+    }
+    if (!on_border) {
+      distance = PathHelp.distance(first_point, [first_point[0], -1])
+      if (distance < threshold) {
+        on_border = true
+      }
+    }
+    if (!on_border) {
+      distance = PathHelp.distance(first_point, [first_point[0], 1])
+      if (distance < threshold) {
+        on_border = true
+      }
+    }
+
+    // If the targe path is closed or on the border go to next path
+    if (overlap_count == 0 || on_border) {
+      active_path_index++
     }
 
     paths = this.joinPaths(paths, threshold, active_path_index, iteration)
