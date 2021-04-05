@@ -1,6 +1,10 @@
 /**
  * Isolines
  *
+ * Resources:
+ * - [Wolfram GeoElevationData Reference](https://reference.wolfram.com/language/ref/GeoElevationData.html)
+ * - [Tangram Heightmapper](https://tangrams.github.io/heightmapper/#14.488/26.0337/50.5175)
+ *
  */
 class Isolines {
 
@@ -17,6 +21,12 @@ class Isolines {
    * Draw path
    */
   draw(p5) {
+
+    /*
+    if (typeof isolines !== 'undefined') {
+      return isolines;
+    }
+    //*/
 
     let PathHelp = new PathHelper();
 
