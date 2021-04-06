@@ -1,5 +1,5 @@
-let sketch_title = 'Truchet Tiling'
-let selectedPattern = "truchet"
+let sketch_title = 'Marching Squares Portrait #3'
+let selectedPattern = "lineimage"
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {
@@ -9,7 +9,7 @@ if (window.location.hash != "") {
 let orientation = 'landscape'
 let showDate = true
 let showSignature = true
-let debugPenDownUp = true
+let debugPenDownUp = false
 
 let fonts
 
@@ -55,7 +55,7 @@ let sketch = function(p) {
 
     // Pre-load an image
     if (selectedPattern == "lineimage") {
-      imported_image = p.loadImage("assets/data/landscape.jpg",
+      imported_image = p.loadImage("assets/data/portrait.jpg",
         success => { /* console.log('jpg success') */ },
         fail => { /* console.log('jpg fail') */ }
       );

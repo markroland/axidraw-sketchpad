@@ -10,19 +10,23 @@ class LineImage {
   draw(p5, imported_image) {
     this.p5 = p5
 
-    let paths = new Array();
+    // return this.calcLines(imported_image);
+    return this.calcOutlines(p5, imported_image);
+    // return this.calcHatch(p5, imported_image);
+    // return this.fillPixels(p5, imported_image, 'box');
+    // return this.fillPixels(p5, imported_image, 'weave');
+    // return this.fillPixels(p5, imported_image, 'spiral');
+    // return this.fillPixels(p5, imported_image, 'fermatSpiral');
+    // return this.drawHatchSolid(p5, imported_image);
+    // return this.drawHatchColor(p5, imported_image);
+  }
 
-    // paths = this.calcLines(imported_image);
-    // paths = this.calcOutlines(p5, imported_image);
-    // paths = this.calcHatch(p5, imported_image);
-    // paths = this.fillPixels(p5, imported_image)
+  drawHatchColor(p5, imported_image) {
 
     imported_image.resize(imported_image.width * 1/4, imported_image.height * 1/4)
 
     let layers = new Array();
 
-    // CYMK
-    //*
     layers.push({
       "color": "cyan",
       "paths": this.calcHatch(p5, imported_image, 'cyan')
@@ -42,17 +46,23 @@ class LineImage {
       "color": "black",
       "paths": this.calcHatch(p5, imported_image, 'key')
     });
-    //*/
+    return layers;
+  }
 
-    // Single Color
-    /*
+  drawHatchSolid(p5, imported_image) {
+
+    let layers = new Array();
+
+    imported_image.resize(imported_image.width * 1/4, imported_image.height * 1/4)
+
+    let paths = this.calcHatch(p5, imported_image, "black")
+
     layers.push({
       "color": "black",
-      "paths": this.calcHatch(p5, imported_image, "black")
+      "paths": paths
     });
-    //*/
 
-    return layers;
+    return layers
   }
 
   calcHatch(p5, imported_image, color) {
@@ -678,11 +688,15 @@ class LineImage {
 
   calcOutlines(p5, imported_image, color) {
 
+    let PathHelp = new PathHelper()
+
+    let layers = new Array();
+
     // Initialize drawing paths
     let paths = new Array();
 
     // Reduce the dimensions of the image
-    let downscale = 1/4;
+    let downscale = 1/8;
 
     let orig_width = imported_image.width;
     let orig_height = imported_image.height;
@@ -701,49 +715,65 @@ class LineImage {
     let num_steps = 8
     for (let i = 1; i < num_steps; i++) {
 
+      let lines = new Array();
+
       // Log progress to console since this is slow
-      console.log(i)
+      console.log('Marching Squares Step:', i, 'of', (num_steps - 1))
 
       let threshold = i * (256/num_steps);
       lines = lines.concat(p5.marchingSquares(image_array, threshold));
+
+      // Combine the 4-point lines sets (x1, y1, x2, y2) into paths
+      let line_segments = new Array();
+      let scaling_factor = (orig_width * downscale) / 2;
+      for (let l = 0; l < lines.length; l++) {
+        line_segments.push([
+          [
+            (lines[l][0] - scaling_factor) / scaling_factor,
+            (lines[l][1] - scaling_factor) / scaling_factor
+          ],
+          [
+            (lines[l][2] - scaling_factor) / scaling_factor,
+            (lines[l][3] - scaling_factor) / scaling_factor
+          ]
+        ])
+      }
+
+      // Join Paths
+      let joined_lines = PathHelp.joinPaths(line_segments, 0.01);
+
+      paths = paths.concat(joined_lines)
     }
 
-    let scaling_factor = (orig_width * downscale) / 2;
-    for (let l = 0; l < lines.length; l++) {
-
-      // TODO: Identity closed paths and join as single shape
-
-      paths.push([
-        [
-          (lines[l][0] - scaling_factor) / scaling_factor,
-          (lines[l][1] - scaling_factor) / scaling_factor
-        ],
-        [
-          (lines[l][2] - scaling_factor) / scaling_factor,
-          (lines[l][3] - scaling_factor) / scaling_factor
-        ]
-      ])
+    // Smooth with an averaging filter
+    for (let p = 0; p < paths.length-1; p++) {
+      paths[p] = PathHelp.smoothPath(paths[p])
     }
 
-    return paths;
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers;
   }
 
-  fillPixels(p5, imported_image) {
+  fillPixels(p5, imported_image, technique) {
 
     let PathHelp = new PathHelper;
 
-    let connect_pixels = true
+    let connect_pixels = false
 
     // Initialize drawing paths
     let paths = new Array();
 
     // Reduce the dimensions of the image
-    let desired_pixels_per_side = 20;
+    let desired_pixels_per_side = 16;
     let downscale = 1/(imported_image.width/desired_pixels_per_side);
 
     // 2: 0 (black), 255 (white)
     // 4: 0 85, 170, 255 (Increments of 255/3)
-    let num_shades = 3;
+    let num_shades = 6;
 
     // Downscale original image
     imported_image.resize(imported_image.width * downscale, imported_image.height * downscale)
@@ -781,10 +811,22 @@ class LineImage {
         let pixel_y = 2 * (row / imported_image.width - 0.5)
 
         // Set path to fill the pixel
-        // let pixel_path = this.renderWeavePixel(num_shades, image_array[row][col], index)
-        // let pixel_path = this.renderBoxPixel(num_shades, image_array[row][col], index)
-        // let pixel_path = this.renderSpiralPixel(num_shades, image_array[row][col], index)
-        let pixel_path = this.renderFermatSpiralPixel(num_shades, image_array[row][col], [num_rows, num_columns], [row, col], connect_pixels)
+        let pixel_path = new Array();
+        switch(technique) {
+          case "weave":
+            pixel_path = this.renderWeavePixel(num_shades, image_array[row][col], index)
+            break;
+          case "box":
+            pixel_path = this.renderBoxPixel(num_shades, image_array[row][col], index)
+            break;
+          case "spiral":
+            pixel_path = this.renderSpiralPixel(num_shades, image_array[row][col], index)
+          case "fermatSpiral":
+            connect_pixels = true
+            pixel_path = this.renderFermatSpiralPixel(num_shades, image_array[row][col], [num_rows, num_columns], [row, col], connect_pixels)
+          default:
+            pixel_path = this.renderBoxPixel(num_shades, image_array[row][col], index)
+        }
 
         // Scale and translate the pixel paths into place on the canvas
         for (let p = 0; p < pixel_path.length; p++) {
