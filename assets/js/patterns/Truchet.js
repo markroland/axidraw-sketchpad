@@ -32,7 +32,7 @@ class Truchet {
     let path = new Array();
 
     // Minimum grid is 3 x 5. Gridscale multiplies these dimensions
-    let gridScale = 3
+    let gridScale = 10
 
     // Grid test
     let rows = 3 * gridScale;
@@ -122,9 +122,8 @@ class Truchet {
     // Debugging - Reduces paths
     // paths = paths.slice(0,3)
 
-    console.log(paths)
-    paths = PathHelp.joinPaths(paths, 0.1);
-    console.log('joinPaths finished.')
+    // Join Paths
+    paths = PathHelp.joinPaths(paths, 0.01);
 
     // Center the Paths to the canvas
     let centered_path = new Array();
