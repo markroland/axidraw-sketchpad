@@ -415,20 +415,32 @@ class PathHelper {
     return divided_path;
   }
 
+  /**
+   * Join Paths together when endpoints within threshold distance of each other
+   * @param paths Array A multidimensional arry of paths
+   * @param float The distance threshold below which points should be considered the same location.
+   *   The value is based on the Standard unit of canvas center to canvas nearest edge.
+   *   In thise case 1 = 1.5" (Default of 0.01 = 0.015" ~ 1/64")
+   * @param integer The index position of the paths input that is being analyzed
+   * @param integer A counter of function call iterations. Useful for debugging and stopping the recursion
+   * @return Array An array of paths
+   **/
   joinPaths(paths, threshold = 0.01, active_path_index = 0, iteration = 0) {
 
     let PathHelp = new PathHelper();
 
-    let debug = true
+    // Set border parameters
+    let min_x = -5/3
+    let max_x = 5/3
+    let min_y = -1
+    let max_y = 1
+
+    let debug = false
 
     // Bail if iterations exceeded
     iteration++
     if (debug) { console.log('---------------------') }
     if (debug) { console.log('Iteration:', iteration) }
-
-    // console.log('new_paths', new_paths)
-
-    // console.log('paths.length', paths.length)
 
     let path_index = active_path_index
     let distance
@@ -490,11 +502,6 @@ class PathHelper {
 
         // remove from paths
         paths.splice(i, 1);
-        // let index = paths.indexOf(i);
-        // if (index > -1) {
-        //   paths.splice(index, 1);
-        // }
-
         break
       }
 
@@ -537,57 +544,60 @@ class PathHelper {
       return paths;
     }
 
-    // Check to see if either end of the current path terminates on
+    // Check to see if both ends of the current path terminate on
     // the edge of the drawing area
     let first_point = paths[path_index][0];
     last_point = paths[path_index][paths[path_index].length - 1];
     let on_border = false;
     if (!on_border) {
-      distance = PathHelp.distance(last_point, [-5/3, last_point[1]])
+      distance = PathHelp.distance(last_point, [min_x, last_point[1]])
       if (distance < threshold) {
         on_border = true
       }
     }
     if (!on_border) {
-      distance = PathHelp.distance(last_point, [5/3, last_point[1]])
+      distance = PathHelp.distance(last_point, [max_x, last_point[1]])
       if (distance < threshold) {
         on_border = true
       }
     }
     if (!on_border) {
-      distance = PathHelp.distance(last_point, [last_point[0], -1])
+      distance = PathHelp.distance(last_point, [last_point[0], min_y])
       if (distance < threshold) {
         on_border = true
       }
     }
     if (!on_border) {
-      distance = PathHelp.distance(last_point, [last_point[0], 1])
+      distance = PathHelp.distance(last_point, [last_point[0], max_y])
       if (distance < threshold) {
         on_border = true
       }
     }
-    if (!on_border) {
-      distance = PathHelp.distance(first_point, [-5/3, first_point[1]])
-      if (distance < threshold) {
-        on_border = true
+
+    // Check the beginning of the path only if the end of the path is
+    // on the border
+    if (on_border) {
+      distance = PathHelp.distance(first_point, [min_x, first_point[1]])
+      if (distance > threshold) {
+        on_border = false
       }
     }
-    if (!on_border) {
-      distance = PathHelp.distance(first_point, [5/3, first_point[1]])
-      if (distance < threshold) {
-        on_border = true
+    if (on_border) {
+      distance = PathHelp.distance(first_point, [max_x, first_point[1]])
+      if (distance > threshold) {
+        on_border = false
       }
     }
-    if (!on_border) {
-      distance = PathHelp.distance(first_point, [first_point[0], -1])
-      if (distance < threshold) {
-        on_border = true
+    if (on_border) {
+      distance = PathHelp.distance(first_point, [first_point[0], min_y])
+      if (distance > threshold) {
+        on_border = false
       }
     }
-    if (!on_border) {
-      distance = PathHelp.distance(first_point, [first_point[0], 1])
-      if (distance < threshold) {
-        on_border = true
+    if (on_border) {
+      distance = PathHelp.distance(first_point, [first_point[0], max_y])
+      if (distance > threshold) {
+        on_border = false
       }
     }
 
