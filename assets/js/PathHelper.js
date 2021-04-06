@@ -415,9 +415,25 @@ class PathHelper {
     return divided_path;
   }
 
-  joinPaths(paths, threshold = 0.01, iteration = 0) {
+  /**
+   * Join Paths together when endpoints within threshold distance of each other
+   * @param paths Array A multidimensional arry of paths
+   * @param float The distance threshold below which points should be considered the same location.
+   *   The value is based on the Standard unit of canvas center to canvas nearest edge.
+   *   In thise case 1 = 1.5" (Default of 0.01 = 0.015" ~ 1/64")
+   * @param integer The index position of the paths input that is being analyzed
+   * @param integer A counter of function call iterations. Useful for debugging and stopping the recursion
+   * @return Array An array of paths
+   **/
+  joinPaths(paths, threshold = 0.01, active_path_index = 0, iteration = 0) {
 
     let PathHelp = new PathHelper();
+
+    // Set border parameters
+    let min_x = -5/3
+    let max_x = 5/3
+    let min_y = -1
+    let max_y = 1
 
     let debug = false
 
@@ -426,16 +442,11 @@ class PathHelper {
     if (debug) { console.log('---------------------') }
     if (debug) { console.log('Iteration:', iteration) }
 
-    // console.log('new_paths', new_paths)
-
-    // console.log('paths.length', paths.length)
-
-    let path_index = 0
+    let path_index = active_path_index
     let distance
 
     // Check for completion of multiple closed loops
-    // Note: This is highly inefficient because it re-checks paths already known to be closed
-    for (let i = 0; i < paths.length; i++) {
+    for (let i = path_index; i < paths.length; i++) {
       let path_closed = false
       if (debug) { console.log('path_index:', path_index) }
 
@@ -445,10 +456,6 @@ class PathHelper {
       // If distance is below threshold, then the path should be considered a closed loop
       if (distance < threshold) {
         path_closed = true
-      }
-
-      if (path_index == 1) {
-
       }
 
       // If the path is a closed loop, then increment the index to look at the next path
@@ -476,9 +483,14 @@ class PathHelper {
     // Check remaining paths
     // console.log('paths.length', paths.length)
     let overlap_count = 0
-    for (let i = path_index + 1; i < paths.length; i++) {
+    for (let i = 0; i < paths.length; i++) {
 
-      // Compare each point in the path to check for coincident points
+      // Skip self
+      if (i == path_index) {
+        continue;
+      }
+
+      // Check last point of target path against first point of other paths
       distance = PathHelp.distance(last_point, paths[i][0])
 
       if (distance < threshold) {
@@ -490,18 +502,11 @@ class PathHelper {
 
         // remove from paths
         paths.splice(i, 1);
-        // let index = paths.indexOf(i);
-        // if (index > -1) {
-        //   paths.splice(index, 1);
-        // }
-
         break
       }
 
-      // Reverse path and try again
-      // paths[i].reverse()
+      // Check last point of target path against last point of other paths
       distance = PathHelp.distance(last_point, paths[i][paths[i].length-1])
-      // console.log(last_point, paths[i][0], distance);
       if (distance < threshold) {
         // console.log(last_point, paths[i][0], distance);
         overlap_count++
@@ -509,15 +514,99 @@ class PathHelper {
 
         // remove from paths
         paths.splice(i, 1);
+        break
+      }
+
+      // Check first point of target path against first point of other paths
+      distance = PathHelp.distance(paths[path_index][0], paths[i][0])
+      if (distance < threshold) {
+        overlap_count++
+        paths[path_index] = paths[i].reverse().concat(paths[path_index])
+        paths.splice(i, 1);
+        break
+      }
+
+      // Check first point of target path against last point of other paths
+      distance = PathHelp.distance(paths[path_index][0], paths[i][paths[i].length-1])
+      if (distance < threshold) {
+        overlap_count++
+        paths[path_index] = paths[i].concat(paths[path_index])
+        paths.splice(i, 1);
+        break
       }
 
     }
 
-    // console.log("Overlap Count", overlap_count)
+    if (debug) { console.log("Overlap Count", overlap_count) }
 
-    if (overlap_count > 0) {
-      paths = this.joinPaths(paths, threshold, iteration)
+    // Exit function if the last path is closed
+    if (path_index == paths.length) {
+      return paths;
     }
+
+    // Check to see if both ends of the current path terminate on
+    // the edge of the drawing area
+    let first_point = paths[path_index][0];
+    last_point = paths[path_index][paths[path_index].length - 1];
+    let on_border = false;
+    if (!on_border) {
+      distance = PathHelp.distance(last_point, [min_x, last_point[1]])
+      if (distance < threshold) {
+        on_border = true
+      }
+    }
+    if (!on_border) {
+      distance = PathHelp.distance(last_point, [max_x, last_point[1]])
+      if (distance < threshold) {
+        on_border = true
+      }
+    }
+    if (!on_border) {
+      distance = PathHelp.distance(last_point, [last_point[0], min_y])
+      if (distance < threshold) {
+        on_border = true
+      }
+    }
+    if (!on_border) {
+      distance = PathHelp.distance(last_point, [last_point[0], max_y])
+      if (distance < threshold) {
+        on_border = true
+      }
+    }
+
+    // Check the beginning of the path only if the end of the path is
+    // on the border
+    if (on_border) {
+      distance = PathHelp.distance(first_point, [min_x, first_point[1]])
+      if (distance > threshold) {
+        on_border = false
+      }
+    }
+    if (on_border) {
+      distance = PathHelp.distance(first_point, [max_x, first_point[1]])
+      if (distance > threshold) {
+        on_border = false
+      }
+    }
+    if (on_border) {
+      distance = PathHelp.distance(first_point, [first_point[0], min_y])
+      if (distance > threshold) {
+        on_border = false
+      }
+    }
+    if (on_border) {
+      distance = PathHelp.distance(first_point, [first_point[0], max_y])
+      if (distance > threshold) {
+        on_border = false
+      }
+    }
+
+    // If the targe path is closed or on the border go to next path
+    if (overlap_count == 0 || on_border) {
+      active_path_index++
+    }
+
+    paths = this.joinPaths(paths, threshold, active_path_index, iteration)
 
     return paths
   }

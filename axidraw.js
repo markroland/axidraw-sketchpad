@@ -1,5 +1,5 @@
-let sketch_title = 'Isolines'
-let selectedPattern = "isolines"
+let sketch_title = 'Truchet Tiling'
+let selectedPattern = "truchet"
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {
@@ -46,7 +46,8 @@ let sketch = function(p) {
     "postcard": new Postcard(),
     "radiallines": new RadialLines(),
     "radiography": new Radiography(),
-    "spiral": new Spiral()
+    "spiral": new Spiral(),
+    "truchet": new Truchet(),
   }
 
   // Preload data
@@ -299,11 +300,11 @@ let sketch = function(p) {
     // Title
     if (sketch_title != '') {
       let svg_title;
-      let font_size = 12;
+      let font_size = 8;
 
       let title_svg = renderText(sketch_title, {
         font: fonts[font_face],
-        charWidth: 12,
+        charWidth: font_size,
         charHeight: charHeight
       });
 
@@ -318,13 +319,13 @@ let sketch = function(p) {
     // Date
     if (showDate) {
       let svg_date
-      font_size = 8;
+      font_size = 6;
       let now = new Date();
       let date_svg = renderText(
         (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear(),
         {
           font: fonts[font_face],
-          charWidth: 8,
+          charWidth: font_size,
           charHeight: charHeight
         }
       );
