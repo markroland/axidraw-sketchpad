@@ -18,10 +18,10 @@ class Truchet {
    * Draw path
    */
   draw(p5) {
-    return this.sketch1()
+    return this.sketch2(5)
   }
 
-  sketch1() {
+  sketch1(gridScale) {
 
     let PathHelp = new PathHelper;
 
@@ -30,9 +30,6 @@ class Truchet {
     let paths = new Array();
 
     let path = new Array();
-
-    // Minimum grid is 3 x 5. Gridscale multiplies these dimensions
-    let gridScale = 10
 
     // Grid test
     let rows = 3 * gridScale;
@@ -143,6 +140,40 @@ class Truchet {
     layers.push({
       "color": "black",
       "paths": paths
+    })
+
+    return layers;
+  }
+
+  /**
+   * Split paths into layers by color
+   */
+  sketch2(gridScale) {
+
+    let layers = new Array();
+    layers.push({
+      "color": "cyan",
+      "paths": new Array()
+    })
+    layers.push({
+      "color": "magenta",
+      "paths": new Array()
+    })
+
+    let truchet1 = this.sketch1(gridScale)
+
+    for (let i = 0; i < truchet1[0].paths.length; i++) {
+      if (i % 2 == 0) {
+        layers[0].paths.push(truchet1[0].paths[i])
+      } else {
+        layers[1].paths.push(truchet1[0].paths[i])
+      }
+    }
+
+    let truchet2 = this.sketch1(gridScale)
+    layers.push({
+      "color": "yellow",
+      "paths": truchet2[0].paths
     })
 
     return layers;
