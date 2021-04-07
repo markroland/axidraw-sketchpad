@@ -18,7 +18,9 @@ class Truchet {
    * Draw path
    */
   draw(p5) {
-    return this.sketch2(5)
+    // return this.sketch1(5)
+    // return this.sketch2(5)
+    return this.gridPetals(3)
   }
 
   sketch1(gridScale) {
@@ -179,4 +181,104 @@ class Truchet {
     return layers;
   }
 
+  gridPetals(gridScale) {
+
+    let PathHelp = new PathHelper;
+
+    let layers = new Array();
+
+    let paths = new Array();
+
+    let path = new Array();
+
+    // Grid test
+    let rows = 3 * gridScale;
+    let columns = 5 * gridScale;
+    let side_length = 2 * (1/rows);
+
+    // Shapes. Defined with local coordinates "[0,0]" at center of shape
+
+    // Square
+    let square = [
+      [-side_length/2, -side_length/2],
+      [ side_length/2, -side_length/2],
+      [ side_length/2, side_length/2],
+      [-side_length/2, side_length/2],
+      [-side_length/2, -side_length/2]
+    ]
+
+    // Arc
+    let arc = new Array();
+    for (let a = 0; a <= 12; a++) {
+      arc.push([
+        side_length/2 * Math.cos(a/12 * Math.PI),
+        -side_length/2 + side_length/2 * Math.sin(a/12 * Math.PI)
+      ])
+    }
+
+    // Build Grid
+    // Top to bottom, left to right
+    for (let c = 0; c < columns; c++) {
+      for (let r = 0; r < rows; r++) {
+
+        // Square Grid (Optional)
+        /*
+        paths.push(
+          PathHelp.translatePath(
+            square,
+            [
+              2 * (columns/rows) * (c/columns),
+              2 * (r/rows)
+            ]
+          )
+        )
+        //*/
+
+        // Arc
+        for (let a = 0; a < 4; a++) {
+          paths.push(
+            PathHelp.translatePath(
+              PathHelp.rotatePath(
+                arc,
+                (a/4) * (2 * Math.PI)
+              ),
+              [
+                2 * (columns/rows) * (c/columns),
+                2 * (r/rows)
+              ]
+            )
+          )
+        }
+
+      }
+    }
+
+    // Debugging - Reduces paths
+    // paths = paths.slice(0,3)
+
+    // Join Paths
+    paths = PathHelp.joinPaths(paths, 0.01);
+
+    // Center the Paths to the canvas
+    let centered_path = new Array();
+    for (let c = 0; c < paths.length; c++) {
+      centered_path.push(
+        PathHelp.translatePath(
+          paths[c],
+          [
+            -(columns/rows) + side_length/2,
+            -1 + side_length/2
+          ]
+        )
+      )
+    }
+    paths = centered_path;
+
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers;
+  }
 }
