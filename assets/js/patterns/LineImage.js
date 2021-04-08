@@ -11,7 +11,7 @@ class LineImage {
     this.p5 = p5
 
     // return this.calcLines(imported_image);
-    return this.calcOutlines(p5, imported_image);
+    // return this.calcOutlines(p5, imported_image);
     // return this.calcHatch(p5, imported_image);
     // return this.fillPixels(p5, imported_image, 'box');
     // return this.fillPixels(p5, imported_image, 'weave');
@@ -19,6 +19,7 @@ class LineImage {
     // return this.fillPixels(p5, imported_image, 'fermatSpiral');
     // return this.drawHatchSolid(p5, imported_image);
     // return this.drawHatchColor(p5, imported_image);
+    return this.dither(p5, imported_image);
   }
 
   drawHatchColor(p5, imported_image) {
@@ -1078,6 +1079,120 @@ class LineImage {
     }
 
     return image_array;
+  }
+
+  dither(p5, imported_image) {
+
+    const scale = 0.25;
+    const y_axis_pixel_range = 288
+    const x_axis_pixel_range = 480
+    const sketch_margin = 48;
+
+    let PathHelp = new PathHelper()
+
+    let layers = new Array();
+
+    let paths = new Array();
+
+    let p5_pixel_size = y_axis_pixel_range / (imported_image.height * scale)
+
+    // Resize image
+    imported_image.resize(imported_image.width * scale, imported_image.height * scale)
+    let rows = imported_image.height;
+    let columns = imported_image.width;
+    let pixel_size = 2 / imported_image.height
+
+    // Sample Downscaled image
+    imported_image.loadPixels();
+    let pixelCount = imported_image.width * imported_image.height;
+    let image_array = new Array(imported_image.height).fill(255);
+    for (let a = 0; a < image_array.length; a++) {
+      image_array[a] = new Array(imported_image.width).fill(255)
+    }
+    let x = 0;
+    let y = 0;
+    let samples = PathHelp.getRndInteger(0, pixelCount/2)
+    console.log("Sampling " + pixelCount + " pixels")
+    for (let i = 0; i < pixelCount; i++) {
+
+      // Get average intensity of RGB color channels
+      let average = Math.round(
+        (imported_image.pixels[i*4 + 0] + imported_image.pixels[i*4 + 1] + imported_image.pixels[i*4 + 2])
+        / 3
+      );
+      // let clamped_intensity = this.p5.round((average/255) * (levels-1)) * (255/(levels-1));
+      // console.log(average, clamped_intensity);
+
+      // Dithering
+
+      if (average < PathHelp.getRndInteger(0,255)) {
+        average = 0;
+      } else {
+        average = 255;
+      }
+
+      // Save intensity value to array
+      y = Math.floor(i / imported_image.width)
+      x = i % imported_image.width
+      image_array[y][x] = average
+    }
+
+    // Loop through sampled image pixels and draw them
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+
+        // Render in "p5 land"
+        /*
+        p5.noStroke();
+        p5.fill(image_array[row][col])
+        p5.rectMode(p5.CORNER);
+        p5.rect(
+          sketch_margin + ((x_axis_pixel_range - (image_array[0].length * p5_pixel_size))/2) + (col * p5_pixel_size),
+          sketch_margin + (row * p5_pixel_size),
+          p5_pixel_size,
+          p5_pixel_size
+        )
+        //*/
+
+        if (image_array[row][col] == 0) {
+          paths.push([
+            [
+              col * pixel_size - pixel_size/2,
+              row * pixel_size - pixel_size/2
+            ],
+            [
+              col * pixel_size + pixel_size/2,
+              row * pixel_size + pixel_size/2
+            ]
+          ]);
+        }
+
+      }
+    }
+
+    // Center the Paths to the canvas
+    //*
+    let centered_path = new Array();
+    for (let c = 0; c < paths.length; c++) {
+      centered_path.push(
+        PathHelp.translatePath(
+          paths[c],
+          [
+            -(columns/rows) + pixel_size/2,
+            -1 + pixel_size/2
+          ]
+        )
+      )
+    }
+    paths = centered_path;
+    //*/
+
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers;
   }
 
 }
