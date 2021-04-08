@@ -130,7 +130,7 @@ class Isolines {
     }
 
     // Blur the data
-    renderData = this.blurFilter(renderData, 1/9)
+    renderData = this.blurFilter(renderData, 1/9, "neighbor")
 
     // Render image in "p5 land"
     //*
@@ -200,9 +200,13 @@ class Isolines {
             newData[row*scale + y] = new Array()
           }
           for (let x = 0; x < scale; x++) {
-            newData[row*scale + y].push(
-              data[row][col] + (data[row][col+1] - data[row][col]) * (x/scale)
-            )
+            let current_value = data[row][col]
+            let next_value = data[row][col]
+            if (typeof data[row][col+1] !== 'undefined') {
+              next_value = data[row][col+1]
+            }
+            let new_value = current_value + (next_value-current_value) * (x/scale)
+            newData[row*scale + y].push(new_value)
           }
         }
       }
@@ -215,7 +219,7 @@ class Isolines {
    * Blur Filter
    * Interpreted from https://processing.org/examples/blur.html and https://p5js.org/examples/image-blur.html
    */
-  blurFilter(data, coefficient) {
+  blurFilter(data, coefficient, edge = "zero") {
 
     let filteredData = new Array();
 
@@ -243,6 +247,10 @@ class Isolines {
         // Do not blur edges (top row, bottom row, left column, right column)
         if ((row == 0 || row == rows-1) || (col == 0 || col == columns-1)) {
           filteredData[row][col] = sum
+          if (edge == "neighbor") {
+            // TODO: I think this value needs to be averaged between previous and next rows
+            filteredData[row][col] = data[row][col]
+          }
           continue;
         }
 
