@@ -21,6 +21,11 @@ class Isolines {
    * Draw path
    */
   draw(p5) {
+    // return this.drawIsolines(p5);
+    return this.drawGeoElevation(p5);
+  }
+
+  drawIsolines(p5) {
 
     /*
     if (typeof isolines !== 'undefined') {
@@ -88,6 +93,91 @@ class Isolines {
     for (let p = 0; p < paths.length-1; p++) {
       paths[p] = PathHelp.smoothPath(paths[p])
     }
+
+    layers.push({
+      "color": "red",
+      "paths": PathHelp.centerPaths(paths)
+    })
+
+    return layers;
+  }
+
+  drawGeoElevation(p5) {
+
+    const sketch_margin = 48;
+    const y_axis_pixel_range = 288
+    const x_axis_pixel_range = 480
+
+    let renderData;
+
+    let PathHelp = new PathHelper();
+
+    // Load data
+    const data = this.getData()
+
+    // Upsample Data
+    let upsample_scale = 2
+    let scaledData
+    if (upsample_scale > 1) {
+      let upsampledData = this.upsampleData(data, upsample_scale)
+      let min = this.getDataMin(upsampledData)
+      let max = this.getDataMax(upsampledData)
+      renderData = this.scaleData(upsampledData, min, max, 0, 255)
+    } else {
+      let min = this.getDataMin(data)
+      let max = this.getDataMax(data)
+      renderData = this.scaleData(data, min, max, 0, 255)
+    }
+
+    // Blur the data
+    renderData = this.blurFilter(renderData, 1/9)
+
+    // Render image in "p5 land"
+    //*
+    const rows = renderData.length;
+    const columns = renderData[0].length;
+    let scale = y_axis_pixel_range/rows
+    let y_scale = -0.0008; // -0.0008
+
+    let paths = new Array();
+
+    // Build image of square "pixels"
+    for (let row = 0; row < rows; row++) {
+      let path = new Array();
+      for (let col = 0; col < columns; col++) {
+
+        let x = PathHelp.map(col, 0, columns, -1, 1)
+        let y = PathHelp.map(row, 0, rows, -1, 1)
+        y = y + y_scale * renderData[row][col]
+
+        path.push([x,y])
+
+        // Render in "p5 land"
+        /*
+        p5.noStroke();
+        p5.fill(renderData[row][col])
+        p5.rectMode(p5.CORNER);
+        p5.rect(
+          sketch_margin + ((x_axis_pixel_range - (renderData.length * scale))/2) + (col * scale),
+          sketch_margin + (row * scale),
+          scale,
+          scale
+        )
+        //*/
+      }
+      // path = PathHelp.smoothPath(path)
+      paths.push(path);
+    }
+    //*/
+
+    // console.log(paths);
+
+    let layers = new Array();
+
+    // Smooth with an averaging filter
+    // for (let p = 0; p < paths.length-1; p++) {
+    //   paths[p] = PathHelp.smoothPath(paths[p])
+    // }
 
     layers.push({
       "color": "red",
