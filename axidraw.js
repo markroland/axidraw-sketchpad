@@ -1,5 +1,5 @@
 let sketch_title = ''
-let selectedPattern = "lineimage"
+let selectedPattern = "sketchbook"
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {
@@ -46,6 +46,7 @@ let sketch = function(p) {
     "postcard": new Postcard(),
     "radiallines": new RadialLines(),
     "radiography": new Radiography(),
+    "sketchbook": new Sketchbook(),
     "spiral": new Spiral(),
     "truchet": new Truchet(),
   }
