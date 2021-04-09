@@ -1,5 +1,5 @@
 let sketch_title = ''
-let selectedPattern = "isolines"
+let selectedPattern = "lineimage"
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {

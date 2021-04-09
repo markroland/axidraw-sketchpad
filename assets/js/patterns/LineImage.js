@@ -1155,6 +1155,9 @@ class LineImage {
         //*/
 
         if (image_array[row][col] == 0) {
+
+          // Diagonal top-left to bottom-right
+          /*
           paths.push([
             [
               col * pixel_size - pixel_size/2,
@@ -1165,6 +1168,22 @@ class LineImage {
               row * pixel_size + pixel_size/2
             ]
           ]);
+          //*/
+
+          // Random
+          let r = pixel_size/2;
+          let theta = PathHelp.getRandom(0, Math.PI * 2)
+          paths.push([
+            [
+              (col * pixel_size) + (r * Math.cos(theta)),
+              (row * pixel_size) + (r * Math.sin(theta))
+            ],
+            [
+              (col * pixel_size) + (r * Math.cos(theta + Math.PI)),
+              (row * pixel_size) + (r * Math.sin(theta + Math.PI))
+            ]
+          ]);
+
         }
 
       }
