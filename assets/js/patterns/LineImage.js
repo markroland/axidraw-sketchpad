@@ -24,8 +24,8 @@ class LineImage {
     // return this.fillPixels(p5, imported_image, 'fermatSpiral');
     // return this.drawHatchSolid(p5, imported_image);
     // return this.drawHatchColor(p5, imported_image);
-    // return this.dither(p5, imported_image);
-    return this.edgeDetection(p5, imported_image);
+    return this.dither(p5, imported_image, false);
+    // return this.edgeDetection(p5, imported_image);
   }
 
   drawHatchColor(p5, imported_image) {
@@ -1087,7 +1087,7 @@ class LineImage {
     return image_array;
   }
 
-  dither(p5, imported_image) {
+  dither(p5, imported_image, split_colors) {
 
     const scale = 0.25;
     const y_axis_pixel_range = 288
@@ -1119,103 +1119,112 @@ class LineImage {
     let y = 0;
     let samples = PathHelp.getRndInteger(0, pixelCount/2)
     console.log("Sampling " + pixelCount + " pixels")
-    for (let i = 0; i < pixelCount; i++) {
 
-      // Get average intensity of RGB color channels
-      let average = Math.round(
-        (imported_image.pixels[i*4 + 0] + imported_image.pixels[i*4 + 1] + imported_image.pixels[i*4 + 2])
-        / 3
-      );
-      // let clamped_intensity = this.p5.round((average/255) * (levels-1)) * (255/(levels-1));
-      // console.log(average, clamped_intensity);
-
-      // Dithering
-
-      if (average < PathHelp.getRndInteger(0,255)) {
-        average = 0;
-      } else {
-        average = 255;
-      }
-
-      // Save intensity value to array
-      y = Math.floor(i / imported_image.width)
-      x = i % imported_image.width
-      image_array[y][x] = average
+    let channel_max = 1
+    if (split_colors) {
+      channel_max = 3
     }
 
-    // Loop through sampled image pixels and draw them
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < columns; col++) {
+    for (let channel = 0; channel < channel_max; channel++) {
+      for (let i = 0; i < pixelCount; i++) {
 
-        // Render in "p5 land"
-        /*
-        p5.noStroke();
-        p5.fill(image_array[row][col])
-        p5.rectMode(p5.CORNER);
-        p5.rect(
-          sketch_margin + ((x_axis_pixel_range - (image_array[0].length * p5_pixel_size))/2) + (col * p5_pixel_size),
-          sketch_margin + (row * p5_pixel_size),
-          p5_pixel_size,
-          p5_pixel_size
-        )
-        //*/
+        // Get average intensity of RGB color channels
+        let average = Math.round(
+          (imported_image.pixels[i*4 + 0] + imported_image.pixels[i*4 + 1] + imported_image.pixels[i*4 + 2])
+          / 3
+        );
+        // let clamped_intensity = this.p5.round((average/255) * (levels-1)) * (255/(levels-1));
+        // console.log(average, clamped_intensity);
 
-        if (image_array[row][col] == 0) {
+        // Dithering
 
-          // Diagonal top-left to bottom-right
-          /*
-          paths.push([
-            [
-              col * pixel_size - pixel_size/2,
-              row * pixel_size - pixel_size/2
-            ],
-            [
-              col * pixel_size + pixel_size/2,
-              row * pixel_size + pixel_size/2
-            ]
-          ]);
-          //*/
-
-          // Random
-          let r = pixel_size/2;
-          let theta = PathHelp.getRandom(0, Math.PI * 2)
-          paths.push([
-            [
-              (col * pixel_size) + (r * Math.cos(theta)),
-              (row * pixel_size) + (r * Math.sin(theta))
-            ],
-            [
-              (col * pixel_size) + (r * Math.cos(theta + Math.PI)),
-              (row * pixel_size) + (r * Math.sin(theta + Math.PI))
-            ]
-          ]);
-
+        if (average < PathHelp.getRndInteger(0,255)) {
+          average = 0;
+        } else {
+          average = 255;
         }
 
+        // Save intensity value to array
+        y = Math.floor(i / imported_image.width)
+        x = i % imported_image.width
+        image_array[y][x] = average
       }
-    }
 
-    // Center the Paths to the canvas
-    //*
-    let centered_path = new Array();
-    for (let c = 0; c < paths.length; c++) {
-      centered_path.push(
-        PathHelp.translatePath(
-          paths[c],
-          [
-            -(columns/rows) + pixel_size/2,
-            -1 + pixel_size/2
-          ]
+      // Loop through sampled image pixels and draw them
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < columns; col++) {
+
+          // Render in "p5 land"
+          /*
+          p5.noStroke();
+          p5.fill(image_array[row][col])
+          p5.rectMode(p5.CORNER);
+          p5.rect(
+            sketch_margin + ((x_axis_pixel_range - (image_array[0].length * p5_pixel_size))/2) + (col * p5_pixel_size),
+            sketch_margin + (row * p5_pixel_size),
+            p5_pixel_size,
+            p5_pixel_size
+          )
+          //*/
+
+          if (image_array[row][col] == 0) {
+
+            // Diagonal top-left to bottom-right
+            /*
+            paths.push([
+              [
+                col * pixel_size - pixel_size/2,
+                row * pixel_size - pixel_size/2
+              ],
+              [
+                col * pixel_size + pixel_size/2,
+                row * pixel_size + pixel_size/2
+              ]
+            ]);
+            //*/
+
+            // Random
+            let r = pixel_size/2;
+            let theta = PathHelp.getRandom(0, Math.PI * 2)
+            paths.push([
+              [
+                (col * pixel_size) + (r * Math.cos(theta)),
+                (row * pixel_size) + (r * Math.sin(theta))
+              ],
+              [
+                (col * pixel_size) + (r * Math.cos(theta + Math.PI)),
+                (row * pixel_size) + (r * Math.sin(theta + Math.PI))
+              ]
+            ]);
+
+          }
+
+        }
+      }
+
+      // Center the Paths to the canvas
+      //*
+      let centered_path = new Array();
+      for (let c = 0; c < paths.length; c++) {
+        centered_path.push(
+          PathHelp.translatePath(
+            paths[c],
+            [
+              -(columns/rows) + pixel_size/2,
+              -1 + pixel_size/2
+            ]
+          )
         )
-      )
-    }
-    paths = centered_path;
-    //*/
+      }
+      paths = centered_path;
+      //*/
 
-    layers.push({
-      "color": "black",
-      "paths": paths
-    })
+      layers.push({
+        "color": "black",
+        "paths": paths
+      })
+
+    }
 
     return layers;
   }

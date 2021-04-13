@@ -56,7 +56,7 @@ let sketch = function(p) {
 
     // Pre-load an image
     if (selectedPattern == "lineimage") {
-      let image_path = "assets/data/mandrill.png";
+      let image_path = "assets/data/portrait.jpg";
       imported_image = p.loadImage(image_path,
         success => { /* console.log('jpg success') */ },
         fail => { /* console.log('jpg fail') */ }
