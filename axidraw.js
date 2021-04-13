@@ -176,6 +176,7 @@ let sketch = function(p) {
 
       // Loop through all Paths in Layer
       let paths = layers[l].paths
+      console.log("Layer " + (l+1) + " Path Count: " + paths.length)
       for (i = 0; i < paths.length; i++) {
 
         // Indicate where the path starts
