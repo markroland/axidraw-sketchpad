@@ -19,7 +19,8 @@ class LineImage {
     // return this.fillPixels(p5, imported_image, 'fermatSpiral');
     // return this.drawHatchSolid(p5, imported_image);
     // return this.drawHatchColor(p5, imported_image);
-    return this.dither(p5, imported_image);
+    // return this.dither(p5, imported_image);
+    return this.edgeDetection(p5, imported_image);
   }
 
   drawHatchColor(p5, imported_image) {
@@ -1208,6 +1209,204 @@ class LineImage {
 
     layers.push({
       "color": "black",
+      "paths": paths
+    })
+
+    return layers;
+  }
+
+  edgeDetection(p5, imported_image) {
+
+    const scale = 0.5;
+    const y_axis_pixel_range = 288
+    const x_axis_pixel_range = 480
+    const sketch_margin = 48;
+
+    let PathHelp = new PathHelper()
+    let ImageHelp = new ImageHelper()
+
+    let layers = new Array();
+    let paths = new Array();
+    let path = new Array();
+    let points = new Array();
+
+    let p5_pixel_size = y_axis_pixel_range / (imported_image.height * scale)
+
+    // Resize image
+    imported_image.resize(imported_image.width * scale, imported_image.height * scale)
+    let rows = imported_image.height;
+    let columns = imported_image.width;
+    let pixel_size = 2 / imported_image.height
+
+    // Sample Downscaled image
+    imported_image.loadPixels();
+    let pixelCount = imported_image.width * imported_image.height;
+    let image_array = new Array(imported_image.height).fill(255);
+    for (let a = 0; a < image_array.length; a++) {
+      image_array[a] = new Array(imported_image.width).fill(255)
+    }
+    let x = 0;
+    let y = 0;
+    let samples = PathHelp.getRndInteger(0, pixelCount/2)
+    console.log("Sampling " + pixelCount + " pixels")
+    for (let i = 0; i < pixelCount; i++) {
+
+      // Get average intensity of RGB color channels
+      let average = Math.round(
+        (imported_image.pixels[i*4 + 0] + imported_image.pixels[i*4 + 1] + imported_image.pixels[i*4 + 2])
+        / 3
+      );
+      // let clamped_intensity = this.p5.round((average/255) * (levels-1)) * (255/(levels-1));
+      // console.log(average, clamped_intensity);
+
+      // Save intensity value to array
+      y = Math.floor(i / imported_image.width)
+      x = i % imported_image.width
+      image_array[y][x] = average
+    }
+
+    // Blur image to reduce detection of minor edges
+    /*
+    const gaussian_kernel = [
+      [1/16, 2/16, 1/16],
+      [2/16, 4/16, 2/16],
+      [1/16, 2/16, 1/16]
+    ]
+    image_array = ImageHelp.filter(image_array, gaussian_kernel, "neighbor")
+    //*/
+
+    // Downsample
+    /*
+    let downsample_factor = 2
+    image_array = ImageHelp.downsample(image_array, downsample_factor)
+    rows = rows / downsample_factor
+    columns = columns / downsample_factor
+    pixel_size = pixel_size * downsample_factor
+    p5_pixel_size = p5_pixel_size * downsample_factor
+    //*/
+
+    // Sobel Edge Detection
+    const Gx_kernel = [
+      [1,0,-1],
+      [2,0,-2],
+      [1,0,-1]
+    ]
+    const Gy_kernel = [
+      [-1,-2,-1],
+      [ 0, 0 ,0],
+      [ 1, 2, 1]
+    ]
+    const indentity_kernel = [
+      [0, 0, 0],
+      [0, 1 ,0],
+      [0, 0, 0]
+    ]
+    let gx = ImageHelp.filter(image_array, Gx_kernel)
+    let gy = ImageHelp.filter(image_array, Gy_kernel)
+
+    // Loop through sampled image pixels and draw them
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+
+        let threshold = 128;
+        let r = pixel_size/2;
+
+        // Magnitude of change
+        let g = Math.sqrt(
+          Math.pow(gx[row][col], 2)
+          +
+          Math.pow(gy[row][col], 2)
+        );
+
+        // Direction of change
+        let theta = Math.atan2(gy[row][col], gx[row][col]) // + Math.PI/2
+        if (theta < 0) {
+          // theta = (2 * Math.PI) + theta;
+        }
+
+        // Render in "p5 land"
+        /*
+        // let c = g // g, image_array[row][col], gx[row][col], gy[row][col]
+        let c = 0;
+        if (g > threshold) {
+          c = p5.color('hsb(' + Math.floor(PathHelp.map(theta, -Math.PI, Math.PI, 0, 360)) + ', 100%, 100%)');
+        }
+        p5.noStroke();
+        p5.fill(c)
+        p5.rectMode(p5.CORNER);
+        p5.rect(
+          sketch_margin + ((x_axis_pixel_range - (columns * p5_pixel_size))/2) + (col * p5_pixel_size),
+          sketch_margin + (row * p5_pixel_size),
+          p5_pixel_size,
+          p5_pixel_size
+        )
+        p5.noFill();
+        //*/
+
+        // if (image_array[row][col] > 128) {
+        // if (false && gy[row][col] > 0) {
+
+        if (g > threshold) {
+
+          points.push([
+            col * pixel_size,
+            row * pixel_size
+          ])
+
+          // Directional line segment
+          /*
+          paths.push([
+            [
+              (col * pixel_size) + (r * Math.cos(theta)),
+              (row * pixel_size) + (r * Math.sin(theta))
+            ],
+            [
+              (col * pixel_size) + (r * Math.cos(theta + Math.PI)),
+              (row * pixel_size) + (r * Math.sin(theta + Math.PI))
+            ]
+          ]);
+          //*/
+
+        }
+
+      }
+    }
+
+    console.log("Number of Points: " + points.length)
+
+    // Move the first point to create a new path
+    path = path.concat([
+      points.shift()
+    ])
+    paths.push(path)
+    paths = PathHelp.pointsToPaths(paths, points, 0, 0.02);
+
+    // Smooth
+    for (let i = 0; i < 1; i++) {
+      paths = paths.map(function(path) {
+        return PathHelp.smoothPath(path)
+      })
+    }
+
+    // Center the Paths to the canvas
+    //*
+    let centered_path = new Array();
+    for (let c = 0; c < paths.length; c++) {
+      centered_path.push(
+        PathHelp.translatePath(
+          paths[c],
+          [
+            -(columns/rows) + pixel_size/2,
+            -1 + pixel_size/2
+          ]
+        )
+      )
+    }
+    paths = centered_path;
+    //*/
+
+    layers.push({
+      "color": "red",
       "paths": paths
     })
 
