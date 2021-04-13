@@ -121,7 +121,7 @@ class PathHelper {
     return [line_A[1], line_B[1]]
   }
 
-  expandPath(path, offset_start, offset_end, capStyle = 'open', ) {
+  expandPath(path, offset_start, offset_end, capStyle = 'open') {
 
     let parallels = new Array();
     let parallel = new Array();
@@ -614,11 +614,14 @@ class PathHelper {
   smoothPath(path) {
     let newData = new Array();
     newData.push(path[0])
-    let v = 1/3
+    let size = 3;
+    let range = (size - 1)/2
+    let v = 1 / size
     const kernel = [v,v,v]
-    for (let p = 1; p < path.length-1; p++) {
+    for (let p = range; p < path.length-range; p++) {
       let sum = [0,0];
-      for (let k = -1; k <= 1; k++) {
+      for (let k = -range; k <= range; k++) {
+        // Sum X and Y components
         sum[0] += path[p+k][0] * kernel[k+1]
         sum[1] += path[p+k][1] * kernel[k+1]
       }
