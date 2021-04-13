@@ -84,7 +84,7 @@ let sketch = function(p) {
     // Add patterns from object
     var pattern_select_menu = document.querySelector('#sketch-selector > div > select');
     const entries = Object.entries(Patterns)
-    for (const [pattern_key, pattern_object] of entries) {
+    for (let [pattern_key, pattern_object] of entries) {
       pattern_select.option(pattern_object.name, pattern_object.key);
     }
 
@@ -399,7 +399,7 @@ let sketch = function(p) {
   }
 
   function buildConfigControls(configs) {
-    for (const [key, val] of configs) {
+    for (let [key, val] of configs) {
 
       // Create a new object
       var control = new Object();
@@ -416,7 +416,7 @@ let sketch = function(p) {
           .parent(control.div)
           .addClass(val.input.class);
         const entries = Object.entries(val.input.options)
-        for (const [key, object] of entries) {
+        for (let [key, object] of entries) {
           control.input.option(object, key);
         }
         if (val.value) {
@@ -458,7 +458,7 @@ let sketch = function(p) {
       } else if (val.input.type == "createTextarea") {
         control.input = p.createElement(
           "textarea",
-          val.value ? val.value : val.input.value,
+          val.value ? val.value : val.input.value
         )
         .attribute("rows", val.input.attributes.rows)
         .attribute("cols", val.input.attributes.cols)
