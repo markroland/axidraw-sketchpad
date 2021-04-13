@@ -611,6 +611,67 @@ class PathHelper {
     return paths
   }
 
+  /**
+   * Join points together when endpoints within threshold distance of each other
+   **/
+  pointsToPaths(paths, points, active_path_index = 0, threshold) {
+
+    // Escape recursion (Chrome is having a "Maximum call stack size exceeded" error)
+    // here where Safari and Firefox are not
+    if (points.length == 0) {
+      return paths
+    }
+
+    // Loop through all points and identify candidate points within
+    // the distance threshold
+    let distance;
+    let candidates = new Array();
+    for (let p = 0; p < points.length; p++) {
+
+      let active_path_last_point_index = paths[active_path_index].length - 1
+      distance = this.distance(
+        paths[active_path_index][active_path_last_point_index],
+        points[p]
+      )
+
+      if (distance < threshold) {
+        candidates.push({
+          "point" : p,
+          "distance" : distance
+        })
+      }
+    }
+
+    if (candidates.length > 0) {
+
+      // Sort points by distance, favor by index if distances are equal
+      // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
+      candidates.sort(
+        (a, b) => (a.distance > b.distance) ? 1 : (a.distance === b.distance) ? ((a.point > b.point) ? 1 : -1) : -1
+      )
+
+      // Add the nearest point as the next point in the path
+      let nearest_point_index = candidates[0].point
+      let nearest_point = points[nearest_point_index]
+      paths[active_path_index].push(nearest_point)
+
+      // Remove the point from available points
+      points.splice(nearest_point_index, 1);
+
+    } else {
+
+      // If no points are within the threshold then start a new path
+      paths.push([
+        points.shift()
+      ])
+      active_path_index++
+    }
+
+    paths = this.pointsToPaths(paths, points, active_path_index, threshold)
+
+    return paths;
+  }
+
   smoothPath(path) {
     let newData = new Array();
     newData.push(path[0])
