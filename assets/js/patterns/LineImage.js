@@ -5,6 +5,11 @@ class LineImage {
 
   constructor() {
 
+    this.key = "lineimage";
+
+    this.name = "Line Image";
+
+    this.constrain = false
   }
 
   draw(p5, imported_image) {
@@ -1265,6 +1270,9 @@ class LineImage {
       image_array[y][x] = average
     }
 
+    // Boost Contrast
+    image_array = ImageHelp.contrast(image_array, 3.0)
+
     // Blur image to reduce detection of minor edges
     /*
     const gaussian_kernel = [
@@ -1320,14 +1328,15 @@ class LineImage {
 
         // Direction of change
         let theta = Math.atan2(gy[row][col], gx[row][col]) // + Math.PI/2
+        /*
         if (theta < 0) {
-          // theta = (2 * Math.PI) + theta;
+          theta = (2 * Math.PI) + theta;
         }
+        //*/
 
         // Render in "p5 land"
         /*
-        // let c = g // g, image_array[row][col], gx[row][col], gy[row][col]
-        let c = 0;
+        let c = 0; // Options: 0, g, image_array[row][col], gx[row][col], gy[row][col]
         if (g > threshold) {
           c = p5.color('hsb(' + Math.floor(PathHelp.map(theta, -Math.PI, Math.PI, 0, 360)) + ', 100%, 100%)');
         }
@@ -1375,11 +1384,13 @@ class LineImage {
     console.log("Number of Points: " + points.length)
 
     // Move the first point to create a new path
+    //*
     path = path.concat([
       points.shift()
     ])
     paths.push(path)
     paths = PathHelp.pointsToPaths(paths, points, 0, 0.02);
+    //*/
 
     // Smooth
     for (let i = 0; i < 1; i++) {

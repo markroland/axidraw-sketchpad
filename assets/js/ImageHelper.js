@@ -80,7 +80,34 @@ class ImageHelper {
     return filteredData;
   }
 
-  contrast () {
+  /**
+   * Adjust image Contrast
+   * @param Array data Image array data
+   * @param float The contrast factor, min: 0, no change: 1
+   * @param integer Optional brightness factor
+   */
+  contrast (data, alpha, beta = undefined) {
+    const rows = data.length;
+    const columns = data[0].length;
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+        data[row][col] = this.constrain(
+          parseInt(alpha * (data[row][col] - 128)) + 128,
+          0,
+          255
+        )
+      }
+    }
+    return data;
+  }
 
+  constrain (n, min, max) {
+    if (n < min) {
+      return min;
+    }
+    if (n > max) {
+      return max;
+    }
+    return n
   }
 }
