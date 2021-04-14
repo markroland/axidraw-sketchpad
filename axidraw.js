@@ -10,6 +10,7 @@ let orientation = 'landscape'
 let showDate = true
 let showSignature = true
 let debugPenDownUp = false
+let draw_grid = false
 
 let fonts
 
@@ -156,7 +157,9 @@ let sketch = function(p) {
     p.translate(p.width/2, p.height/2)
 
     // Draw Margins, Padding and Axis. Useful for debugging or formatting art
-    // draw_helper_grid()
+    if (draw_grid) {
+      draw_helper_grid()
+    }
 
     let constrain = false;
     if (Patterns[selectedPattern].constrain !== undefined) {
