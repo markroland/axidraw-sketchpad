@@ -110,4 +110,13 @@ class ImageHelper {
     }
     return n
   }
+
+  // https://www.rapidtables.com/convert/color/rgb-to-cmyk.html
+  rgbToCmyk(red, green, blue) {
+    let key     = 1 - (Math.max(red, green, blue)/255)
+    let cyan    = (1 - red/255 - key) / (1 - key)
+    let magenta = (1 - green/255 - key) / (1 - key)
+    let yellow  = (1 - blue/255 - key) / (1 - key)
+    return [cyan, magenta, yellow, key]
+  }
 }

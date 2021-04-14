@@ -24,7 +24,7 @@ class LineImage {
     // return this.fillPixels(p5, imported_image, 'fermatSpiral');
     // return this.drawHatchSolid(p5, imported_image);
     // return this.drawHatchColor(p5, imported_image);
-    return this.dither(p5, imported_image, false);
+    return this.dither(p5, imported_image, true);
     // return this.edgeDetection(p5, imported_image);
   }
 
@@ -1095,6 +1095,7 @@ class LineImage {
     const sketch_margin = 48;
 
     let PathHelp = new PathHelper()
+    let ImageHelp = new ImageHelper()
 
     let layers = new Array();
 
@@ -1122,19 +1123,27 @@ class LineImage {
 
     let channel_max = 1
     if (split_colors) {
-      channel_max = 3
+      channel_max = 4
     }
 
     for (let channel = 0; channel < channel_max; channel++) {
+
+      // Reset paths array
+      paths = new Array();
+
       for (let i = 0; i < pixelCount; i++) {
 
-        // Get average intensity of RGB color channels
-        let average = Math.round(
-          (imported_image.pixels[i*4 + 0] + imported_image.pixels[i*4 + 1] + imported_image.pixels[i*4 + 2])
-          / 3
-        );
+        let red   = imported_image.pixels[i*4 + 0];
+        let green = imported_image.pixels[i*4 + 1];
+        let blue  = imported_image.pixels[i*4 + 2];
+        let average = Math.round((red + green + blue) / 3);
         // let clamped_intensity = this.p5.round((average/255) * (levels-1)) * (255/(levels-1));
         // console.log(average, clamped_intensity);
+
+        if (split_colors) {
+          let cmyk = ImageHelp.rgbToCmyk(red, green, blue)
+          average = (1 - cmyk[channel]) * 255
+        }
 
         // Dithering
 
@@ -1203,7 +1212,6 @@ class LineImage {
       }
 
       // Center the Paths to the canvas
-      //*
       let centered_path = new Array();
       for (let c = 0; c < paths.length; c++) {
         centered_path.push(
@@ -1217,10 +1225,15 @@ class LineImage {
         )
       }
       paths = centered_path;
-      //*/
+
+      let color = "black"
+      let colors = ["cyan", "magenta", "yellow", "black"]
+      if (split_colors) {
+        color = colors[channel]
+      }
 
       layers.push({
-        "color": "black",
+        "color": color,
         "paths": paths
       })
 
