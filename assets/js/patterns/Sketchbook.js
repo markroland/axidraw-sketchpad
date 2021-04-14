@@ -16,6 +16,10 @@ class Sketchbook {
    * Draw path
    */
   draw(p5) {
+    return default()
+  }
+
+  default() {
 
     let PathHelp = new PathHelper;
 
