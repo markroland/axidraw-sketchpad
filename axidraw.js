@@ -1,5 +1,5 @@
-let sketch_title = ''
-let selectedPattern = "lineimage"
+let sketch_title = 'Hitomezashi Sashiko Stitching'
+let selectedPattern = "grid"
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {

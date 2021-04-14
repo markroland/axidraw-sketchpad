@@ -13,13 +13,16 @@ class Grid {
     // return this.perspectiveGridWithNoise();
     // return this.grid1()
     // return this.TenPrint(12) // 12 Feels nice
+    // return this.SashikoStitching(8, ["black"]);
+    return this.SashikoStitching(8, ["cyan", "magenta"]);
 
     // Hex Grid
-    // Cell Count = (rows * columns)/2 + 1/2
+    /*
     let hex_columns = 33
     let hex_rows = hex_columns
     let hex_side = (5/3 - -5/3) / (3/2 * hex_columns + 0.5)
     return this.hexGrid(hex_rows, hex_columns, hex_side, 0);
+    //*/
   }
 
   grid1() {
@@ -256,7 +259,7 @@ class Grid {
           path = back_slash
         }
 
-        // Move to position on gride
+        // Move to position on grid
         path = PathHelp.translatePath(
           path,
           [
@@ -285,6 +288,133 @@ class Grid {
     paths = centered_path;
 
     return paths
+  }
+
+  /**
+   * Inspiration: Code as Creative Medium page 159
+   */
+  SashikoStitching(gridScale, colors) {
+
+    // Grid test
+    let rows = 3 * gridScale;
+    let columns = 5 * gridScale;
+    let side_length = 2 * (1/rows);
+    let layers = new Array();
+    let paths = new Array();
+    let PathHelp = new PathHelper();
+
+    // Seed random values for stitching
+    let row_values = new Array()
+    for (let a = 0; a <= rows; a++) {
+      row_values.push(Math.random() > 0.5 ? 1 : 0)
+    }
+    let col_values = new Array()
+    for (let a = 0; a <= columns; a++) {
+      col_values.push(Math.random() > 0.5 ? 1 : 0)
+    }
+
+    // Fill Grid
+    for (let c = 0; c <= columns; c++) {
+      for (let r = 0; r <= rows; r++) {
+
+        // Vertical stitches
+        let stitch = false;
+        if (col_values[c]) {
+          if (r % 2 == 0) {
+            stitch = true;
+          }
+        } else {
+          if (r % 2 == 1) {
+            stitch = true;
+          }
+        }
+        if (r == rows) {
+          stitch = false
+        }
+        if (stitch) {
+          paths.push([
+            [
+              (c * side_length),
+              (r * side_length)
+            ],
+            [
+              (c * side_length),
+              (r * side_length) + side_length
+            ]
+          ])
+        }
+
+        // Horizontal stitches
+        stitch = false;
+        if (row_values[r]) {
+          if (c % 2 == 0) {
+            stitch = true;
+          }
+        } else {
+          if (c % 2 == 1) {
+            stitch = true;
+          }
+        }
+        if (c == columns) {
+          stitch = false
+        }
+        if (stitch) {
+          paths.push([
+            [
+              (c * side_length),
+              (r * side_length)
+            ],
+            [
+              (c * side_length) + side_length,
+              (r * side_length)
+            ]
+          ])
+        }
+      }
+    }
+
+    // Center the Paths to the canvas
+    for (let i = 0; i < paths.length; i++) {
+      paths[i] = PathHelp.translatePath(
+        paths[i],
+        [
+          -5/3,
+          -1
+        ]
+      )
+    }
+
+    // Join Paths to reduce pen up/down
+    paths = PathHelp.joinPaths(paths, 0.01);
+
+    // One Color
+    if (colors.length == 1) {
+      layers.push({
+        "color": colors[0],
+        "paths": paths
+      })
+      return layers;
+    }
+
+    // Split paths between multiple colors
+
+    let layer_paths = new Array(colors.length)
+    for (let i = 0; i < paths.length; i++) {
+      let layer_index = i % colors.length
+      if (typeof layer_paths[layer_index] == 'undefined') {
+        layer_paths[layer_index] = new Array();
+      }
+      layer_paths[layer_index].push(paths[i]);
+    }
+
+    for (let i = 0; i < colors.length; i++) {
+      layers.push({
+        "color": colors[i],
+        "paths": layer_paths[i]
+      })
+    }
+
+    return layers
   }
 
   /**
