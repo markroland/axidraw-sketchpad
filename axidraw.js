@@ -1,5 +1,5 @@
-let sketch_title = 'Hitomezashi Sashiko Stitching'
-let selectedPattern = "grid"
+let sketch_title = ''
+let selectedPattern = "3d"
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {
@@ -49,7 +49,8 @@ let sketch = function(p) {
     "radiography": new Radiography(),
     "sketchbook": new Sketchbook(),
     "spiral": new Spiral(),
-    "truchet": new Truchet(),
+    "3d": new ThreeD(),
+    "truchet": new Truchet()
   }
 
   // Preload data
