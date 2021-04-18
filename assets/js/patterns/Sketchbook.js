@@ -16,7 +16,7 @@ class Sketchbook {
    * Draw path
    */
   draw(p5) {
-    return default()
+    return this.default()
   }
 
   default() {
