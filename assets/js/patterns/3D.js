@@ -35,12 +35,6 @@ class ThreeD {
     // Set angle of shape rotation
     let angle = (5/100) * (2 * Math.PI);
 
-    // Project on to plane
-    const projection = [
-      [1, 0, 0],
-      [0, 1, 0],
-    ];
-
     // Define 3D shape (cube) (x,y,z)
     let points = [];
     points[0] = p5.createVector(-0.5, -0.5, -0.5);
@@ -78,13 +72,23 @@ class ThreeD {
       // Apply rotation
       let rotated = this.matmul(rotationY, points[i]);
       rotated = this.matmul(rotationX, rotated);
+
+
+      // Project on to plane
+      let distance = 2;
+      let z = 1 / (distance - rotated.z);
+      const projection = [
+        [z, 0, 0],
+        [0, z, 0]
+      ];
+
       rotated = this.matmul(rotationZ, rotated);
 
       // Project model onto 2D surface
       let projected2d = this.matmul(projection, rotated);
 
       // Scale as necessary
-      projected2d.mult(0.5);
+      // projected2d.mult(0.5);
 
       // Push point to path
       path.push([
