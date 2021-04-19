@@ -22,7 +22,8 @@ class ThreeD {
    */
   draw(p5) {
     this.p5 = p5
-    return this.sketch1(p5)
+    // return this.sketch1(p5)
+    return this.sketch2(p5, 2)
   }
 
   sketch1(p5) {
@@ -114,6 +115,133 @@ class ThreeD {
       "color": "black",
       "paths": paths
     })
+
+    return layers;
+  }
+
+  sketch2(p5, gridScale) {
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+
+    // Grid test
+    let rows = 3 * gridScale;
+    let columns = 5 * gridScale;
+    // let side_length = (1/rows);
+    let side_length = (1/gridScale) * 0.33
+
+    // Define 3D shape (cube) (x,y,z)
+    const points = [
+      p5.createVector(-side_length, -side_length, -side_length),
+      p5.createVector( side_length, -side_length, -side_length),
+      p5.createVector( side_length,  side_length, -side_length),
+      p5.createVector(-side_length,  side_length, -side_length),
+      p5.createVector(-side_length, -side_length,  side_length),
+      p5.createVector( side_length, -side_length,  side_length),
+      p5.createVector( side_length,  side_length,  side_length),
+      p5.createVector(-side_length,  side_length,  side_length)
+    ];
+
+    // Fill Grid
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < columns; c++) {
+
+        let paths = new Array();
+        let path = new Array();
+
+        // Index position
+        let id = (r * columns) + c;
+
+        // Set angle of shape rotation
+        // let angle = (c / columns) * (0.5 * Math.PI);
+        let angle = (id / (rows * columns)) * (2 * Math.PI);
+
+        // Set Transformation matrices (rotrations)
+        const rotationZ = [
+          [Math.cos(angle), -Math.sin(angle), 0],
+          [Math.sin(angle),  Math.cos(angle), 0],
+          [0, 0, 1]
+        ];
+        const rotationX = [
+          [1, 0, 0],
+          [0, Math.cos(angle), -Math.sin(angle)],
+          [0, Math.sin(angle),  Math.cos(angle)]
+        ];
+        const rotationY = [
+          [ Math.cos(angle), 0, Math.sin(angle)],
+          [0, 1, 0],
+          [-Math.sin(angle), 0, Math.cos(angle)]
+        ];
+
+        // Loop through Model points and apply transformation and projection
+        let projected = [];
+        for (let i = 0; i < points.length; i++) {
+
+          // Apply rotation
+          let rotated = this.matmul(rotationY, points[i]);
+          rotated = this.matmul(rotationX, rotated);
+          rotated = this.matmul(rotationZ, rotated);
+
+          // Project model onto 2D surface
+          // Calculate "weak perspective" on Z Axis
+          let distance = 2;
+          let z = 1 / (distance - rotated.z);
+          const projection = [
+            [z, 0, 0],
+            [0, z, 0]
+          ];
+          let projected2d = this.matmul(projection, rotated);
+
+          // Push point to path
+          path.push([
+            projected2d.x, projected2d.y
+          ])
+        }
+
+        // Connect points to edges
+        for (let i = 0; i < 4; i++) {
+          paths.push(
+            this.connect(i, (i + 1) % 4, path)
+          );
+          paths.push(
+            this.connect(i + 4, ((i + 1) % 4) + 4, path)
+          );
+          paths.push(
+            this.connect(i, i + 4, path)
+          );
+        }
+
+        // Translate to position on grid
+        for (let i = 0; i < paths.length; i++) {
+
+          // Distribute shapes across grid
+          // Top-left of this is at local origin (center of canvas)
+          paths[i] = PathHelp.translatePath(
+            paths[i],
+            [
+              (2 * (columns/rows) * (c/columns)),
+              (2 * (r/rows))
+            ]
+          )
+
+          // Move from center to top-left
+          paths[i] = PathHelp.translatePath(
+            paths[i],
+            [
+              -5/3 + 1/rows,
+              -1 + 1/rows
+            ]
+          )
+        }
+
+        // Put each model/shape on its own layer
+        layers.push({
+          "color": "cyan",
+          "paths": paths
+        })
+
+      }
+    }
 
     return layers;
   }
