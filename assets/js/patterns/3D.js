@@ -9,24 +9,20 @@
 class ThreeD {
 
   constructor() {
-
     this.key = "3d";
-
     this.name = "3D";
-
     this.constrain = false
   }
 
   /**
    * Draw path
    */
-  draw(p5) {
-    this.p5 = p5
-    // return this.sketch1(p5)
-    return this.sketch2(p5, 2)
+  draw() {
+    // return this.sketch1()
+    return this.sketch2(2)
   }
 
-  sketch1(p5) {
+  sketch1() {
 
     let PathHelp = new PathHelper;
     let layers = new Array();
@@ -37,15 +33,16 @@ class ThreeD {
     let angle = (5/100) * (2 * Math.PI);
 
     // Define 3D shape (cube) (x,y,z)
-    let points = [];
-    points[0] = p5.createVector(-0.5, -0.5, -0.5);
-    points[1] = p5.createVector(0.5, -0.5, -0.5);
-    points[2] = p5.createVector(0.5, 0.5, -0.5);
-    points[3] = p5.createVector(-0.5, 0.5, -0.5);
-    points[4] = p5.createVector(-0.5, -0.5, 0.5);
-    points[5] = p5.createVector(0.5, -0.5, 0.5);
-    points[6] = p5.createVector(0.5, 0.5, 0.5);
-    points[7] = p5.createVector(-0.5, 0.5, 0.5);
+    let points = [
+      [-0.5, -0.5, -0.5],
+      [0.5, -0.5, -0.5],
+      [0.5, 0.5, -0.5],
+      [-0.5, 0.5, -0.5],
+      [-0.5, -0.5, 0.5],
+      [0.5, -0.5, 0.5],
+      [0.5, 0.5, 0.5],
+      [-0.5, 0.5, 0.5]
+    ];
 
     const rotationZ = [
       [Math.cos(angle), -Math.sin(angle), 0],
@@ -71,45 +68,51 @@ class ThreeD {
     for (let i = 0; i < points.length; i++) {
 
       // Apply rotation
-      let rotated = this.matmul(rotationY, points[i]);
-      rotated = this.matmul(rotationX, rotated);
 
+      let rotated = this.matrixMultiply(rotationY, points[i]);
+      rotated = this.matrixMultiply(rotationX, rotated);
 
-      // Project on to plane
       let distance = 2;
-      let z = 1 / (distance - rotated.z);
+      let z = 1 / (distance - rotated[2]);
       const projection = [
         [z, 0, 0],
         [0, z, 0]
       ];
-
-      rotated = this.matmul(rotationZ, rotated);
+      rotated = this.matrixMultiply(rotationZ, rotated);
 
       // Project model onto 2D surface
-      let projected2d = this.matmul(projection, rotated);
+      let projected2d = this.matrixMultiply(projection, rotated);
 
       // Scale as necessary
-      // projected2d.mult(0.5);
+      projected2d = this.matrixMultiply(projected2d, 0.5)
 
       // Push point to path
       path.push([
-        projected2d.x, projected2d.y
+        projected2d[0], projected2d[1]
       ])
     }
 
-    // Connect points to edges
+    // Connect points to create paths (edges)
     for (let i = 0; i < 4; i++) {
       paths.push(
-        this.connect(i, (i + 1) % 4, path)
+        new Array(
+          path[i],
+          path[(i + 1) % 4]
+        )
       );
       paths.push(
-        this.connect(i + 4, ((i + 1) % 4) + 4, path)
+        new Array(
+          path[i + 4],
+          path[((i + 1) % 4) + 4],
+        )
       );
       paths.push(
-        this.connect(i, i + 4, path)
+        new Array(
+          path[i],
+          path[i + 4]
+        )
       );
     }
-
 
     layers.push({
       "color": "black",
@@ -119,7 +122,7 @@ class ThreeD {
     return layers;
   }
 
-  sketch2(p5, gridScale) {
+  sketch2(gridScale) {
 
     let PathHelp = new PathHelper;
     let layers = new Array();
@@ -131,15 +134,15 @@ class ThreeD {
     let side_length = (1/gridScale) * 0.33
 
     // Define 3D shape (cube) (x,y,z)
-    const points = [
-      p5.createVector(-side_length, -side_length, -side_length),
-      p5.createVector( side_length, -side_length, -side_length),
-      p5.createVector( side_length,  side_length, -side_length),
-      p5.createVector(-side_length,  side_length, -side_length),
-      p5.createVector(-side_length, -side_length,  side_length),
-      p5.createVector( side_length, -side_length,  side_length),
-      p5.createVector( side_length,  side_length,  side_length),
-      p5.createVector(-side_length,  side_length,  side_length)
+    let points = [
+      [-side_length, -side_length, -side_length],
+      [ side_length, -side_length, -side_length],
+      [ side_length,  side_length, -side_length],
+      [-side_length,  side_length, -side_length],
+      [-side_length, -side_length,  side_length],
+      [ side_length, -side_length,  side_length],
+      [ side_length,  side_length,  side_length],
+      [-side_length,  side_length,  side_length]
     ];
 
     // Fill Grid
@@ -178,36 +181,45 @@ class ThreeD {
         for (let i = 0; i < points.length; i++) {
 
           // Apply rotation
-          let rotated = this.matmul(rotationY, points[i]);
-          rotated = this.matmul(rotationX, rotated);
-          rotated = this.matmul(rotationZ, rotated);
+          let rotated = this.matrixMultiply(rotationY, points[i]);
+          rotated = this.matrixMultiply(rotationX, rotated);
+          rotated = this.matrixMultiply(rotationZ, rotated);
 
           // Project model onto 2D surface
           // Calculate "weak perspective" on Z Axis
           let distance = 2;
-          let z = 1 / (distance - rotated.z);
+          let z = 1 / (distance - rotated[2]);
           const projection = [
             [z, 0, 0],
             [0, z, 0]
           ];
-          let projected2d = this.matmul(projection, rotated);
+          let projected2d = this.matrixMultiply(projection, rotated);
 
           // Push point to path
           path.push([
-            projected2d.x, projected2d.y
+            projected2d[0], projected2d[1]
           ])
         }
 
-        // Connect points to edges
+        // Connect points to create paths (edges)
         for (let i = 0; i < 4; i++) {
           paths.push(
-            this.connect(i, (i + 1) % 4, path)
+            new Array(
+              path[i],
+              path[(i + 1) % 4]
+            )
           );
           paths.push(
-            this.connect(i + 4, ((i + 1) % 4) + 4, path)
+            new Array(
+              path[i + 4],
+              path[((i + 1) % 4) + 4],
+            )
           );
           paths.push(
-            this.connect(i, i + 4, path)
+            new Array(
+              path[i],
+              path[i + 4]
+            )
           );
         }
 
@@ -246,88 +258,36 @@ class ThreeD {
     return layers;
   }
 
-  // Everything below here is lifted from https://editor.p5js.org/codingtrain/sketches/r8l8XXD2A
-
-  connect(i, j, points) {
-    let path = new Array();
-    path.push(points[i])
-    path.push(points[j])
-    return path;
-  }
-
-  // Daniel Shiffman
-  // http://youtube.com/thecodingtrain
-  // http://codingtra.in
-  // Javascript transcription: Chuck England
-
-  // Coding Challenge #112: 3D Rendering with Rotation and Projection
-  // https://youtu.be/p4Iz0XJY-Qk
-
-  // Matrix Multiplication
-  // https://youtu.be/tzsgS19RRc8
-
-  logMatrix(m) {
-    const cols = m[0].length;
-    const rows = m.length;
-    console.log(rows + "x" + cols);
-    console.log("----------------");
-    let s = '';
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        s += (m[i][j] + " ");
-      }
-      console.log(s);
-    }
-    console.log();
-  }
-
-  vecToMatrix(v) {
-    let m = [];
-    for (let i = 0; i < 3; i++) {
-      m[i] = [];
-    }
-    m[0][0] = v.x;
-    m[1][0] = v.y;
-    m[2][0] = v.z;
-    return m;
-  }
-
-  matrixToVec(m) {
-    return this.p5.createVector(m[0][0], m[1][0], m.length > 2 ? m[2][0] : 0);
-  }
-
-  matmulvec(a, vec) {
-    let m = this.vecToMatrix(vec);
-    let r = this.matmul(a, m);
-    return this.matrixToVec(r);
-  }
-
-  matmul(a, b) {
-    if (b instanceof p5.Vector) {
-      return this.matmulvec(a, b);
-    }
-
-    let colsA = a[0].length;
-    let rowsA = a.length;
-    let colsB = b[0].length;
-    let rowsB = b.length;
-
-    if (colsA !== rowsB) {
-      console.error("Columns of A must match rows of B");
-      return null;
-    }
-
-    let result = [];
-    for (let j = 0; j < rowsA; j++) {
-      result[j] = [];
-      for (let i = 0; i < colsB; i++) {
-        let sum = 0;
-        for (let n = 0; n < colsA; n++) {
-          sum += a[j][n] * b[n][i];
-        }
-        result[j][i] = sum;
+  /**
+   * Multiply two matrices
+   * @param Array Input Matrix
+   * @param Array Input Matrix
+   * @return Array
+   */
+  matrixMultiply(a, b) {
+    let result = new Array(b.length)
+    for (let i = 0; i < a.length; i++) {
+      if (Array.isArray(b)) {
+        result[i] = this.dotProduct(a[i], b)
+      } else {
+        result[i] = a[i] * b
       }
     }
     return result;
   }
+
+  /**
+   * Perform the dot product between two matrices
+   * @param Array Input Matrix
+   * @param Array Input Matrix
+   * @return Integer Scalar dot product
+   */
+  dotProduct(a, b) {
+    let dot_product = 0;
+    for (let i = 0; i < a.length; i++) {
+      dot_product += a[i] * b[i]
+    }
+    return dot_product;
+  }
+
 }
