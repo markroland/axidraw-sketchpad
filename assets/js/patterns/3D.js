@@ -18,11 +18,13 @@ class ThreeD {
    * Draw path
    */
   draw() {
-    // return this.sketch1()
-    return this.sketch2(2)
+    // return this.simpleCube()
+    // return this.anaglyphCube()
+    return this.cubeGrid(2)
+    // return this.sketch3(2)
   }
 
-  sketch1() {
+  simpleCube() {
 
     let PathHelp = new PathHelper;
     let layers = new Array();
@@ -122,7 +124,150 @@ class ThreeD {
     return layers;
   }
 
-  sketch2(gridScale) {
+  anaglyphCube() {
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+    let paths = new Array();
+    let path = new Array();
+
+    let paths2 = new Array();
+    let path2 = new Array();
+
+    // Set angle of shape rotation
+    let angle = 0.08 * (2 * Math.PI);
+
+    // Define 3D shape (cube) (x,y,z)
+    let points = [
+      [-0.5, -0.5, -0.5],
+      [0.5, -0.5, -0.5],
+      [0.5, 0.5, -0.5],
+      [-0.5, 0.5, -0.5],
+      [-0.5, -0.5, 0.5],
+      [0.5, -0.5, 0.5],
+      [0.5, 0.5, 0.5],
+      [-0.5, 0.5, 0.5]
+    ];
+
+    const rotationZ = [
+      [Math.cos(angle), -Math.sin(angle), 0],
+      [Math.sin(angle),  Math.cos(angle), 0],
+      [0, 0, 1]
+    ];
+
+    const rotationX = [
+      [1, 0, 0],
+      [0, Math.cos(angle), -Math.sin(angle)],
+      [0, Math.sin(angle),  Math.cos(angle)]
+    ];
+
+    const rotationY = [
+      [ Math.cos(angle), 0, Math.sin(angle)],
+      [0, 1, 0],
+      [-Math.sin(angle), 0, Math.cos(angle)]
+    ];
+
+    let projected = [];
+
+    // Loop through Model points and apply transformation and projection
+    for (let i = 0; i < points.length; i++) {
+
+      // Apply rotation
+
+      let rotated = this.matrixMultiply(rotationY, points[i]);
+      rotated = this.matrixMultiply(rotationX, rotated);
+
+      let distance = 2;
+      let z = 1 / (distance - rotated[2]);
+      // let z = 1
+      const projection = [
+        [z, 0, 0],
+        [0, z, 0]
+      ];
+      rotated = this.matrixMultiply(rotationZ, rotated);
+
+      let shape2 = [...rotated]
+
+      // Translate X
+      let offset = 0.025
+      rotated[0] += offset
+      shape2[0] -= offset
+
+      // Project model onto 2D surface
+      let projected2d = this.matrixMultiply(projection, rotated);
+      let projectedshape2 = this.matrixMultiply(projection, shape2);
+
+      // Scale as necessary
+      projected2d = this.matrixMultiply(projected2d,2)
+      projectedshape2 = this.matrixMultiply(projectedshape2, 2)
+
+      // Push point to path
+      path.push([
+        projected2d[0], projected2d[1]
+      ])
+
+      path2.push([
+        projectedshape2[0], projectedshape2[1]
+      ])
+    }
+
+    // Connect points to create paths (edges)
+    for (let i = 0; i < 4; i++) {
+      paths.push(
+        new Array(
+          path[i],
+          path[(i + 1) % 4]
+        )
+      );
+      paths.push(
+        new Array(
+          path[i + 4],
+          path[((i + 1) % 4) + 4],
+        )
+      );
+      paths.push(
+        new Array(
+          path[i],
+          path[i + 4]
+        )
+      );
+    }
+
+    for (let i = 0; i < 4; i++) {
+      paths2.push(
+        new Array(
+          path2[i],
+          path2[(i + 1) % 4]
+        )
+      );
+      paths2.push(
+        new Array(
+          path2[i + 4],
+          path2[((i + 1) % 4) + 4],
+        )
+      );
+      paths2.push(
+        new Array(
+          path2[i],
+          path2[i + 4]
+        )
+      );
+    }
+
+    layers.push({
+      "color": "cyan",
+      "paths": paths
+    })
+
+    layers.push({
+      "color": "magenta",
+      "paths": paths2
+    })
+
+    return layers;
+  }
+
+  cubeGrid(gridScale) {
 
     let PathHelp = new PathHelper;
     let layers = new Array();
