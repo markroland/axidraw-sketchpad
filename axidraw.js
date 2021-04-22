@@ -1,5 +1,5 @@
-let sketch_title = '3D!'
 let selectedPattern = "3d"
+let sketch_title = ''
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {
@@ -93,6 +93,10 @@ let sketch = function(p) {
 
     // Set default selected pattern
     pattern_select.selected(selectedPattern);
+
+    if (typeof Patterns[selectedPattern].title !== "undefined") {
+      sketch_title = Patterns[selectedPattern].title
+    }
 
     // Add change event handler
     pattern_select.changed(patternSelectEvent);

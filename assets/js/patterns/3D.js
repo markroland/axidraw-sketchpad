@@ -11,6 +11,7 @@ class ThreeD {
   constructor() {
     this.key = "3d";
     this.name = "3D";
+    this.title = "Sphere Spiral";
     this.constrain = false
   }
 
