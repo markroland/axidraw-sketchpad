@@ -23,6 +23,7 @@ class ThreeD {
     // return this.anaglyphCube()
     // return this.cubeGrid(2)
     // return this.isometricPlanes()
+    // return this.sphere()
   }
 
   simpleCube() {
@@ -535,6 +536,130 @@ class ThreeD {
     }
 
     return layers;
+  }
+
+  sphere() {
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+    let paths = new Array();
+    let path = new Array();
+
+    // Define Model(s)
+    let shapes = new Array();
+    let shape = new Array();
+    let sides = 48;
+    let rings = 24;
+    let radius = 2;
+    for (let a = 1; a < rings; a++) {
+      // if (a % 2 == 0) { continue }
+      let shape = new Array();
+      let y = PathHelp.map(a, 0, rings, -radius, radius)
+      let theta_2 = Math.asin(y/radius)
+      for (let i = 0; i < sides; i++) {
+        let x = radius * Math.sin(theta_2 + Math.PI/2) * Math.cos(i/sides * 2 * Math.PI)
+        let z = radius * Math.sin(theta_2 + Math.PI/2) * Math.sin(i/sides * 2 * Math.PI)
+        shape.push([x,y,z])
+      }
+      shapes.push(shape);
+    }
+
+    // Define Transformations
+    const x_rotation = (1/16) * (2 * Math.PI)
+    const rotationX = [
+      [1, 0, 0],
+      [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
+      [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
+    ];
+
+    const y_rotation = (2/16) * (2 * Math.PI)
+    const rotationY = [
+      [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
+      [0, 1, 0],
+      [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
+    ];
+
+    const z_rotation = (0/16) * (2 * Math.PI)
+    const rotationZ = [
+      [Math.cos(z_rotation), -Math.sin(z_rotation), 0],
+      [Math.sin(z_rotation),  Math.cos(z_rotation), 0],
+      [0, 0, 1]
+    ];
+
+    // Loop through Model points and apply transformation and projection
+    for (let h = 0; h < shapes.length; h++) {
+
+      // Perspective
+      let paths = this.transform(shapes[h], [rotationY, rotationX], 6, 12)
+
+      // Orthographic
+      // let paths = this.transform(shapes[h], [rotationY, rotationX], 0.5, 1)
+
+      let color = "black"
+      switch(h) {
+        case 0:
+          color = "red"
+          break;
+        case 1:
+          color = "green"
+          break;
+        case 2:
+          color = "blue"
+          break;
+        default:
+          color = "black"
+      }
+
+      layers.push({
+        "color": color,
+        "paths": paths
+      })
+    }
+
+    return layers;
+  }
+
+  transform(points, transforms, scale = 1, distance = 1) {
+
+    let paths = new Array();
+    let path = new Array();
+    let z;
+    for (let i = 0; i < points.length; i++) {
+
+      // Apply transformation(s)
+      let world = points[i]
+      for (let transform of transforms) {
+        world = this.matrixMultiply(transform, world);
+      }
+
+      // Set projection matrix
+      z = distance;
+      if (distance > 1) {
+        z = 1 / (distance - world[2]);
+      }
+      let projection = [
+        [z, 0, 0],
+        [0, z, 0]
+      ];
+
+      // Project model onto 2D surface
+      let projected2d = this.matrixMultiply(projection, world);
+
+      // Scale
+      if (scale !== 1) {
+        projected2d = this.matrixMultiply(projected2d, scale)
+      }
+
+      // Push point to path
+      path.push([
+        projected2d[0], projected2d[1]
+      ])
+    }
+
+    // Add path to Paths
+    paths.push(path);
+
+    return paths;
   }
 
   /**
