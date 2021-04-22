@@ -21,8 +21,8 @@ class ThreeD {
   draw() {
     // return this.simpleCube()
     // return this.anaglyphCube()
-    return this.cubeGrid(2)
-    // return this.sketch3(2)
+    // return this.cubeGrid(2)
+    // return this.isometricPlanes()
   }
 
   simpleCube() {
@@ -399,6 +399,139 @@ class ThreeD {
         })
 
       }
+    }
+
+    return layers;
+  }
+
+  isometricPlanes() {
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+    let paths = new Array();
+    let path = new Array();
+
+    // Define 3D shape (cube) (x,y,z)
+    let side_length = 1;
+    let planes = [
+      [
+        [-side_length, 0, -side_length],
+        [ side_length, 0, -side_length],
+        [ side_length, 0, side_length],
+        [-side_length, 0, side_length]
+      ]
+      ,
+      [
+        [-side_length/2, -0.1 * side_length, -side_length/2],
+        [ side_length/2, -0.1 * side_length, -side_length/2],
+        [ side_length/2, -0.1 * side_length, side_length/2],
+        [-side_length/2, -0.1 * side_length, side_length/2]
+      ]
+      ,
+      [
+        [-side_length, -side_length, 0],
+        [ side_length, -side_length, 0],
+        [ side_length, side_length, 0],
+        [-side_length, side_length, 0]
+      ]
+      ,
+      [
+        [0, -side_length, -side_length],
+        [0,  side_length, -side_length],
+        [0,  side_length,  side_length],
+        [0, -side_length,  side_length]
+      ]
+    ];
+
+    // https://en.wikipedia.org/wiki/Rotation_matrix
+    const x_rotation = (1/16) * (2 * Math.PI)
+    const rotationX = [
+      [1, 0, 0],
+      [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
+      [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
+    ];
+
+    const y_rotation = (2/16) * (2 * Math.PI)
+    const rotationY = [
+      [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
+      [0, 1, 0],
+      [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
+    ];
+
+    const z_rotation = (0/16) * (2 * Math.PI)
+    const rotationZ = [
+      [Math.cos(z_rotation), -Math.sin(z_rotation), 0],
+      [Math.sin(z_rotation),  Math.cos(z_rotation), 0],
+      [0, 0, 1]
+    ];
+
+    let z
+    let projected = [];
+
+    // Loop through Model points and apply transformation and projection
+    for (let h = 0; h < planes.length; h++) {
+      let points = planes[h];
+      let paths = new Array();
+      let path = new Array();
+      for (let i = 0; i < points.length; i++) {
+
+        // Apply rotation
+        let world = points[i]
+
+        world = this.matrixMultiply(rotationY, world);
+        world = this.matrixMultiply(rotationX, world);
+
+        // world = this.matrixMultiply(rotationZ, world);
+
+        // Set projection matrix
+        let distance = 8;
+        // z = 1
+        z = 1 / (distance - world[2]);
+        const projection = [
+          [z, 0, 0],
+          [0, z, 0]
+        ];
+
+        // Translate Y
+        // world[1] += 0.5;
+
+        // Project model onto 2D surface
+        let projected2d = this.matrixMultiply(projection, world);
+
+        // Scale as necessary
+        projected2d = this.matrixMultiply(projected2d, 4)
+
+        // Push point to path
+        path.push([
+          projected2d[0], projected2d[1]
+        ])
+      }
+
+      // And first point to close path
+      path.push(path[0])
+
+      // Add path to Paths
+      paths.push(path);
+
+      let color = "black"
+      switch(h) {
+        case 0:
+          color = "red"
+          break;
+        case 1:
+          color = "green"
+          break;
+        case 2:
+          color = "blue"
+          break;
+        default:
+          color = "black"
+      }
+
+      layers.push({
+        "color": color,
+        "paths": paths
+      })
     }
 
     return layers;
