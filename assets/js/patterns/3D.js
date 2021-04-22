@@ -24,6 +24,7 @@ class ThreeD {
     // return this.cubeGrid(2)
     // return this.isometricPlanes()
     // return this.sphere()
+    return this.sphereSpiral()
   }
 
   simpleCube() {
@@ -573,6 +574,83 @@ class ThreeD {
     ];
 
     const y_rotation = (2/16) * (2 * Math.PI)
+    const rotationY = [
+      [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
+      [0, 1, 0],
+      [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
+    ];
+
+    const z_rotation = (0/16) * (2 * Math.PI)
+    const rotationZ = [
+      [Math.cos(z_rotation), -Math.sin(z_rotation), 0],
+      [Math.sin(z_rotation),  Math.cos(z_rotation), 0],
+      [0, 0, 1]
+    ];
+
+    // Loop through Model points and apply transformation and projection
+    for (let h = 0; h < shapes.length; h++) {
+
+      // Perspective
+      let paths = this.transform(shapes[h], [rotationY, rotationX], 6, 12)
+
+      // Orthographic
+      // let paths = this.transform(shapes[h], [rotationY, rotationX], 0.5, 1)
+
+      let color = "black"
+      switch(h) {
+        case 0:
+          color = "red"
+          break;
+        case 1:
+          color = "green"
+          break;
+        case 2:
+          color = "blue"
+          break;
+        default:
+          color = "black"
+      }
+
+      layers.push({
+        "color": color,
+        "paths": paths
+      })
+    }
+
+    return layers;
+  }
+
+  sphereSpiral() {
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+
+    // Define Model(s)
+    let shapes = new Array();
+    let shape = new Array();
+    let sides = 48;
+    let revolutions = 32;
+    let radius = 2;
+    for (let a = 0; a < revolutions; a++) {
+      for (let i = 0; i < sides; i++) {
+        let y = PathHelp.map(a*sides + i, 0, revolutions*sides, -radius, radius)
+        let theta_2 = Math.asin(y/radius)
+        let x = radius * Math.sin(theta_2 + Math.PI/2) * Math.cos(i/sides * 2 * Math.PI)
+        let z = radius * Math.sin(theta_2 + Math.PI/2) * Math.sin(i/sides * 2 * Math.PI)
+        shape.push([x,y,z])
+      }
+    }
+    shapes.push(shape);
+
+    // Define Transformations
+    const x_rotation = (2/16) * (2 * Math.PI)
+    const rotationX = [
+      [1, 0, 0],
+      [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
+      [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
+    ];
+
+    const y_rotation = (0/16) * (2 * Math.PI)
     const rotationY = [
       [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
       [0, 1, 0],
