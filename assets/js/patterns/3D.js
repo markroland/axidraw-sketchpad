@@ -11,20 +11,21 @@ class ThreeD {
   constructor() {
     this.key = "3d";
     this.name = "3D";
-    this.title = "Sphere Spiral";
+    this.title = "Noise Plane";
     this.constrain = false
   }
 
   /**
    * Draw path
    */
-  draw() {
+  draw(p5) {
     // return this.simpleCube()
     // return this.anaglyphCube()
     // return this.cubeGrid(2)
     // return this.isometricPlanes()
     // return this.sphere()
-    return this.sphereSpiral()
+    // return this.sphereSpiral()
+    return this.noisePlane(p5)
   }
 
   simpleCube() {
@@ -697,6 +698,78 @@ class ThreeD {
     return layers;
   }
 
+  noisePlane(p5) {
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+
+    // Define Model(s)
+    let shapes = new Array();
+    let gridSize = 50;
+    let noiseInScale = 10; // 10
+    let noiseOutScale = 0.5; // 0.5
+    let side_length = 4
+    for (let x = 0; x < gridSize; x++) {
+      let shape = new Array();
+      for (let z = 0; z < gridSize; z++) {
+        let y = noiseOutScale * p5.noise(noiseInScale * x/gridSize, noiseInScale * z/gridSize)
+        shape.push([
+          PathHelp.map(x, 0, gridSize, -side_length, side_length),
+          y,
+          PathHelp.map(z, 0, gridSize, -side_length, side_length)
+        ])
+      }
+      shapes.push(shape);
+    }
+
+    for (let z = 0; z < gridSize; z++) {
+      let shape = new Array();
+      for (let x = 0; x < gridSize; x++) {
+        let y = noiseOutScale * p5.noise(noiseInScale * x/gridSize, noiseInScale * z/gridSize)
+        shape.push([
+          PathHelp.map(x, 0, gridSize, -side_length, side_length),
+          y,
+          PathHelp.map(z, 0, gridSize, -side_length, side_length)
+        ])
+      }
+      shapes.push(shape);
+    }
+
+    console.log(shapes);
+
+    // Define Transformations
+    const x_rotation = 0.05 * (2 * Math.PI)
+    const rotationX = [
+      [1, 0, 0],
+      [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
+      [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
+    ];
+
+    const y_rotation = (2/16) * (2 * Math.PI)
+    const rotationY = [
+      [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
+      [0, 1, 0],
+      [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
+    ];
+
+    // Loop through Model points and apply transformation and projection
+    for (let h = 0; h < shapes.length; h++) {
+
+      // Perspective
+      let paths = this.transform(shapes[h], [rotationY, rotationX], 4, 12)
+
+      // Orthographic
+      // let paths = this.transform(shapes[h], [rotationY, rotationX], 0.5, 1)
+
+      layers.push({
+        "color": "black",
+        "paths": paths
+      })
+    }
+
+    return layers;
+  }
+
   transform(points, transforms, scale = 1, distance = 1) {
 
     let paths = new Array();
@@ -719,6 +792,18 @@ class ThreeD {
         [z, 0, 0],
         [0, z, 0]
       ];
+
+      // Translation matrix
+      // Temp for this sketch only
+      // TODO: make transform loop above able to handle a 4x4 matrix
+      /*
+      world = this.matrixMultiply([
+        [1,0,0,0],
+        [0,1,0,-0.5],
+        [0,0,1,0],
+        [0,0,0,1]
+      ], world.concat(1));
+      //*/
 
       // Project model onto 2D surface
       let projected2d = this.matrixMultiply(projection, world);
