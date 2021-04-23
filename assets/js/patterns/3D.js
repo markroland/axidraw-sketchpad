@@ -11,7 +11,7 @@ class ThreeD {
   constructor() {
     this.key = "3d";
     this.name = "3D";
-    this.title = "Noise Plane";
+    this.title = "Bahrain Grand Prix Terrain";
     this.constrain = false
   }
 
@@ -25,7 +25,8 @@ class ThreeD {
     // return this.isometricPlanes()
     // return this.sphere()
     // return this.sphereSpiral()
-    return this.noisePlane(p5)
+    // return this.noisePlane(p5)
+    return this.geoData()
   }
 
   simpleCube() {
@@ -770,6 +771,83 @@ class ThreeD {
     return layers;
   }
 
+  geoData() {
+
+    let Iso = new Isolines();
+    let geoData = Iso.getData();
+    let geoDataMin = Iso.getDataMin(geoData)
+    let geoDataMax = Iso.getDataMax(geoData)
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+
+    // Define Model(s)
+    let shapes = new Array();
+    let x_max = geoData[0].length;
+    let z_max = geoData.length;
+
+    // Note: This may be mirrored along the x or z axis
+
+    let grid_unit = 4
+    for (let x = 0; x < x_max; x++) {
+      let shape = new Array();
+      for (let z = 0; z < z_max; z++) {
+        let y = 0;
+        shape.push([
+          PathHelp.map(x, 0, x_max, -grid_unit, grid_unit),
+          PathHelp.map(-geoData[x][z], geoDataMin, geoDataMax, 0, 0.5),
+          PathHelp.map(z, 0, z_max, -grid_unit, grid_unit)
+        ])
+      }
+      shapes.push(shape);
+    }
+
+    for (let z = 0; z < z_max; z++) {
+      let shape = new Array();
+      for (let x = 0; x < x_max; x++) {
+        let y = 0;
+        shape.push([
+          PathHelp.map(x, 0, x_max, -grid_unit, grid_unit),
+          PathHelp.map(-geoData[x][z], geoDataMin, geoDataMax, 0, 0.5),
+          PathHelp.map(z, 0, z_max, -grid_unit, grid_unit)
+        ])
+      }
+      shapes.push(shape);
+    }
+
+    // Define Transformations
+    const x_rotation = .07 * (2 * Math.PI)
+    const rotationX = [
+      [1, 0, 0],
+      [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
+      [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
+    ];
+
+    const y_rotation = (5/16) * (2 * Math.PI)
+    const rotationY = [
+      [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
+      [0, 1, 0],
+      [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
+    ];
+
+    // Loop through Model points and apply transformation and projection
+    for (let h = 0; h < shapes.length; h++) {
+
+      // Perspective
+      let paths = this.transform(shapes[h], [rotationY, rotationX], 4, 12)
+
+      // Orthographic
+      // let paths = this.transform(shapes[h], [rotationY, rotationX], 0.5, 1)
+
+      layers.push({
+        "color": "black",
+        "paths": paths
+      })
+    }
+
+    return layers;
+  }
+
   transform(points, transforms, scale = 1, distance = 1) {
 
     let paths = new Array();
@@ -796,9 +874,9 @@ class ThreeD {
       // Translation matrix
       // Temp for this sketch only
       // TODO: make transform loop above able to handle a 4x4 matrix
-      /*
+      //*
       world = this.matrixMultiply([
-        [1,0,0,0],
+        [1,0,0,-0.5],
         [0,1,0,-0.5],
         [0,0,1,0],
         [0,0,0,1]
