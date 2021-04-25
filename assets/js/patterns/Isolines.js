@@ -86,18 +86,24 @@ class Isolines {
 
     // Create isolines
     let paths = new Array();
-    // Note: I'm not sure where this 0.0315 (about 1/32) factor is coming from
-    paths = this.calcOutlines(p5, renderData, 0.0315/upsample_scale, 16)
 
-    // Smooth with an averaging filter
-    for (let p = 0; p < paths.length-1; p++) {
-      paths[p] = PathHelp.smoothPath(paths[p])
+    // Contour "Marching Squares"
+    let num_steps = 16;
+    for (let i = 0; i < num_steps; i++) {
+
+      // Note: I'm not sure where this 0.0315 (about 1/32) factor is coming from
+      paths = this.calcOutlines(p5, renderData, 0.0315/upsample_scale, num_steps, i)
+
+      // Smooth with an averaging filter
+      for (let p = 0; p < paths.length-1; p++) {
+        paths[p] = PathHelp.smoothPath(paths[p])
+      }
+
+      layers.push({
+        "color": "red",
+        "paths": paths
+      })
     }
-
-    layers.push({
-      "color": "red",
-      "paths": PathHelp.centerPaths(paths)
-    })
 
     return layers;
   }
@@ -279,42 +285,38 @@ class Isolines {
     return filteredData;
   }
 
-  calcOutlines(p5, data, scale, num_steps) {
+  calcOutlines(p5, data, scale, num_steps, step) {
 
     let PathHelp = new PathHelper()
 
     let paths = new Array();
 
-    // Contour "Marching Squares"
-    for (let i = 0; i < num_steps; i++) {
+    let lines = new Array();
 
-      let lines = new Array();
+    // Log progress to console since this is slow
+    console.log('Marching Squares Step:', step, 'of', (num_steps - 1))
 
-      // Log progress to console since this is slow
-      console.log('Marching Squares Step:', i, 'of', (num_steps - 1))
+    let threshold = step * (256/num_steps);
+    lines = lines.concat(p5.marchingSquares(data, threshold));
 
-      let threshold = i * (256/num_steps);
-      lines = lines.concat(p5.marchingSquares(data, threshold));
-
-      // Combine the 4-point lines sets (x1, y1, x2, y2) into paths
-      let isoline_paths = new Array();
-      for (let l = 0; l < lines.length; l++) {
-        isoline_paths.push([
-          [
-            lines[l][0] * scale - 5/3,
-            lines[l][1] * scale - 1
-          ],
-          [
-            lines[l][2] * scale - 5/3,
-            lines[l][3] * scale - 1
-          ]
-        ])
-      }
-
-      isoline_paths = PathHelp.joinPaths(isoline_paths, 0.01);
-
-      paths = paths.concat(isoline_paths)
+    // Combine the 4-point lines sets (x1, y1, x2, y2) into paths
+    let isoline_paths = new Array();
+    for (let l = 0; l < lines.length; l++) {
+      isoline_paths.push([
+        [
+          lines[l][0] * scale - 5/3,
+          lines[l][1] * scale - 1
+        ],
+        [
+          lines[l][2] * scale - 5/3,
+          lines[l][3] * scale - 1
+        ]
+      ])
     }
+
+    isoline_paths = PathHelp.joinPaths(isoline_paths, 0.01);
+
+    paths = paths.concat(isoline_paths)
 
     return paths;
   }
