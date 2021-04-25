@@ -119,4 +119,32 @@ class ImageHelper {
     let yellow  = (1 - blue/255 - key) / (1 - key)
     return [cyan, magenta, yellow, key]
   }
+
+  posterize(image, levels) {
+
+    // Sample Downscaled image
+    image.loadPixels();
+    let pixelCount = image.width * image.height;
+    let image_array = new Array();
+    let x = 0;
+    let y = 0;
+    for (let i = 0; i < pixelCount; i++) {
+
+      // Get average intensity of RGB color channels
+      let average = (image.pixels[i*4 + 0] + image.pixels[i*4 + 1] + image.pixels[i*4 + 2]) / 3;
+      let clamped_intensity = this.p5.round((average/255) * (levels-1)) * (255/(levels-1));
+      // console.log(average, clamped_intensity);
+
+      y = Math.floor(i / image.width)
+      x = i % image.width
+
+      // Save intensity value to new array
+      if (image_array[y] == undefined) {
+        image_array[y] = new Array();
+      }
+      image_array[y][x] = clamped_intensity
+    }
+
+    return image_array;
+  }
 }

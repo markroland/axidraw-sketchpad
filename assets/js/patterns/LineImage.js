@@ -557,6 +557,7 @@ class LineImage {
   calcLines(imported_image) {
 
     let PathHelp = new PathHelper;
+    let ImageHelp = new ImageHelper
 
     // Initialize drawing paths
     let paths = new Array();
@@ -572,7 +573,7 @@ class LineImage {
     imported_image.resize(imported_image.width * downscale, imported_image.height * downscale)
 
     // Reduce the number of tones in the image
-    let image_array = this.posterize(imported_image, num_shades)
+    let image_array = ImageHelp.posterize(imported_image, num_shades)
 
     // console.log(image_array)
 
@@ -696,6 +697,7 @@ class LineImage {
   calcOutlines(p5, imported_image, color) {
 
     let PathHelp = new PathHelper()
+    let ImageHelp = new ImageHelper
 
     let layers = new Array();
 
@@ -715,7 +717,7 @@ class LineImage {
     // p5.image(imported_image, 24, 24);
 
     // Reduce the number of tones in the image
-    let image_array = this.posterize(imported_image, 16)
+    let image_array = ImageHelp.posterize(imported_image, 16)
 
     // Contour "Marching Squares"
     let lines = new Array();
@@ -768,6 +770,7 @@ class LineImage {
   fillPixels(p5, imported_image, technique) {
 
     let PathHelp = new PathHelper;
+    let ImageHelp = new ImageHelper
 
     let connect_pixels = false
 
@@ -789,7 +792,7 @@ class LineImage {
     // p5.image(imported_image, 0, 0);
 
     // Reduce the number of tones in the image
-    let image_array = this.posterize(imported_image, num_shades)
+    let image_array = ImageHelp.posterize(imported_image, num_shades)
 
     // Render image pixels to paths
     let scale = 2;
@@ -1059,33 +1062,6 @@ class LineImage {
     return paths;
   }
 
-  posterize(image, levels) {
-
-    // Sample Downscaled image
-    image.loadPixels();
-    let pixelCount = image.width * image.height;
-    let image_array = new Array();
-    let x = 0;
-    let y = 0;
-    for (let i = 0; i < pixelCount; i++) {
-
-      // Get average intensity of RGB color channels
-      let average = (image.pixels[i*4 + 0] + image.pixels[i*4 + 1] + image.pixels[i*4 + 2]) / 3;
-      let clamped_intensity = this.p5.round((average/255) * (levels-1)) * (255/(levels-1));
-      // console.log(average, clamped_intensity);
-
-      y = Math.floor(i / image.width)
-      x = i % image.width
-
-      // Save intensity value to new array
-      if (image_array[y] == undefined) {
-        image_array[y] = new Array();
-      }
-      image_array[y][x] = clamped_intensity
-    }
-
-    return image_array;
-  }
 
   dither(p5, imported_image, split_colors) {
 
