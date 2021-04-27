@@ -1266,8 +1266,9 @@ class LineImage {
     image_array = ImageHelp.filter(image_array, gaussian_kernel, "neighbor")
     //*/
 
-    // Sobel Edge Detection
-    image_array = ImageHelp.sobel(image_array);
+    // Edge Detection
+    // image_array = ImageHelp.sobel(image_array);
+    image_array = ImageHelp.canny(image_array);
 
     // Render
     let rows = p5_imported_image.height;

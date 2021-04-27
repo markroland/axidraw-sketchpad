@@ -242,4 +242,227 @@ class ImageHelper {
     return filtered_image;
   }
 
+  /**
+   * Canny Edge Detection
+   * - https://towardsdatascience.com/canny-edge-detection-step-by-step-in-python-computer-vision-b49c3a2d8123
+   * - https://www.youtube.com/watch?v=sRFM5IEqR2w
+   */
+  canny(image) {
+
+    // Sobel Edge Detection
+    console.log("Performing Sobel Edge Detection")
+    image = this.sobel(image)
+
+    // Non-maximum suppression
+    console.log("Performing Non-Maximum Suppression")
+    image = this.canny_suppression(image);
+
+    // Double Threshold
+    let lower_threshold = 100;
+    let upper_threshold = 200;
+    console.log("Performing Thresholding: (" + lower_threshold + "," + upper_threshold + ")")
+    image = this.canny_threshold(image, lower_threshold, upper_threshold);
+
+    // Edge Tracking by Hysteresis
+    console.log("Performing Hysteresis")
+    image = this.canny_hysteresis(image, 128);
+
+    return image;
+  }
+
+  // TODO: Use interpolation
+  // See http://www.justin-liang.com/tutorials/canny/
+  canny_suppression(image) {
+
+    // Non-maximum suppression
+    let rows = image.length;
+    let columns = image[0].length;
+
+    // Fill new image with zero values
+    // https://sanori.github.io/2019/05/JavaScript-Pitfalls-Tips-2D-Array-Matrix/
+    let new_image = Array(rows).fill().map(() => Array(columns).fill([0,0]));
+
+    for (let row = 1; row < rows-1; row++) {
+
+      for (let col = 1; col < columns-1; col++) {
+
+        let angle = image[row][col][1]
+
+        if (
+          (angle >= -(1/8) * Math.PI && angle < (1/8) * Math.PI)
+          ||
+          ((angle >= (7/8) * Math.PI && angle < Math.PI) || (angle >= -(7/8) * Math.PI && angle < Math.PI))
+        ) {
+          // horizontal
+          if (
+            (image[row][col][0] > image[row][col-1][0])
+            &&
+            (image[row][col][0] > image[row][col+1][0])
+          ) {
+            new_image[row][col] = image[row][col]
+          }
+        }
+
+        else if (
+          (angle >= (3/8) * Math.PI && angle < (5/8) * Math.PI)
+          ||
+          (angle >= (-3/8) * Math.PI && angle < (-5/8) * Math.PI)
+        ) {
+          // Vertical
+          if (
+            (image[row][col][0] > image[row-1][col][0])
+            &&
+            (image[row][col][0] > image[row+1][col][0])
+          ) {
+            new_image[row][col] = image[row][col]
+          }
+        }
+
+        else if (
+          (angle >= (5/8) * Math.PI && angle < (7/8) * Math.PI)
+          ||
+          (angle >= (-1/8) * Math.PI && angle < (-3/8) * Math.PI)
+        ) {
+          // Forward Diagonal
+          if (
+            (image[row][col][0] > image[row+1][col-1][0])
+            &&
+            (image[row][col][0] > image[row-1][col+1][0])
+          ) {
+            new_image[row][col] = image[row][col]
+          }
+        }
+
+        else if (
+          (angle >= (-5/8) * Math.PI && angle < (-7/8) * Math.PI)
+          ||
+          (angle >= (1/8) * Math.PI && angle < (3/8) * Math.PI)
+        ) {
+          // Back Diagonal
+          if (
+            (image[row][col][0] > image[row-1][col-1][0])
+            &&
+            (image[row][col][0] > image[row+1][col+1][0])
+          ) {
+            new_image[row][col] = image[row][col]
+          }
+        }
+      }
+    }
+
+    return new_image;
+  }
+
+  canny_threshold(image, low, high) {
+
+    // Non-maximum suppression
+    let rows = image.length;
+    let columns = image[0].length;
+
+    // Fill new image with zero values
+    let new_image = Array(rows).fill().map(() => Array(columns).fill([0,0]));
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+
+        // Weak
+        new_image[row][col] = [128, image[row][col][1]];
+
+        // Strong
+        if (image[row][col][0] > high) {
+          new_image[row][col] = [255, image[row][col][1]];
+        }
+        else if (image[row][col][0] < low) {
+          new_image[row][col] = [0, image[row][col][1]];
+        }
+
+      }
+    }
+
+    // console.log(new_image);
+
+    return new_image;
+  }
+
+  canny_hysteresis(image, weak_value, limit = 100) {
+
+    // Non-maximum suppression
+    let rows = image.length;
+    let columns = image[0].length;
+
+    // Fill new image with zero values
+    let new_image = Array(rows).fill().map(() => Array(columns).fill([0,0]));
+
+    let num_connected = 0;
+
+    for (let row = 1; row < rows-1; row++) {
+
+      for (let col = 1; col < columns-1; col++) {
+
+        // Save and don't analyze strong values
+        if (image[row][col][0] != weak_value) {
+          new_image[row][col] = image[row][col]
+          continue;
+        }
+
+        // this.canny_connect_weak_edges(image, weak_value, row, col);
+
+        // Analyze weak values
+        // TODO: Convert this to recursive method
+        NeighborLoop:
+        for (let i = -1; i <= 1; i++) {
+          for (let j = -1; j <= 1; j++) {
+
+            // Ignore center pixel
+            if (i == 0 && j == 0) {
+              continue;
+            }
+
+            if (image[row+i][col+j][0] > weak_value) {
+              // image[row][col] = [255, image[row][col][1]]
+              new_image[row][col] = [255, image[row][col][1]]
+              num_connected++
+              break NeighborLoop;
+            }
+          }
+        }
+
+      }
+    }
+
+    console.log(num_connected, limit);
+    limit--;
+
+    if (limit == 0) {
+      return new_image;
+    }
+
+    return this.canny_hysteresis(new_image, weak_value, limit);
+
+  }
+
+  // INCOMPLETE
+  canny_connect_weak_edges(image, weak_value, row, col) {
+
+    // Analyze weak values
+    for (let i = -1; i <= 1; i++) {
+      for (let j = -1; j <= 1; j++) {
+
+        // Ignore center pixel
+        if (i == 0 && j == 0) {
+          continue;
+        }
+
+        if (image[row+i][col+j][0] > weak_value) {
+          image[row][col] = [255, image[row][col][1]]
+          new_image[row][col] = [255, image[row][col][1]]
+          return true
+        }
+      }
+    }
+
+    return false;
+
+  }
+
 }

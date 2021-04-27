@@ -1,5 +1,5 @@
-let selectedPattern = "3d"
-let sketch_title = ''
+let selectedPattern = "lineimage"
+let sketch_title = 'Canny Edge Detection #1'
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {
