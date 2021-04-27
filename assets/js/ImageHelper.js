@@ -101,6 +101,22 @@ class ImageHelper {
     return data;
   }
 
+  /**
+   * Invert an image
+   */
+  invert (data) {
+    const rows = data.length;
+    const columns = data[0].length;
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+        if (!Array.isArray(data[row][col])) {
+          data[row][col] = 255 - data[row][col]
+        }
+      }
+    }
+    return data;
+  }
+
   constrain (n, min, max) {
     if (n < min) {
       return min;
