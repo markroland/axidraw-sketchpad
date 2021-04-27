@@ -191,4 +191,55 @@ class ImageHelper {
     return image_array;
   }
 
+  sobel(image) {
+
+    let filtered_image = new Array();
+
+    // Perform edge detection horizontally and vertically
+    const Gx_kernel = [
+      [1,0,-1],
+      [2,0,-2],
+      [1,0,-1]
+    ]
+    const Gy_kernel = [
+      [-1,-2,-1],
+      [ 0, 0 ,0],
+      [ 1, 2, 1]
+    ]
+    let gx = this.filter(image, Gx_kernel)
+    let gy = this.filter(image, Gy_kernel)
+
+    // Loop through filtered image pixels and calculate edge magnitude and direction
+    let rows = image.length;
+    let columns = image[0].length;
+    for (let row = 0; row < rows; row++) {
+
+      // Initialize columns of row
+      filtered_image[row] = new Array(columns);
+
+      for (let col = 0; col < columns; col++) {
+
+        // Magnitude of change
+        let g = Math.sqrt(
+          Math.pow(gx[row][col], 2)
+          +
+          Math.pow(gy[row][col], 2)
+        );
+
+        // Direction of change
+        let theta = Math.atan2(gy[row][col], gx[row][col]) // + Math.PI/2
+        /*
+        if (theta < 0) {
+          theta = (2 * Math.PI) + theta;
+        }
+        //*/
+
+        // Return magnitude and direction of pixel "edginess"
+        filtered_image[row][col] = [g, theta];
+      }
+    }
+
+    return filtered_image;
+  }
+
 }
