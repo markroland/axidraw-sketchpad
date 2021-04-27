@@ -101,6 +101,22 @@ class ImageHelper {
     return data;
   }
 
+  /**
+   * Invert an image
+   */
+  invert (data) {
+    const rows = data.length;
+    const columns = data[0].length;
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+        if (!Array.isArray(data[row][col])) {
+          data[row][col] = 255 - data[row][col]
+        }
+      }
+    }
+    return data;
+  }
+
   constrain (n, min, max) {
     if (n < min) {
       return min;
@@ -146,5 +162,275 @@ class ImageHelper {
     }
 
     return image_array;
+  }
+
+  p5PixelsToIntensityArray(p5image) {
+    let pixelCount = p5image.width * p5image.height;
+    console.log("Sampling " + pixelCount + " pixels...")
+    let image_array = new Array(p5image.height).fill(255);
+    for (let a = 0; a < image_array.length; a++) {
+      image_array[a] = new Array(p5image.width).fill(255)
+    }
+    let x = 0;
+    let y = 0;
+    for (let i = 0; i < pixelCount; i++) {
+
+      // Get average intensity of RGB color channels
+      let average = Math.round(
+        (p5image.pixels[i*4 + 0] + p5image.pixels[i*4 + 1] + p5image.pixels[i*4 + 2])
+        / 3
+      );
+      // let clamped_intensity = this.p5.round((average/255) * (levels-1)) * (255/(levels-1));
+      // console.log(average, clamped_intensity);
+
+      // Save intensity value to array
+      y = Math.floor(i / p5image.width)
+      x = i % p5image.width
+      image_array[y][x] = average
+    }
+    return image_array;
+  }
+
+  sobel(image) {
+
+    let filtered_image = new Array();
+
+    // Perform edge detection horizontally and vertically
+    const Gx_kernel = [
+      [1,0,-1],
+      [2,0,-2],
+      [1,0,-1]
+    ]
+    const Gy_kernel = [
+      [-1,-2,-1],
+      [ 0, 0 ,0],
+      [ 1, 2, 1]
+    ]
+    let gx = this.filter(image, Gx_kernel)
+    let gy = this.filter(image, Gy_kernel)
+
+    // Loop through filtered image pixels and calculate edge magnitude and direction
+    let rows = image.length;
+    let columns = image[0].length;
+    for (let row = 0; row < rows; row++) {
+
+      // Initialize columns of row
+      filtered_image[row] = new Array(columns);
+
+      for (let col = 0; col < columns; col++) {
+
+        // Magnitude of change
+        let g = Math.sqrt(
+          Math.pow(gx[row][col], 2)
+          +
+          Math.pow(gy[row][col], 2)
+        );
+
+        // Direction of change
+        let theta = Math.atan2(gy[row][col], gx[row][col]) // + Math.PI/2
+        /*
+        if (theta < 0) {
+          theta = (2 * Math.PI) + theta;
+        }
+        //*/
+
+        // Return magnitude and direction of pixel "edginess"
+        filtered_image[row][col] = [g, theta];
+      }
+    }
+
+    return filtered_image;
+  }
+
+  /**
+   * Canny Edge Detection
+   * - https://towardsdatascience.com/canny-edge-detection-step-by-step-in-python-computer-vision-b49c3a2d8123
+   * - https://www.youtube.com/watch?v=sRFM5IEqR2w
+   */
+  canny(image, lower_threshold, upper_threshold) {
+
+    // Sobel Edge Detection
+    console.log("Performing Sobel Edge Detection")
+    image = this.sobel(image)
+
+    // Non-maximum suppression
+    console.log("Performing Non-Maximum Suppression")
+    image = this.canny_suppression(image);
+
+    // Double Threshold
+    console.log("Performing Thresholding: (" + lower_threshold + "," + upper_threshold + ")")
+    image = this.canny_threshold(image, lower_threshold, upper_threshold);
+
+    // Edge Tracking by Hysteresis
+    console.log("Performing Hysteresis")
+    image = this.canny_hysteresis(image, 128);
+
+    return image;
+  }
+
+  // TODO: Use interpolation
+  // See http://www.justin-liang.com/tutorials/canny/
+  canny_suppression(image) {
+
+    // Non-maximum suppression
+    let rows = image.length;
+    let columns = image[0].length;
+
+    // Fill new image with zero values
+    // https://sanori.github.io/2019/05/JavaScript-Pitfalls-Tips-2D-Array-Matrix/
+    let new_image = Array(rows).fill().map(() => Array(columns).fill([0,0]));
+
+    for (let row = 1; row < rows-1; row++) {
+
+      for (let col = 1; col < columns-1; col++) {
+
+        let angle = image[row][col][1]
+
+        if (
+          (angle >= -(1/8) * Math.PI && angle < (1/8) * Math.PI)
+          ||
+          ((angle >= (7/8) * Math.PI && angle < Math.PI) || (angle >= -(7/8) * Math.PI && angle < Math.PI))
+        ) {
+          // horizontal
+          if (
+            (image[row][col][0] > image[row][col-1][0])
+            &&
+            (image[row][col][0] > image[row][col+1][0])
+          ) {
+            new_image[row][col] = image[row][col]
+          }
+        }
+
+        else if (
+          (angle >= (3/8) * Math.PI && angle < (5/8) * Math.PI)
+          ||
+          (angle >= (-3/8) * Math.PI && angle < (-5/8) * Math.PI)
+        ) {
+          // Vertical
+          if (
+            (image[row][col][0] > image[row-1][col][0])
+            &&
+            (image[row][col][0] > image[row+1][col][0])
+          ) {
+            new_image[row][col] = image[row][col]
+          }
+        }
+
+        else if (
+          (angle >= (5/8) * Math.PI && angle < (7/8) * Math.PI)
+          ||
+          (angle >= (-1/8) * Math.PI && angle < (-3/8) * Math.PI)
+        ) {
+          // Forward Diagonal
+          if (
+            (image[row][col][0] > image[row+1][col-1][0])
+            &&
+            (image[row][col][0] > image[row-1][col+1][0])
+          ) {
+            new_image[row][col] = image[row][col]
+          }
+        }
+
+        else if (
+          (angle >= (-5/8) * Math.PI && angle < (-7/8) * Math.PI)
+          ||
+          (angle >= (1/8) * Math.PI && angle < (3/8) * Math.PI)
+        ) {
+          // Back Diagonal
+          if (
+            (image[row][col][0] > image[row-1][col-1][0])
+            &&
+            (image[row][col][0] > image[row+1][col+1][0])
+          ) {
+            new_image[row][col] = image[row][col]
+          }
+        }
+      }
+    }
+
+    return new_image;
+  }
+
+  canny_threshold(image, low, high) {
+
+    // Non-maximum suppression
+    let rows = image.length;
+    let columns = image[0].length;
+
+    // Fill new image with zero values
+    let new_image = Array(rows).fill().map(() => Array(columns).fill([0,0]));
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+
+        // Weak
+        new_image[row][col] = [128, image[row][col][1]];
+
+        // Strong
+        if (image[row][col][0] > high) {
+          new_image[row][col] = [255, image[row][col][1]];
+        }
+        else if (image[row][col][0] < low) {
+          new_image[row][col] = [0, image[row][col][1]];
+        }
+
+      }
+    }
+
+    return new_image;
+  }
+
+  canny_hysteresis(image, weak_value) {
+
+    // Non-maximum suppression
+    let rows = image.length;
+    let columns = image[0].length;
+
+    // Start with a strong pixel and trace weak paths until an end is hit
+    for (let row = 1; row < rows-1; row++) {
+      for (let col = 1; col < columns-1; col++) {
+        if (image[row][col][0] == 255) {
+          this.canny_trace_strong(image, weak_value, row, col);
+        }
+      }
+    }
+
+    // Remove detached weak values
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+        if (image[row][col][0] == weak_value) {
+          image[row][col] = [0, image[row][col][1]]
+        }
+      }
+    }
+
+    return image;
+  }
+
+  canny_trace_strong(image, weak_value, row, col) {
+
+    let connect_count = 0;
+
+    // Analyze weak values
+    for (let i = -1; i <= 1; i++) {
+      for (let j = -1; j <= 1; j++) {
+
+        // Ignore center pixel
+        if (i == 0 && j == 0) {
+          continue;
+        }
+
+        if (image[row+i][col+j][0] == weak_value) {
+          connect_count++
+          image[row+i][col+j] = [255, image[row+i][col+j][1]]
+          this.canny_trace_strong(image, weak_value, row+i, col+j)
+        }
+      }
+    }
+
+    // Return when no more connections are made
+    if (connect_count == 0) {
+      return
+    }
   }
 }
