@@ -163,4 +163,32 @@ class ImageHelper {
 
     return image_array;
   }
+
+  p5PixelsToIntensityArray(p5image) {
+    let pixelCount = p5image.width * p5image.height;
+    console.log("Sampling " + pixelCount + " pixels...")
+    let image_array = new Array(p5image.height).fill(255);
+    for (let a = 0; a < image_array.length; a++) {
+      image_array[a] = new Array(p5image.width).fill(255)
+    }
+    let x = 0;
+    let y = 0;
+    for (let i = 0; i < pixelCount; i++) {
+
+      // Get average intensity of RGB color channels
+      let average = Math.round(
+        (p5image.pixels[i*4 + 0] + p5image.pixels[i*4 + 1] + p5image.pixels[i*4 + 2])
+        / 3
+      );
+      // let clamped_intensity = this.p5.round((average/255) * (levels-1)) * (255/(levels-1));
+      // console.log(average, clamped_intensity);
+
+      // Save intensity value to array
+      y = Math.floor(i / p5image.width)
+      x = i % p5image.width
+      image_array[y][x] = average
+    }
+    return image_array;
+  }
+
 }
