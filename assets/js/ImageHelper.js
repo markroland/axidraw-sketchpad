@@ -247,7 +247,7 @@ class ImageHelper {
    * - https://towardsdatascience.com/canny-edge-detection-step-by-step-in-python-computer-vision-b49c3a2d8123
    * - https://www.youtube.com/watch?v=sRFM5IEqR2w
    */
-  canny(image) {
+  canny(image, lower_threshold, upper_threshold) {
 
     // Sobel Edge Detection
     console.log("Performing Sobel Edge Detection")
@@ -258,8 +258,6 @@ class ImageHelper {
     image = this.canny_suppression(image);
 
     // Double Threshold
-    let lower_threshold = 100;
-    let upper_threshold = 200;
     console.log("Performing Thresholding: (" + lower_threshold + "," + upper_threshold + ")")
     image = this.canny_threshold(image, lower_threshold, upper_threshold);
 
@@ -384,14 +382,14 @@ class ImageHelper {
     return new_image;
   }
 
-  canny_hysteresis(image, weak_value, limit = 100) {
+  canny_hysteresis(image, weak_value) {
 
     // Non-maximum suppression
     let rows = image.length;
     let columns = image[0].length;
 
     // Fill new image with zero values
-    let new_image = Array(rows).fill().map(() => Array(columns).fill([0,0]));
+    // let new_image = Array(rows).fill().map(() => Array(columns).fill([0,0]));
 
     let num_connected = 0;
 
@@ -399,16 +397,20 @@ class ImageHelper {
 
       for (let col = 1; col < columns-1; col++) {
 
-        // Save and don't analyze strong values
-        if (image[row][col][0] != weak_value) {
-          new_image[row][col] = image[row][col]
-          continue;
+        if (image[row][col][0] == 255) {
+          this.canny_trace_strong(image, weak_value, row, col);
         }
 
-        // this.canny_connect_weak_edges(image, weak_value, row, col);
+        // Don't analyze strong values
+        // if (image[row][col][0] != weak_value) {
+          // new_image[row][col] = image[row][col]
+          // continue;
+        // }
 
         // Analyze weak values
-        // TODO: Convert this to recursive method
+        // this.canny_connect_weak_edges(image, weak_value, row, col);
+
+        /*
         NeighborLoop:
         for (let i = -1; i <= 1; i++) {
           for (let j = -1; j <= 1; j++) {
@@ -419,30 +421,64 @@ class ImageHelper {
             }
 
             if (image[row+i][col+j][0] > weak_value) {
-              // image[row][col] = [255, image[row][col][1]]
               new_image[row][col] = [255, image[row][col][1]]
               num_connected++
               break NeighborLoop;
             }
           }
         }
+        /*/
 
       }
     }
 
-    console.log(num_connected, limit);
-    limit--;
-
-    if (limit == 0) {
-      return new_image;
+    // Remove detached weak values
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+        if (image[row][col][0] == weak_value) {
+          image[row][col] = [0, image[row][col][1]]
+        }
+      }
     }
 
-    return this.canny_hysteresis(new_image, weak_value, limit);
+      return image;
+  }
 
+  canny_trace_strong(image, weak_value, row, col) {
+
+    let connect_count = 0;
+
+    // Analyze weak values
+    for (let i = -1; i <= 1; i++) {
+      for (let j = -1; j <= 1; j++) {
+
+        // Ignore center pixel
+        if (i == 0 && j == 0) {
+          continue;
+        }
+
+        if (image[row+i][col+j][0] == weak_value) {
+          if (row+i == 9 && col+j == 40) {
+            console.log("Here", row, col)
+          }
+          connect_count++
+          image[row+i][col+j] = [255, image[row+i][col+j][1]]
+          this.canny_trace_strong(image, weak_value, row+i, col+j)
+        }
+
+      }
+    }
+
+    // Return when no more connections are made
+    if (connect_count == 0) {
+      return
+    }
   }
 
   // INCOMPLETE
   canny_connect_weak_edges(image, weak_value, row, col) {
+
+    let connect_count = 0;
 
     // Analyze weak values
     for (let i = -1; i <= 1; i++) {
@@ -454,14 +490,24 @@ class ImageHelper {
         }
 
         if (image[row+i][col+j][0] > weak_value) {
+          if (row+i == 9 && col+j == 40) {
+            console.log("Here", row, col)
+          }
           image[row][col] = [255, image[row][col][1]]
-          new_image[row][col] = [255, image[row][col][1]]
-          return true
+          connect_count++
         }
+
+        if (image[row+i][col+j][0] == weak_value) {
+          this.canny_connect_weak_edges(image, weak_value, row+i, col+i)
+        }
+
       }
     }
 
-    return false;
+    // Return when no more connections are made
+    if (connect_count == 0) {
+      return
+    }
 
   }
 

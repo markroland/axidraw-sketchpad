@@ -10,6 +10,40 @@ class LineImage {
     this.name = "Line Image";
 
     this.constrain = false
+
+    this.config = {
+      "lower": {
+        "name": "Lower Bound",
+        "value": null,
+        "input": {
+          "type": "createSlider",
+          "params" : [
+            0,
+            255,
+            120,
+            1
+          ],
+          "class": "slider",
+          "displayValue": true
+        }
+      },
+      "upper": {
+        "name": "Upper Bound",
+        "value": null,
+        "input": {
+          "type": "createSlider",
+          "params" : [
+            0,
+            255,
+            180,
+            1
+          ],
+          "class": "slider",
+          "displayValue": true
+        }
+      }
+    };
+
   }
 
   draw(p5, imported_image) {
@@ -1220,7 +1254,18 @@ class LineImage {
 
   edgeDetection(p5, p5_imported_image) {
 
-    const scale = 0.25;
+    let lower_threshold = 30;
+    let upper_threshold = 100;
+    // lower_threshold = parseInt(document.querySelector('#sketch-controls > div:nth-child(1) > input').value)
+    // upper_threshold = parseInt(document.querySelector('#sketch-controls > div:nth-child(2) > input').value)
+
+    // Display selected value(s)
+    document.querySelector('#sketch-controls > div:nth-child(1) > span').innerHTML = lower_threshold;
+    document.querySelector('#sketch-controls > div:nth-child(2) > span').innerHTML = upper_threshold;
+
+    console.log(lower_threshold, upper_threshold);
+
+    const scale = 1;
     const y_axis_pixel_range = 288
     const x_axis_pixel_range = 480
     const sketch_margin = 48;
@@ -1268,7 +1313,7 @@ class LineImage {
 
     // Edge Detection
     // image_array = ImageHelp.sobel(image_array);
-    image_array = ImageHelp.canny(image_array);
+    image_array = ImageHelp.canny(image_array, lower_threshold, upper_threshold);
 
     // Render
     let rows = p5_imported_image.height;
@@ -1280,7 +1325,7 @@ class LineImage {
       for (let col = 0; col < columns; col++) {
 
         // Render in "p5 land"
-        //*
+        /*
         let pixel_color = image_array[row][col][0]
         // pixel_color = p5.color('hsl('
         //   + Math.floor(PathHelp.map(image_array[row][col][1], -Math.PI, Math.PI, 0, 360))
@@ -1300,29 +1345,15 @@ class LineImage {
         p5.noFill();
         //*/
 
-
         // Convert pixels to geometry path points
+        //*
         if (image_array[row][col][0] > 128) {
-
-          // points.push([
-          //   col * pixel_size,
-          //   row * pixel_size
-          // ])
-
-          // Directional line segment
-          /*
-          paths.push([
-            [
-              (col * pixel_size) + (r * Math.cos(theta)),
-              (row * pixel_size) + (r * Math.sin(theta))
-            ],
-            [
-              (col * pixel_size) + (r * Math.cos(theta + Math.PI)),
-              (row * pixel_size) + (r * Math.sin(theta + Math.PI))
-            ]
-          ]);
-          //*/
+          points.push([
+            col * pixel_size,
+            row * pixel_size
+          ])
         }
+        //*/
 
       }
     }
