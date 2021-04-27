@@ -377,8 +377,6 @@ class ImageHelper {
       }
     }
 
-    // console.log(new_image);
-
     return new_image;
   }
 
@@ -388,47 +386,12 @@ class ImageHelper {
     let rows = image.length;
     let columns = image[0].length;
 
-    // Fill new image with zero values
-    // let new_image = Array(rows).fill().map(() => Array(columns).fill([0,0]));
-
-    let num_connected = 0;
-
+    // Start with a strong pixel and trace weak paths until an end is hit
     for (let row = 1; row < rows-1; row++) {
-
       for (let col = 1; col < columns-1; col++) {
-
         if (image[row][col][0] == 255) {
           this.canny_trace_strong(image, weak_value, row, col);
         }
-
-        // Don't analyze strong values
-        // if (image[row][col][0] != weak_value) {
-          // new_image[row][col] = image[row][col]
-          // continue;
-        // }
-
-        // Analyze weak values
-        // this.canny_connect_weak_edges(image, weak_value, row, col);
-
-        /*
-        NeighborLoop:
-        for (let i = -1; i <= 1; i++) {
-          for (let j = -1; j <= 1; j++) {
-
-            // Ignore center pixel
-            if (i == 0 && j == 0) {
-              continue;
-            }
-
-            if (image[row+i][col+j][0] > weak_value) {
-              new_image[row][col] = [255, image[row][col][1]]
-              num_connected++
-              break NeighborLoop;
-            }
-          }
-        }
-        /*/
-
       }
     }
 
@@ -441,7 +404,7 @@ class ImageHelper {
       }
     }
 
-      return image;
+    return image;
   }
 
   canny_trace_strong(image, weak_value, row, col) {
@@ -458,14 +421,10 @@ class ImageHelper {
         }
 
         if (image[row+i][col+j][0] == weak_value) {
-          if (row+i == 9 && col+j == 40) {
-            console.log("Here", row, col)
-          }
           connect_count++
           image[row+i][col+j] = [255, image[row+i][col+j][1]]
           this.canny_trace_strong(image, weak_value, row+i, col+j)
         }
-
       }
     }
 
@@ -474,41 +433,4 @@ class ImageHelper {
       return
     }
   }
-
-  // INCOMPLETE
-  canny_connect_weak_edges(image, weak_value, row, col) {
-
-    let connect_count = 0;
-
-    // Analyze weak values
-    for (let i = -1; i <= 1; i++) {
-      for (let j = -1; j <= 1; j++) {
-
-        // Ignore center pixel
-        if (i == 0 && j == 0) {
-          continue;
-        }
-
-        if (image[row+i][col+j][0] > weak_value) {
-          if (row+i == 9 && col+j == 40) {
-            console.log("Here", row, col)
-          }
-          image[row][col] = [255, image[row][col][1]]
-          connect_count++
-        }
-
-        if (image[row+i][col+j][0] == weak_value) {
-          this.canny_connect_weak_edges(image, weak_value, row+i, col+i)
-        }
-
-      }
-    }
-
-    // Return when no more connections are made
-    if (connect_count == 0) {
-      return
-    }
-
-  }
-
 }
