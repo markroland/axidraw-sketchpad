@@ -1,5 +1,5 @@
-let selectedPattern = "sketchbook"
-let sketch_title = 'Toxiclibs Test'
+let selectedPattern = "geojson"
+let sketch_title = 'GeoJSON'
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {
@@ -37,6 +37,7 @@ let sketch = function(p) {
     "fibonacci": new Fibonacci(),
     "flowfield": new FlowField(),
     "genuary": new Genuary(),
+    "geojson": new GeoJSON(),
     "grid": new Grid(),
     "heart": new Heart(),
     "isolines": new Isolines(),
