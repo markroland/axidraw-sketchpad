@@ -1,5 +1,53 @@
 class PathHelper {
 
+  info(path) {
+    let results = {
+      "min": this.getMin(path),
+      "max": this.getMax(path)
+    }
+    results.range = [
+      results.max[0] - results.min[0],
+      results.max[1] - results.min[1]
+    ]
+    results.center = [
+      results.min[0] + results.range[0]/2,
+      results.min[1] + results.range[1]/2
+    ]
+    return results
+  }
+
+  /**
+   *
+   **/
+  getMin(path) {
+    let x_coordinates = this.arrayColumn(path, 0);
+    let y_coordinates = this.arrayColumn(path, 1);
+    return [
+      this.arrayMin(x_coordinates),
+      this.arrayMin(y_coordinates),
+    ]
+  }
+
+  /**
+   *
+   **/
+  getMax(path) {
+    let x_coordinates = this.arrayColumn(path, 0);
+    let y_coordinates = this.arrayColumn(path, 1);
+    return [
+      this.arrayMax(x_coordinates),
+      this.arrayMax(y_coordinates),
+    ]
+  }
+
+  arrayMin(a) {
+    return Math.min(...a);
+  }
+
+  arrayMax(a) {
+    return Math.max(...a);
+  }
+
   /**
    * https://www.w3schools.com/js/js_random.asp
    */
