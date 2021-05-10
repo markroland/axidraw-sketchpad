@@ -11,7 +11,7 @@ class ThreeD {
   constructor() {
     this.key = "3d";
     this.name = "3D";
-    this.title = "Bahrain Grand Prix Isolines";
+    this.title = "Portimao Grand Prix";
     this.constrain = false
   }
 
@@ -27,7 +27,8 @@ class ThreeD {
     // return this.sphereSpiral()
     // return this.noisePlane(p5)
     // return this.geoData()
-    return this.geoIsolines(p5)
+    return this.grandPrix()
+    // return this.geoIsolines(p5)
   }
 
   simpleCube() {
@@ -427,13 +428,6 @@ class ThreeD {
       ]
       ,
       [
-        [-side_length/2, -0.1 * side_length, -side_length/2],
-        [ side_length/2, -0.1 * side_length, -side_length/2],
-        [ side_length/2, -0.1 * side_length, side_length/2],
-        [-side_length/2, -0.1 * side_length, side_length/2]
-      ]
-      ,
-      [
         [-side_length, -side_length, 0],
         [ side_length, -side_length, 0],
         [ side_length, side_length, 0],
@@ -449,21 +443,21 @@ class ThreeD {
     ];
 
     // https://en.wikipedia.org/wiki/Rotation_matrix
-    const x_rotation = (1/16) * (2 * Math.PI)
+    const x_rotation = (0/16) * (2 * Math.PI)
     const rotationX = [
       [1, 0, 0],
       [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
       [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
     ];
 
-    const y_rotation = (2/16) * (2 * Math.PI)
+    const y_rotation = (0/16) * (2 * Math.PI)
     const rotationY = [
       [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
       [0, 1, 0],
       [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
     ];
 
-    const z_rotation = (0/16) * (2 * Math.PI)
+    const z_rotation = (1/16) * (2 * Math.PI)
     const rotationZ = [
       [Math.cos(z_rotation), -Math.sin(z_rotation), 0],
       [Math.sin(z_rotation),  Math.cos(z_rotation), 0],
@@ -485,8 +479,7 @@ class ThreeD {
 
         world = this.matrixMultiply(rotationY, world);
         world = this.matrixMultiply(rotationX, world);
-
-        // world = this.matrixMultiply(rotationZ, world);
+        world = this.matrixMultiply(rotationZ, world);
 
         // Set projection matrix
         let distance = 8;
@@ -521,13 +514,13 @@ class ThreeD {
       let color = "black"
       switch(h) {
         case 0:
-          color = "red"
-          break;
-        case 1:
           color = "green"
           break;
-        case 2:
+        case 1:
           color = "blue"
+          break;
+        case 2:
+          color = "red"
           break;
         default:
           color = "black"
@@ -817,14 +810,14 @@ class ThreeD {
     }
 
     // Define Transformations
-    const x_rotation = .07 * (2 * Math.PI)
+    const x_rotation = .09 * (2 * Math.PI)
     const rotationX = [
       [1, 0, 0],
       [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
       [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
     ];
 
-    const y_rotation = (5/16) * (2 * Math.PI)
+    const y_rotation = (3/8) * (2 * Math.PI)
     const rotationY = [
       [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
       [0, 1, 0],
@@ -835,7 +828,7 @@ class ThreeD {
     for (let h = 0; h < shapes.length; h++) {
 
       // Perspective
-      let paths = this.transform(shapes[h], [rotationY, rotationX], 4, 12)
+      let paths = this.transform(shapes[h], [rotationY, rotationX], 4, 14)
 
       // Orthographic
       // let paths = this.transform(shapes[h], [rotationY, rotationX], 0.5, 1)
@@ -845,6 +838,183 @@ class ThreeD {
         "paths": paths
       })
     }
+
+    return layers;
+  }
+
+  grandPrix() {
+
+    let Iso = new Isolines();
+
+    // Load Geo Data
+    let geoData = f1.portimao.terrain.elevations
+
+    let lat_min = f1.portimao.terrain.bbox[1] // y
+    let lat_max = f1.portimao.terrain.bbox[3]
+    let long_min = f1.portimao.terrain.bbox[0] // x
+    let long_max = f1.portimao.terrain.bbox[2]
+
+    let geoDataMin = Iso.getDataMin(geoData)
+    let geoDataMax = Iso.getDataMax(geoData)
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+
+    // Define Model(s)
+    let shapes = new Array();
+    let x_max = geoData[0].length;
+    let y_max = geoData.length;
+
+    // Note: This may be mirrored along the x or z axis
+
+    let grid_unit = 5
+
+    let elevation_scale = 1
+    let scale = 5;
+    let distance = 12;
+    let crop = 10;
+
+    // Vertical Lines of constant Longitude
+    //*
+    for (let x = 0 + crop; x < x_max - crop; x+=1) {
+      let shape = new Array();
+      for (let y = 0 + crop; y < y_max - crop; y+=1) {
+
+        let px = PathHelp.map(x, 0, x_max, -grid_unit, grid_unit)
+        let py = PathHelp.map(y, 0, y_max, -grid_unit, grid_unit)
+        let pz = PathHelp.map(geoData[y][x], geoDataMin, geoDataMax, 0, elevation_scale)
+
+        // Trim to circle
+        // if (Math.abs(py) > Math.abs(0.75 * grid_unit * Math.sin(Math.atan2(py,px)))) {
+        if (Math.abs(py) > Math.abs((y_max - 2 * crop)/(y_max-1) * grid_unit * Math.sin(Math.atan2(py,px)))) {
+          continue;
+        }
+
+        shape.push([px, py, pz])
+      }
+      shapes.push(shape);
+    }
+
+    //*/
+
+    // Horizontal Lines of constant Latitude
+    //*
+    for (let y = 0 + crop; y < y_max - crop; y+=1) {
+      let shape = new Array();
+      for (let x = 0 + crop; x < x_max - crop; x+=1) {
+
+        let px = PathHelp.map(x, 0, x_max, -grid_unit, grid_unit)
+        let py = PathHelp.map(y, 0, y_max, -grid_unit, grid_unit)
+        let pz = PathHelp.map(geoData[y][x], geoDataMin, geoDataMax, 0, elevation_scale)
+
+        // Trim to circle
+        if (Math.abs(px) > Math.abs((x_max - 2 * crop)/(x_max-1) * grid_unit * Math.cos(Math.atan2(py,px)))) {
+          continue;
+        }
+
+        shape.push([px, py, pz])
+      }
+      shapes.push(shape);
+    }
+    //*/
+
+    // Define Transformations
+    const x_rotation = (-2.5/16) * (2 * Math.PI) // 0.09
+    const rotationX = [
+      [1, 0, 0],
+      [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
+      [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
+    ];
+
+    const y_rotation = (0/16) * (2 * Math.PI) // 3/8
+    const rotationY = [
+      [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
+      [0, 1, 0],
+      [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
+    ];
+
+    const z_rotation = (-1/16) * (2 * Math.PI)
+    const rotationZ = [
+      [Math.cos(z_rotation), -Math.sin(z_rotation), 0],
+      [Math.sin(z_rotation),  Math.cos(z_rotation), 0],
+      [0, 0, 1]
+    ];
+
+    // Loop through Model points and apply transformation and projection
+    let paths = new Array();
+    for (let h = 0; h < shapes.length; h++) {
+
+      // Perspective
+      paths = paths.concat(this.transform(shapes[h], [rotationZ, rotationY, rotationX], scale, distance));
+
+      // Orthographic
+      // paths = paths.concat(this.transform(shapes[h], [rotationZ, rotationY, rotationX], 0.5, 1));
+    }
+    layers.push({
+      "color": "green",
+      "paths": paths
+    })
+
+    //////// TRACK
+
+    shapes = new Array();
+    let shape = new Array();
+
+    // Extract Track coordinates to a polyline
+    let path = new Array();
+    for (let coordinate of f1.portimao.track.features[0].geometry.coordinates) {
+      let x = PathHelp.map(
+        PathHelp.map(coordinate[0], long_min, long_max, 0, x_max),
+        0, x_max, -grid_unit, grid_unit
+      );
+
+      let y = PathHelp.map(
+        PathHelp.map(coordinate[1], lat_min, lat_max, 0, y_max),
+        0, y_max, grid_unit, -grid_unit
+      )
+      path.push([x,y])
+    }
+
+    // Expand single path to parallel paths
+    let parallel_paths = new Array();
+    parallel_paths.push(path);
+    parallel_paths = parallel_paths.concat(PathHelp.expandPath(path, 0.025, 0.025, 'open'));
+    parallel_paths = parallel_paths.concat(PathHelp.expandPath(path, 0.05, 0.05, 'open'));
+
+    for (let i = 0; i < parallel_paths.length; i++) {
+      shape = new Array();
+      for (let point of parallel_paths[i]) {
+        // Interpolate Z value from terrain
+        let coordinate_x = PathHelp.map(point[0], -grid_unit, grid_unit, 0, x_max)
+        let nearest_x_min = Math.floor(coordinate_x)
+        let nearest_x_max = Math.ceil(coordinate_x)
+
+        let coordinate_y = PathHelp.map(point[1], -grid_unit, grid_unit, 0, x_max)
+        let nearest_y_min = Math.floor(coordinate_y)
+        let nearest_y_max = Math.ceil(coordinate_y)
+
+        // Nearest Neighbor
+        let z = PathHelp.map(geoData[nearest_y_min][nearest_x_min], geoDataMin, geoDataMax, 0, elevation_scale)
+
+        shape.push([point[0],point[1],z])
+      }
+      shapes.push(shape);
+    }
+
+    // Loop through Model points and apply transformation and projection
+    paths = new Array();
+    for (let h = 0; h < shapes.length; h++) {
+
+      // Perspective
+      paths = paths.concat(this.transform(shapes[h], [rotationZ, rotationY, rotationX], scale, distance))
+
+      // Orthographic
+      // paths = paths.concat(this.transform(shapes[h], [rotationY, rotationX, rotationZ], 0.5, 1))
+    }
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
 
     return layers;
   }
@@ -942,7 +1112,7 @@ class ThreeD {
       // Translation matrix
       // Temp for this sketch only
       // TODO: make transform loop above able to handle a 4x4 matrix
-      //*
+      /*
       world = this.matrixMultiply([
         [1,0,0,0.5],
         [0,1,0,],

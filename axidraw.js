@@ -1,4 +1,4 @@
-let selectedPattern = "isolines"
+let selectedPattern = "3d"
 let sketch_title = ''
 
 // Select sketch from Hash in URL
@@ -13,6 +13,8 @@ let debugPenDownUp = false
 let draw_grid = false
 
 let fonts
+
+let f1 = new Array();
 
 let sketch = function(p) {
 
@@ -60,7 +62,7 @@ let sketch = function(p) {
     // Pre-load Hershey Text font data
     fonts = p.loadJSON('assets/js/hersheytext.json')
 
-    // Pre-load an image
+    // Pre-load supporting data
     if (selectedPattern == "lineimage") {
       let image_path = "assets/data/portrait.jpg";
       imported_image = p.loadImage(image_path,
@@ -69,10 +71,15 @@ let sketch = function(p) {
       );
     }
 
-    if (selectedPattern == "isolines") {
+    else if (selectedPattern == "isolines") {
       f1.bahrain = p.loadJSON('assets/data/bahrain-gp.json')
     }
 
+    else if (selectedPattern == "3d") {
+      f1.portimao = {"terrain": null, "track": null}
+      f1.portimao.terrain = p.loadJSON('assets/data/f1-portimao-terrain.json')
+      f1.portimao.track = p.loadJSON('assets/data/f1-portimao-track.json')
+    }
   }
 
   p.setup = function() {
