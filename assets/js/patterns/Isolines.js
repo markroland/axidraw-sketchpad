@@ -14,6 +14,8 @@ class Isolines {
 
     this.name = "Isolines";
 
+    this.title = "Bahrain Grand Prix Circuit"
+
     this.constrain = false
   }
 
@@ -22,7 +24,8 @@ class Isolines {
    */
   draw(p5) {
     // return this.drawIsolines(p5);
-    return this.drawGeoElevation(p5);
+    // return this.drawGeoElevation(p5);
+    return this.bahrainGP(p5);
   }
 
   drawIsolines(p5) {
@@ -188,6 +191,149 @@ class Isolines {
     layers.push({
       "color": "red",
       "paths": PathHelp.centerPaths(paths)
+    })
+
+    return layers;
+  }
+
+  bahrainGP(p5) {
+
+    const sketch_margin = 48;
+    const y_axis_pixel_range = 288
+    const x_axis_pixel_range = 480
+
+    let renderData;
+
+    let PathHelp = new PathHelper();
+
+    // Load data
+    const data = this.getData()
+
+    // Upsample Data
+    let upsample_scale = 2
+    let scaledData
+    if (upsample_scale > 1) {
+      let upsampledData = this.upsampleData(data, upsample_scale)
+      let min = this.getDataMin(upsampledData)
+      let max = this.getDataMax(upsampledData)
+      renderData = this.scaleData(upsampledData, min, max, 0, 255)
+    } else {
+      let min = this.getDataMin(data)
+      let max = this.getDataMax(data)
+      renderData = this.scaleData(data, min, max, 0, 255)
+    }
+
+    // Blur the data
+    renderData = this.blurFilter(renderData, 1/9, "neighbor")
+
+    //*
+    const rows = renderData.length;
+    const columns = renderData[0].length;
+    let scale = y_axis_pixel_range/rows
+    let y_scale = -0.0005; // -0.0008
+    // let y_scale = 0;
+
+    let paths = new Array();
+
+    // Build image of square "pixels"
+    for (let row = 0; row < rows; row++) {
+      let path = new Array();
+      for (let col = 0; col < columns; col++) {
+
+        let x = PathHelp.map(col, 0, columns, -1, 1)
+        let y = PathHelp.map(row, 0, rows, -1, 1)
+        y = y + y_scale * renderData[row][col]
+
+        path.push([x,y])
+
+        // Render in "p5 land"
+        /*
+        p5.noStroke();
+        p5.fill(renderData[row][col])
+        p5.rectMode(p5.CORNER);
+        p5.rect(
+          sketch_margin + ((x_axis_pixel_range - (renderData.length * scale))/2) + (col * scale),
+          sketch_margin + (row * scale),
+          scale,
+          scale
+        )
+        //*/
+      }
+      // path = PathHelp.smoothPath(path)
+      paths.push(path);
+    }
+    //*/
+
+    // console.log(paths);
+
+    let layers = new Array();
+
+    // Smooth with an averaging filter
+    // for (let p = 0; p < paths.length-1; p++) {
+    //   paths[p] = PathHelp.smoothPath(paths[p])
+    // }
+
+    layers.push({
+      "color": "green",
+      "paths": paths
+      // "paths": PathHelp.centerPaths(paths)
+    })
+
+    // ---------
+
+    let lat_min = 26.02 // y
+    let lat_max = 26.04
+    let long_min = 50.50 // x
+    let long_max = 50.52
+
+    paths = new Array();
+
+    // Bounding Box
+    // paths.push(PathHelp.polygon(4, Math.sqrt(2), Math.PI/4))
+
+    let Geo = new GeoJSON;
+
+    // Load GeoJSON data
+    // let geoPath = Geo.getGeoData();
+    let geoPath = f1.bahrain;
+
+    // Extract the coordinates to a polyline
+    let path = new Array();
+    for (let coordinate of geoPath.features[0].geometry.coordinates) {
+      let x = PathHelp.map(coordinate[0], long_min, long_max, -1, 1)
+      let y = PathHelp.map(coordinate[1], lat_min, lat_max, -1, 1)
+      y = y + y_scale * coordinate[2]
+      // console.log(coordinate[2])
+      path.push([x,y])
+    }
+
+    // Flip vertically to account for p5js's inverted y-axis
+    path = PathHelp.scalePath(path, [1,-1]);
+
+    // Get path info
+    let path_info = PathHelp.info(path)
+
+    // Translate the path to the center of the canvas
+    // path = PathHelp.translatePath(path,
+    //     [
+    //         -path_info.center[0],
+    //         -path_info.center[1]
+    //     ]
+    // )
+
+    // // Re-get path info and scale to the canvas constraint (y-axis in this case)
+    // path_info = PathHelp.info(path)
+    // let scaleFactor = 1/path_info.max[1]
+    // path = PathHelp.scalePath(path, scaleFactor);
+    paths.push(path)
+
+    // Expand/offset path to create 2 paths
+    let paths2 = PathHelp.expandPath(path, 0.01, 0.01, 'open')
+    paths = paths.concat(paths2)
+
+    layers.push({
+      "color": "black",
+      "paths": paths
     })
 
     return layers;
@@ -371,6 +517,7 @@ class Isolines {
   }
 
   // GeoElevationData for location of Bahrain Grand Prix (26.02,50.50 to 26.04,50.52)
+  // Elevation in feet
   getData() {
     return [
         [3.28084, 3.28084, 3.28084, 9.84252, 13.1234, 9.84252, 6.56168, 13.1234, 19.685, 16.4042, 9.84252, 6.56168, 13.1234, 22.9659, 22.9659, 19.685, 19.685, 22.9659, 19.685, 19.685, 16.4042, 13.1234, 13.1234, 9.84252, 13.1234, 16.4042, 19.685, 16.4042, 16.4042, 16.4042, 16.4042, 19.685, 22.9659, 26.2467, 29.5276, 29.5276, 32.8084, 36.0892, 36.0892, 36.0892, 42.6509, 45.9318, 49.2126, 55.7743, 59.0551, 59.0551, 68.8976, 68.8976, 72.1785, 78.7402, 82.021, 82.021, 85.3018, 91.8635, 91.8635, 88.5827, 85.3018, 91.8635, 91.8635, 85.3018, 82.021, 82.021, 85.3018, 82.021],

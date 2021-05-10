@@ -1,5 +1,5 @@
-let selectedPattern = "geojson"
-let sketch_title = 'GeoJSON'
+let selectedPattern = "isolines"
+let sketch_title = ''
 
 // Select sketch from Hash in URL
 if (window.location.hash != "") {
@@ -57,6 +57,9 @@ let sketch = function(p) {
   // Preload data
   p.preload = function() {
 
+    // Pre-load Hershey Text font data
+    fonts = p.loadJSON('assets/js/hersheytext.json')
+
     // Pre-load an image
     if (selectedPattern == "lineimage") {
       let image_path = "assets/data/portrait.jpg";
@@ -66,8 +69,10 @@ let sketch = function(p) {
       );
     }
 
-    // Pre-load Hershey Text font data
-    fonts = p.loadJSON('assets/js/hersheytext.json')
+    if (selectedPattern == "isolines") {
+      f1.bahrain = p.loadJSON('assets/data/bahrain-gp.json')
+    }
+
   }
 
   p.setup = function() {
@@ -601,7 +606,7 @@ let sketch = function(p) {
       for (let p1 = 0; p1 < layers[l].paths.length; p1++) {
 
         // Assemble path points
-        // TODO: This don't appear to be quite in their intended position
+        // TODO: These don't appear to be quite in their intended position
         let x_dim = (width - 4 * margin) / 2;
         let y_dim = (height - 4 * margin) / 2;
         let d = "M " + ((layers[l].paths[p1][0][0] / (5/3)) * x_dim) + " " + ((layers[l].paths[p1][0][1] / (1)) * y_dim);
