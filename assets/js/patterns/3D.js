@@ -994,7 +994,17 @@ class ThreeD {
         let nearest_y_max = Math.ceil(coordinate_y)
 
         // Nearest Neighbor
-        let z = PathHelp.map(geoData[nearest_y_min][nearest_x_min], geoDataMin, geoDataMax, 0, elevation_scale)
+        // let z = PathHelp.map(geoData[nearest_y_min][nearest_x_min], geoDataMin, geoDataMax, 0, elevation_scale)
+
+        // Bilinear interpolation
+        let interpolated_elevation = PathHelp.map(
+          coordinate_y,
+          nearest_y_min,
+          nearest_y_max,
+          PathHelp.map(coordinate_x, nearest_x_min, nearest_x_max, geoData[nearest_y_min][nearest_x_min], geoData[nearest_y_min][nearest_x_max]),
+          PathHelp.map(coordinate_x, nearest_x_min, nearest_x_max, geoData[nearest_y_max][nearest_x_min], geoData[nearest_y_max][nearest_x_max])
+        )
+        let z = PathHelp.map(interpolated_elevation, geoDataMin, geoDataMax, 0, elevation_scale)
 
         shape.push([point[0],point[1],z])
       }
