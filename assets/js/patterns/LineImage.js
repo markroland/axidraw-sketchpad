@@ -1096,7 +1096,6 @@ class LineImage {
     return paths;
   }
 
-
   dither(p5, imported_image, split_colors) {
 
     const scale = 0.25;
@@ -1254,8 +1253,10 @@ class LineImage {
 
   edgeDetection(p5, p5_imported_image) {
 
-    let lower_threshold = 30;
-    let upper_threshold = 100;
+    // Square: 180, 240
+    // Portrait: 50, 110
+    let lower_threshold = 20;
+    let upper_threshold = 90;
     // lower_threshold = parseInt(document.querySelector('#sketch-controls > div:nth-child(1) > input').value)
     // upper_threshold = parseInt(document.querySelector('#sketch-controls > div:nth-child(2) > input').value)
 
@@ -1303,11 +1304,8 @@ class LineImage {
 
     // Blur image to reduce detection of minor edges
     //*
-    const gaussian_kernel = [
-      [1/16, 2/16, 1/16],
-      [2/16, 4/16, 2/16],
-      [1/16, 2/16, 1/16]
-    ]
+    const gaussian_kernel = ImageHelp.gaussian(3, 1)
+    // console.log(gaussian_kernel);
     image_array = ImageHelp.filter(image_array, gaussian_kernel, "neighbor")
     //*/
 
