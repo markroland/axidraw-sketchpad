@@ -1042,7 +1042,6 @@ class ThreeD {
     let layers = new Array();
 
     // Note: This may be mirrored along the x or z axis
-    // TODO:
     let shapes = new Array();
     for (let a = 0; a < isoline_layers.length; a++) {
       let layer = isoline_layers[a];

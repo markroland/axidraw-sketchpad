@@ -1096,7 +1096,6 @@ class LineImage {
     return paths;
   }
 
-
   dither(p5, imported_image, split_colors) {
 
     const scale = 0.25;
