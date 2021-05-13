@@ -256,6 +256,7 @@ class ImageHelper {
     // Non-maximum suppression
     console.log("Performing Non-Maximum Suppression")
     image = this.canny_suppression(image);
+    // image = this.canny_suppression_interpolated(image);
 
     // Double Threshold
     console.log("Performing Thresholding: (" + lower_threshold + "," + upper_threshold + ")")
@@ -364,29 +365,134 @@ class ImageHelper {
     return new_image;
   }
 
+  // Inspired by https://github.com/JustinLiang/ComputerVisionProjects/blob/master/CannyEdgeDetector/CannyEdgeDetector.m
+  canny_suppression_interpolated(image) {
+
+    let PathHelp = new PathHelper();
+    let right_side_interpolated_value;
+    let left_side_interpolated_value;
+
+    // Non-maximum suppression
+    let rows = image.length;
+    let columns = image[0].length;
+
+    // Fill new image with zero values
+    // https://sanori.github.io/2019/05/JavaScript-Pitfalls-Tips-2D-Array-Matrix/
+    let new_image = Array(rows).fill().map(() => Array(columns).fill([0,0]));
+
+    for (let row = 1; row < rows-1; row++) {
+
+      for (let col = 1; col < columns-1; col++) {
+
+        let angle = image[row][col][1]
+
+        if (
+          (angle >= (0/4) * Math.PI && angle < (1/4) * Math.PI)
           ||
-          (angle >= (-1/8) * Math.PI && angle < (-3/8) * Math.PI)
+          ((angle >= -(3/4) * Math.PI && angle < (4/4) * Math.PI))
         ) {
-          // Forward Diagonal
+          right_side_interpolated_value = PathHelp.map(
+            Math.tan(angle),
+            0,
+            1,
+            image[row][col+1][0],
+            image[row-1][col+1][0]
+          );
+          left_side_interpolated_value = PathHelp.map(
+            Math.tan(angle),
+            0,
+            1,
+            image[row][col-1][0],
+            image[row+1][col-1][0]
+          );
           if (
-            (image[row][col][0] > image[row+1][col-1][0])
+            (image[row][col][0] > right_side_interpolated_value)
             &&
-            (image[row][col][0] > image[row-1][col+1][0])
+            (image[row][col][0] > left_side_interpolated_value)
           ) {
             new_image[row][col] = image[row][col]
           }
         }
 
         else if (
-          (angle >= (-5/8) * Math.PI && angle < (-7/8) * Math.PI)
+          (angle >= (1/4) * Math.PI && angle < (2/4) * Math.PI)
           ||
-          (angle >= (1/8) * Math.PI && angle < (3/8) * Math.PI)
+          (angle >= -(2/4) * Math.PI && angle < -(1/4) * Math.PI)
         ) {
-          // Back Diagonal
+          right_side_interpolated_value = PathHelp.map(
+            1/Math.tan(angle),
+            0,
+            1,
+            image[row-1][col][0],
+            image[row-1][col+1][0]
+          );
+          left_side_interpolated_value = PathHelp.map(
+            1/Math.tan(angle),
+            0,
+            1,
+            image[row+1][col][0],
+            image[row+1][col-1][0]
+          );
           if (
-            (image[row][col][0] > image[row-1][col-1][0])
+            (image[row][col][0] > right_side_interpolated_value)
             &&
-            (image[row][col][0] > image[row+1][col+1][0])
+            (image[row][col][0] > left_side_interpolated_value)
+          ) {
+            new_image[row][col] = image[row][col]
+          }
+        }
+
+        else if (
+          (angle >= (2/4) * Math.PI && angle < (3/4) * Math.PI)
+          ||
+          (angle >= -(1/4) * Math.PI && angle < -(2/4) * Math.PI)
+        ) {
+          right_side_interpolated_value = PathHelp.map(
+            1/Math.tan(angle),
+            0,
+            1,
+            image[row+1][col][0],
+            image[row+1][col+1][0]
+          );
+          left_side_interpolated_value = PathHelp.map(
+            1/Math.tan(angle),
+            0,
+            1,
+            image[row-1][col][0],
+            image[row-1][col-1][0]
+          );
+          if (
+            (image[row][col][0] > right_side_interpolated_value)
+            &&
+            (image[row][col][0] > left_side_interpolated_value)
+          ) {
+            new_image[row][col] = image[row][col]
+          }
+        }
+
+        else if (
+          (angle >= (3/4) * Math.PI && angle < (4/4) * Math.PI)
+          ||
+          (angle >= (0/4) * Math.PI && angle < -(1/4) * Math.PI)
+        ) {
+          right_side_interpolated_value = PathHelp.map(
+            Math.tan(angle),
+            0,
+            1,
+            image[row][col+1][0],
+            image[row+1][col+1][0]
+          );
+          left_side_interpolated_value = PathHelp.map(
+            Math.tan(angle),
+            0,
+            1,
+            image[row-1][col-1][0],
+            image[row][col-1][0]
+          );
+          if (
+            (image[row][col][0] > right_side_interpolated_value)
+            &&
+            (image[row][col][0] > left_side_interpolated_value)
           ) {
             new_image[row][col] = image[row][col]
           }
