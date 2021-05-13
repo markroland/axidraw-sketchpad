@@ -272,6 +272,8 @@ class ImageHelper {
   // See http://www.justin-liang.com/tutorials/canny/
   canny_suppression(image) {
 
+    let debug = true;
+
     // Non-maximum suppression
     let rows = image.length;
     let columns = image[0].length;
@@ -280,11 +282,20 @@ class ImageHelper {
     // https://sanori.github.io/2019/05/JavaScript-Pitfalls-Tips-2D-Array-Matrix/
     let new_image = Array(rows).fill().map(() => Array(columns).fill([0,0]));
 
+    // Deep Copy image array
+    // https://www.freecodecamp.org/news/how-to-clone-an-array-in-javascript-1d3183468f6a/
+    // let new_image = JSON.parse(JSON.stringify(image));
+
+    let line = ""
+
     for (let row = 1; row < rows-1; row++) {
 
       for (let col = 1; col < columns-1; col++) {
 
         let angle = image[row][col][1]
+
+        // if (debug) { line += Math.floor(image[row][col][0]) + "\t" }
+        if (debug) { line += (image[row][col][1] > 0 ? image[row][col][1].toFixed(2) : 0) + "\t" }
 
         if (
           (angle >= -(1/8) * Math.PI && angle < (1/8) * Math.PI)
@@ -318,6 +329,11 @@ class ImageHelper {
 
         else if (
           (angle >= (5/8) * Math.PI && angle < (7/8) * Math.PI)
+
+      if (debug) { line = line.slice(0, -1) + "\n" }
+
+    if (debug) { console.log(line) }
+
           ||
           (angle >= (-1/8) * Math.PI && angle < (-3/8) * Math.PI)
         ) {
