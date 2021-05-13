@@ -433,4 +433,40 @@ class ImageHelper {
       return
     }
   }
+
+  gaussian(size, sigma) {
+
+    if (size == 3) {
+      return [
+        [1/16, 2/16, 1/16],
+        [2/16, 4/16, 2/16],
+        [1/16, 2/16, 1/16]
+      ]
+    }
+
+    // Not working:
+    // https://en.wikipedia.org/wiki/Canny_edge_detector
+
+    // let kernel = new Array(size).fill().map(() => Array(size).fill(0))
+
+    // let k = (size - 1)/2;
+
+    // for (let i = 1; i <= size; i++) {
+    //   for (let j = 1; j <= size; j++) {
+    //     kernel[i-1][j-1] =
+    //       (1/(2 * Math.PI * Math.pow(sigma, 2)))
+    //       * Math.exp(
+    //         -(
+    //           Math.pow(i - (k+1), 2)
+    //           +
+    //           Math.pow(j - (k+1), 2)
+    //         )
+    //         /
+    //         (2 * Math.pow(sigma, 2))
+    //       )
+    //   }
+    // }
+
+    // return kernel;
+  }
 }

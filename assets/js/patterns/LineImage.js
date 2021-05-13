@@ -1302,11 +1302,8 @@ class LineImage {
 
     // Blur image to reduce detection of minor edges
     //*
-    const gaussian_kernel = [
-      [1/16, 2/16, 1/16],
-      [2/16, 4/16, 2/16],
-      [1/16, 2/16, 1/16]
-    ]
+    const gaussian_kernel = ImageHelp.gaussian(3, 1)
+    // console.log(gaussian_kernel);
     image_array = ImageHelp.filter(image_array, gaussian_kernel, "neighbor")
     //*/
 
