@@ -1253,8 +1253,10 @@ class LineImage {
 
   edgeDetection(p5, p5_imported_image) {
 
-    let lower_threshold = 30;
-    let upper_threshold = 100;
+    // Square: 180, 240
+    // Portrait: 50, 110
+    let lower_threshold = 20;
+    let upper_threshold = 90;
     // lower_threshold = parseInt(document.querySelector('#sketch-controls > div:nth-child(1) > input').value)
     // upper_threshold = parseInt(document.querySelector('#sketch-controls > div:nth-child(2) > input').value)
 

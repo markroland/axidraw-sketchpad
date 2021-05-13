@@ -268,8 +268,8 @@ class ImageHelper {
     return image;
   }
 
-  // TODO: Use interpolation
   // See http://www.justin-liang.com/tutorials/canny/
+  // Inspired by https://towardsdatascience.com/canny-edge-detection-step-by-step-in-python-computer-vision-b49c3a2d8123
   canny_suppression(image) {
 
     let debug = true;
@@ -294,19 +294,36 @@ class ImageHelper {
 
         let angle = image[row][col][1]
 
+        if (angle < 0) {
+          angle += Math.PI
+        }
+
         // if (debug) { line += Math.floor(image[row][col][0]) + "\t" }
         if (debug) { line += (image[row][col][1] > 0 ? image[row][col][1].toFixed(2) : 0) + "\t" }
 
         if (
-          (angle >= -(1/8) * Math.PI && angle < (1/8) * Math.PI)
+          (angle >= 0 && angle < (1/8) * Math.PI)
           ||
-          ((angle >= (7/8) * Math.PI && angle < Math.PI) || (angle >= -(7/8) * Math.PI && angle < Math.PI))
+          (angle >= (7/8) * Math.PI && angle <= Math.PI)
         ) {
           // horizontal
           if (
-            (image[row][col][0] > image[row][col-1][0])
+            (image[row][col][0] >= image[row][col-1][0])
             &&
-            (image[row][col][0] > image[row][col+1][0])
+            (image[row][col][0] >= image[row][col+1][0])
+          ) {
+            new_image[row][col] = image[row][col]
+          }
+        }
+
+        else if (
+          (angle >= (1/8) * Math.PI && angle < (3/8) * Math.PI)
+        ) {
+          // Vertical
+          if (
+            (image[row][col][0] >= image[row+1][col-1][0])
+            &&
+            (image[row][col][0] >= image[row-1][col+1][0])
           ) {
             new_image[row][col] = image[row][col]
           }
@@ -314,14 +331,12 @@ class ImageHelper {
 
         else if (
           (angle >= (3/8) * Math.PI && angle < (5/8) * Math.PI)
-          ||
-          (angle >= (-3/8) * Math.PI && angle < (-5/8) * Math.PI)
         ) {
-          // Vertical
+          // Forward Diagonal
           if (
-            (image[row][col][0] > image[row-1][col][0])
+            (image[row][col][0] >= image[row+1][col][0])
             &&
-            (image[row][col][0] > image[row+1][col][0])
+            (image[row][col][0] >= image[row-1][col][0])
           ) {
             new_image[row][col] = image[row][col]
           }
@@ -329,10 +344,25 @@ class ImageHelper {
 
         else if (
           (angle >= (5/8) * Math.PI && angle < (7/8) * Math.PI)
+        ) {
+          // Back Diagonal
+          if (
+            (image[row][col][0] >= image[row-1][col-1][0])
+            &&
+            (image[row][col][0] >= image[row+1][col+1][0])
+          ) {
+            new_image[row][col] = image[row][col]
+          }
+        }
+      }
 
       if (debug) { line = line.slice(0, -1) + "\n" }
+    }
 
     if (debug) { console.log(line) }
+
+    return new_image;
+  }
 
           ||
           (angle >= (-1/8) * Math.PI && angle < (-3/8) * Math.PI)
