@@ -148,7 +148,7 @@ class ImageHelper {
 
       // Get average intensity of RGB color channels
       let average = (image.pixels[i*4 + 0] + image.pixels[i*4 + 1] + image.pixels[i*4 + 2]) / 3;
-      let clamped_intensity = this.p5.round((average/255) * (levels-1)) * (255/(levels-1));
+      let clamped_intensity = Math.round((average/255) * (levels-1)) * (255/(levels-1));
       // console.log(average, clamped_intensity);
 
       y = Math.floor(i / image.width)
@@ -180,7 +180,7 @@ class ImageHelper {
         (p5image.pixels[i*4 + 0] + p5image.pixels[i*4 + 1] + p5image.pixels[i*4 + 2])
         / 3
       );
-      // let clamped_intensity = this.p5.round((average/255) * (levels-1)) * (255/(levels-1));
+      // let clamped_intensity = Math.round((average/255) * (levels-1)) * (255/(levels-1));
       // console.log(average, clamped_intensity);
 
       // Save intensity value to array
