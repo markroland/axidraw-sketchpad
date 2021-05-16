@@ -720,19 +720,21 @@ class PathHelper {
     return paths;
   }
 
-  smoothPath(path) {
+  smoothPath(path, size = 3) {
     let newData = new Array();
     newData.push(path[0])
-    let size = 3;
+    if (path.length < size) {
+      return path
+    }
     let range = (size - 1)/2
     let v = 1 / size
-    const kernel = [v,v,v]
+    const kernel = new Array(size).fill(v)
     for (let p = range; p < path.length-range; p++) {
       let sum = [0,0];
       for (let k = -range; k <= range; k++) {
         // Sum X and Y components
-        sum[0] += path[p+k][0] * kernel[k+1]
-        sum[1] += path[p+k][1] * kernel[k+1]
+        sum[0] += path[p+k][0] * kernel[k+range]
+        sum[1] += path[p+k][1] * kernel[k+range]
       }
       newData.push(sum)
     }
