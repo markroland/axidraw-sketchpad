@@ -255,8 +255,8 @@ class ImageHelper {
 
     // Non-maximum suppression
     console.log("Performing Non-Maximum Suppression")
-    image = this.canny_suppression(image);
-    // image = this.canny_suppression_interpolated(image);
+    // image = this.canny_suppression(image);
+    image = this.canny_suppression_interpolated(image);
 
     // Double Threshold
     console.log("Performing Thresholding: (" + lower_threshold + "," + upper_threshold + ")")
@@ -273,7 +273,7 @@ class ImageHelper {
   // Inspired by https://towardsdatascience.com/canny-edge-detection-step-by-step-in-python-computer-vision-b49c3a2d8123
   canny_suppression(image) {
 
-    let debug = true;
+    let debug = false;
 
     // Non-maximum suppression
     let rows = image.length;
@@ -385,11 +385,12 @@ class ImageHelper {
       for (let col = 1; col < columns-1; col++) {
 
         let angle = image[row][col][1]
+        if (angle < 0) {
+          angle += Math.PI
+        }
 
         if (
           (angle >= (0/4) * Math.PI && angle < (1/4) * Math.PI)
-          ||
-          ((angle >= -(3/4) * Math.PI && angle < (4/4) * Math.PI))
         ) {
           right_side_interpolated_value = PathHelp.map(
             Math.tan(angle),
@@ -406,9 +407,9 @@ class ImageHelper {
             image[row+1][col-1][0]
           );
           if (
-            (image[row][col][0] > right_side_interpolated_value)
+            (image[row][col][0] >= right_side_interpolated_value)
             &&
-            (image[row][col][0] > left_side_interpolated_value)
+            (image[row][col][0] >= left_side_interpolated_value)
           ) {
             new_image[row][col] = image[row][col]
           }
@@ -416,8 +417,6 @@ class ImageHelper {
 
         else if (
           (angle >= (1/4) * Math.PI && angle < (2/4) * Math.PI)
-          ||
-          (angle >= -(2/4) * Math.PI && angle < -(1/4) * Math.PI)
         ) {
           right_side_interpolated_value = PathHelp.map(
             1/Math.tan(angle),
@@ -434,9 +433,9 @@ class ImageHelper {
             image[row+1][col-1][0]
           );
           if (
-            (image[row][col][0] > right_side_interpolated_value)
+            (image[row][col][0] >= right_side_interpolated_value)
             &&
-            (image[row][col][0] > left_side_interpolated_value)
+            (image[row][col][0] >= left_side_interpolated_value)
           ) {
             new_image[row][col] = image[row][col]
           }
@@ -444,8 +443,6 @@ class ImageHelper {
 
         else if (
           (angle >= (2/4) * Math.PI && angle < (3/4) * Math.PI)
-          ||
-          (angle >= -(1/4) * Math.PI && angle < -(2/4) * Math.PI)
         ) {
           right_side_interpolated_value = PathHelp.map(
             1/Math.tan(angle),
@@ -462,18 +459,16 @@ class ImageHelper {
             image[row-1][col-1][0]
           );
           if (
-            (image[row][col][0] > right_side_interpolated_value)
+            (image[row][col][0] >= right_side_interpolated_value)
             &&
-            (image[row][col][0] > left_side_interpolated_value)
+            (image[row][col][0] >= left_side_interpolated_value)
           ) {
             new_image[row][col] = image[row][col]
           }
         }
 
         else if (
-          (angle >= (3/4) * Math.PI && angle < (4/4) * Math.PI)
-          ||
-          (angle >= (0/4) * Math.PI && angle < -(1/4) * Math.PI)
+          (angle >= (3/4) * Math.PI && angle <= (4/4) * Math.PI)
         ) {
           right_side_interpolated_value = PathHelp.map(
             Math.tan(angle),
@@ -490,9 +485,9 @@ class ImageHelper {
             image[row][col-1][0]
           );
           if (
-            (image[row][col][0] > right_side_interpolated_value)
+            (image[row][col][0] >= right_side_interpolated_value)
             &&
-            (image[row][col][0] > left_side_interpolated_value)
+            (image[row][col][0] >= left_side_interpolated_value)
           ) {
             new_image[row][col] = image[row][col]
           }
