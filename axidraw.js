@@ -64,7 +64,7 @@ let sketch = function(p) {
 
     // Pre-load supporting data
     if (selectedPattern == "lineimage") {
-      let image_path = "assets/data/portrait.jpg";
+      let image_path = "assets/data/landscape.jpg";
       imported_image = p.loadImage(image_path,
         success => { /* console.log('jpg success') */ },
         fail => { /* console.log('jpg fail') */ }

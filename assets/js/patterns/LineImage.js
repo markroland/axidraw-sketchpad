@@ -59,7 +59,8 @@ class LineImage {
     // return this.drawHatchSolid(p5, imported_image);
     // return this.drawHatchColor(p5, imported_image);
     // return this.dither(p5, imported_image, true);
-    return this.edgeDetection(p5, imported_image);
+    // return this.edgeDetection(p5, imported_image);
+    return this.combo(p5, imported_image)
   }
 
   drawHatchColor(p5, imported_image) {
@@ -588,7 +589,7 @@ class LineImage {
     return paths;
   }
 
-  calcLines(imported_image) {
+  calcLines(imported_image, noise = false) {
 
     let PathHelp = new PathHelper;
     let ImageHelp = new ImageHelper
@@ -694,14 +695,20 @@ class LineImage {
 
     paths = renderLines;
 
-    return paths;
+    if (!noise) {
+      return [{
+        "color": "black",
+        "paths": paths
+      }]
+    }
 
     // Convert straight lines to wavy lines with Perlin noise
     let segmentation = 0.01
     let perlinLines = new Array();
     for (let l = 0; l < renderLines.length; l++) {
       let perlinLine = new Array();
-      let y_offset = (Math.random() - 0.5) * 0.005
+      // let y_offset = (Math.random() - 0.5) * 0.005
+      let y_offset = 0
 
       // Break the path down into small segments to apply noise
       let segments = (renderLines[l][1][0] - renderLines[l][0][0]) / segmentation;
@@ -725,7 +732,10 @@ class LineImage {
 
     paths = perlinLines;
 
-    return paths;
+    return [{
+      "color": "black",
+      "paths": paths
+    }];
   }
 
   calcOutlines(p5, imported_image, color) {
@@ -1253,10 +1263,12 @@ class LineImage {
 
   edgeDetection(p5, p5_imported_image) {
 
+    const debug = false;
+
     // Square: 180, 240
     // Portrait: 50, 110
-    let lower_threshold = 20;
-    let upper_threshold = 90;
+    let lower_threshold = 15;
+    let upper_threshold = 140;
     // lower_threshold = parseInt(document.querySelector('#sketch-controls > div:nth-child(1) > input').value)
     // upper_threshold = parseInt(document.querySelector('#sketch-controls > div:nth-child(2) > input').value)
 
@@ -1300,7 +1312,7 @@ class LineImage {
     //*/
 
     // Boost Contrast
-    // image_array = ImageHelp.contrast(image_array, 3.0)
+    image_array = ImageHelp.contrast(image_array, 2.0)
 
     // Blur image to reduce detection of minor edges
     //*
@@ -1323,40 +1335,40 @@ class LineImage {
       for (let col = 0; col < columns; col++) {
 
         // Render in "p5 land"
-        /*
-        let pixel_color = image_array[row][col][0]
-        // pixel_color = p5.color('hsl('
-        //   + Math.floor(PathHelp.map(image_array[row][col][1], -Math.PI, Math.PI, 0, 360))
-        //   + ', 100%'
-        //   + ', ' + PathHelp.map(image_array[row][col][0], 0, 255, 0, 100) + '%)'
-        // );
-        p5.noStroke();
-        p5.fill(pixel_color)
-        p5.noSmooth();
-        p5.rectMode(p5.CORNER);
-        p5.rect(
-          sketch_margin + ((x_axis_pixel_range - (columns * p5_pixel_size))/2) + (col * p5_pixel_size),
-          sketch_margin + (row * p5_pixel_size),
-          p5_pixel_size,
-          p5_pixel_size
-        )
-        p5.noFill();
-        //*/
+        if (debug) {
+          let pixel_color = image_array[row][col][0]
+          // pixel_color = p5.color('hsl('
+          //   + Math.floor(PathHelp.map(image_array[row][col][1], -Math.PI, Math.PI, 0, 360))
+          //   + ', 100%'
+          //   + ', ' + PathHelp.map(image_array[row][col][0], 0, 255, 0, 100) + '%)'
+          // );
+          p5.noStroke();
+          p5.fill(pixel_color)
+          p5.noSmooth();
+          p5.rectMode(p5.CORNER);
+          p5.rect(
+            sketch_margin + ((x_axis_pixel_range - (columns * p5_pixel_size))/2) + (col * p5_pixel_size),
+            sketch_margin + (row * p5_pixel_size),
+            p5_pixel_size,
+            p5_pixel_size
+          )
+          p5.noFill();
+        }
 
         // Convert pixels to geometry path points
-        //*
         if (image_array[row][col][0] > 128) {
           points.push([
             col * pixel_size,
             row * pixel_size
           ])
         }
-        //*/
 
       }
     }
 
-    // return [{"color": "red", "paths": []}];
+    if (debug) {
+      return [{"color": "red", "paths": []}];
+    }
 
     console.log("Number of Points: " + points.length)
 
@@ -1370,11 +1382,13 @@ class LineImage {
     //*/
 
     // Smooth
-    for (let i = 0; i < 1; i++) {
+    //*
+    // for (let i = 0; i < 1; i++) {
       paths = paths.map(function(path) {
-        return PathHelp.smoothPath(path)
+        return PathHelp.smoothPath(path, 5)
       })
-    }
+    // }
+    //*/
 
     // Center the Paths to the canvas
     //*
@@ -1394,11 +1408,28 @@ class LineImage {
     //*/
 
     layers.push({
-      "color": "red",
+      "color": "black",
       "paths": paths
     })
 
     return layers;
+  }
+
+  combo(p5, imported_image) {
+    let layers;
+
+    // This must be calculated first because "dither" changes "imported_iamge"
+    let top_layers = this.edgeDetection(p5, imported_image)
+
+    // Base Layer
+    // layers = this.dither(p5, imported_image);
+    // layers = this.drawHatchSolid(p5, imported_image);
+    layers = this.calcLines(imported_image, true)
+    // layers = this.calcOutlines(p5, imported_image, "black")
+
+    layers = layers.concat(top_layers);
+
+    return layers
   }
 
 }
