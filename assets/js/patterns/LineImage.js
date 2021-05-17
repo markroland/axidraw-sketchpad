@@ -59,8 +59,9 @@ class LineImage {
     // return this.drawHatchSolid(p5, imported_image);
     // return this.drawHatchColor(p5, imported_image);
     // return this.dither(p5, imported_image, true);
-    // return this.edgeDetection(p5, imported_image);
-    return this.combo(p5, imported_image)
+    return this.edgeDetection(p5, imported_image);
+    
+    //return this.combo(p5, imported_image)
   }
 
   drawHatchColor(p5, imported_image) {
@@ -1372,14 +1373,16 @@ class LineImage {
 
     console.log("Number of Points: " + points.length)
 
-    // Start a new path with the first point
-    //*
-    path = path.concat([
-      points.shift()
-    ])
-    paths.push(path)
-    paths = PathHelp.pointsToPaths(paths, points, 0, 0.02);
-    //*/
+    // // Start a new path with the first point
+    // //*
+    // path = path.concat([
+    //   points.shift()
+    // ])
+    // paths.push(path)
+    // paths = PathHelp.pointsToPaths(paths, points, 0, 0.02);
+    // //*/
+
+    paths = PathHelp.pointsToPaths2(points, 0.02);
 
     // Smooth
     //*
