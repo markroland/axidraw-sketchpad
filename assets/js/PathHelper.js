@@ -659,6 +659,67 @@ class PathHelper {
     return paths
   }
 
+  pointsToPaths2(points, threshold) {
+    const paths = [];
+
+    let new_path = [];
+    while (points.length > 1) {
+
+      // New paths starts with next unprocessed point
+      if (new_path.length == 0) {
+        new_path.push(points.shift());
+      }
+      
+      // Loop through all points and identify candidate points within
+      // the distance threshold
+      let distance;
+      let candidates = new Array();
+      for (let p = 0; p < points.length; p++) {
+
+        let active_path_last_point_index = new_path.length - 1
+        distance = this.distance(
+          new_path[active_path_last_point_index],
+          points[p]
+        )
+
+        if (distance < threshold) {
+          candidates.push({
+            "point" : p,
+            "distance" : distance
+          })
+        }
+      }
+
+      // No points near enough? We got us a path; move on.
+      if (candidates.length == 0) {
+
+        paths.push(new_path);
+        new_path = [];
+
+        continue;
+      }
+
+      // If we're here, we got candidates
+      // Sort points by distance, favor by index if distances are equal
+      candidates.sort(
+        (a, b) => (a.distance > b.distance) ? 1 : (a.distance === b.distance) ? ((a.point > b.point) ? 1 : -1) : -1
+      )
+
+      // Add the nearest point as the next point in the path
+      let nearest_point_index = candidates[0].point
+      let nearest_point = points[nearest_point_index]
+      new_path.push(nearest_point)
+
+      // Remove the point from available points
+      points.splice(nearest_point_index, 1);
+    }
+    
+    // We might be left with a non-empty path
+    if (new_path.length > 0) paths.push(new_path);
+
+    return paths;
+  }
+
   /**
    * Join points together when endpoints within threshold distance of each other
    **/
