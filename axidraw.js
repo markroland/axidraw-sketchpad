@@ -1,4 +1,4 @@
-let selectedPattern = "3d"
+let selectedPattern = "geojson"
 let sketch_title = ''
 
 // Select sketch from Hash in URL
@@ -69,6 +69,11 @@ let sketch = function(p) {
         success => { /* console.log('jpg success') */ },
         fail => { /* console.log('jpg fail') */ }
       );
+    }
+
+    else if (selectedPattern == "geojson") {
+      f1.track = {"terrain": null, "track": null}
+      f1.track.track = p.loadJSON('assets/data/f1-portimao-track.json')
     }
 
     else if (selectedPattern == "isolines") {
