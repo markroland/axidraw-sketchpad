@@ -1,4 +1,4 @@
-let selectedPattern = "lineimage"
+let selectedPattern = "3d"
 let sketch_title = ''
 
 // Select sketch from Hash in URL
@@ -76,9 +76,9 @@ let sketch = function(p) {
     }
 
     else if (selectedPattern == "3d") {
-      f1.portimao = {"terrain": null, "track": null}
-      f1.portimao.terrain = p.loadJSON('assets/data/f1-portimao-terrain.json')
-      f1.portimao.track = p.loadJSON('assets/data/f1-portimao-track.json')
+      f1.track = {"terrain": null, "track": null}
+      f1.track.terrain = p.loadJSON('assets/data/f1-monaco-terrain.json')
+      f1.track.track = p.loadJSON('assets/data/f1-monaco-track.json')
     }
   }
 

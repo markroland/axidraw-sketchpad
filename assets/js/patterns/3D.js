@@ -11,7 +11,7 @@ class ThreeD {
   constructor() {
     this.key = "3d";
     this.name = "3D";
-    this.title = "Portimao Grand Prix";
+    this.title = "Monico Grand Prix";
     this.constrain = false
   }
 
@@ -847,12 +847,12 @@ class ThreeD {
     let Iso = new Isolines();
 
     // Load Geo Data
-    let geoData = f1.portimao.terrain.elevations
+    let geoData = f1.track.terrain.elevations
 
-    let lat_min = f1.portimao.terrain.bbox[1] // y
-    let lat_max = f1.portimao.terrain.bbox[3]
-    let long_min = f1.portimao.terrain.bbox[0] // x
-    let long_max = f1.portimao.terrain.bbox[2]
+    let lat_min = f1.track.terrain.bbox[1] // y
+    let lat_max = f1.track.terrain.bbox[3]
+    let long_min = f1.track.terrain.bbox[0] // x
+    let long_max = f1.track.terrain.bbox[2]
 
     let geoDataMin = Iso.getDataMin(geoData)
     let geoDataMax = Iso.getDataMax(geoData)
@@ -869,10 +869,10 @@ class ThreeD {
 
     let grid_unit = 5
 
-    let elevation_scale = 1
-    let scale = 5;
+    let elevation_scale = 1.5
+    let scale = 5; // 5
     let distance = 12;
-    let crop = 10;
+    let crop = 6;
 
     // Vertical Lines of constant Longitude
     //*
@@ -919,7 +919,7 @@ class ThreeD {
     //*/
 
     // Define Transformations
-    const x_rotation = (-2.5/16) * (2 * Math.PI) // 0.09
+    const x_rotation = (-2.5/16) * (2 * Math.PI) // -2.5
     const rotationX = [
       [1, 0, 0],
       [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
@@ -933,7 +933,7 @@ class ThreeD {
       [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
     ];
 
-    const z_rotation = (-1/16) * (2 * Math.PI)
+    const z_rotation = (1/16) * (2 * Math.PI) // -1/16
     const rotationZ = [
       [Math.cos(z_rotation), -Math.sin(z_rotation), 0],
       [Math.sin(z_rotation),  Math.cos(z_rotation), 0],
@@ -943,6 +943,10 @@ class ThreeD {
     // Loop through Model points and apply transformation and projection
     let paths = new Array();
     for (let h = 0; h < shapes.length; h++) {
+
+      if (shapes[h].length == 0){
+        continue;
+      }
 
       // Perspective
       paths = paths.concat(this.transform(shapes[h], [rotationZ, rotationY, rotationX], scale, distance));
@@ -962,7 +966,7 @@ class ThreeD {
 
     // Extract Track coordinates to a polyline
     let path = new Array();
-    for (let coordinate of f1.portimao.track.features[0].geometry.coordinates) {
+    for (let coordinate of f1.track.track.features[0].geometry.coordinates) {
       let x = PathHelp.map(
         PathHelp.map(coordinate[0], long_min, long_max, 0, x_max),
         0, x_max, -grid_unit, grid_unit
@@ -979,7 +983,7 @@ class ThreeD {
     let parallel_paths = new Array();
     parallel_paths.push(path);
     parallel_paths = parallel_paths.concat(PathHelp.expandPath(path, 0.025, 0.025, 'open'));
-    parallel_paths = parallel_paths.concat(PathHelp.expandPath(path, 0.05, 0.05, 'open'));
+    // parallel_paths = parallel_paths.concat(PathHelp.expandPath(path, 0.05, 0.05, 'open'));
 
     for (let i = 0; i < parallel_paths.length; i++) {
       shape = new Array();
