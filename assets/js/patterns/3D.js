@@ -862,6 +862,7 @@ class ThreeD {
 
     // Define Model(s)
     let shapes = new Array();
+    let shapes_belowsealevel = new Array();
     let x_max = geoData[0].length;
     let y_max = geoData.length;
 
@@ -878,6 +879,7 @@ class ThreeD {
     //*
     for (let x = 0 + crop; x < x_max - crop; x+=1) {
       let shape = new Array();
+      let shape_below_sealevel = new Array();
       for (let y = 0 + crop; y < y_max - crop; y+=1) {
 
         let px = PathHelp.map(x, 0, x_max, -grid_unit, grid_unit)
@@ -890,9 +892,40 @@ class ThreeD {
           continue;
         }
 
-        shape.push([px, py, pz])
+        if (geoData[y][x] < 0) {
+
+          // Below Sea Levl
+
+          // Previous point above sea level (ASL)
+          if (geoData[y-1][x] >= 0) {
+            // Add last point of above sea level points to prevent drawing gaps
+            shape_below_sealevel = shape_below_sealevel.concat(shape.slice(-1))
+
+            // Close above-sea-level path
+            shapes.push(shape)
+            shape = new Array();
+          }
+
+          shape_below_sealevel.push([px, py, pz])
+        } else {
+
+          // Above Sea Level
+
+          // Previous point below sea level (BSL)
+          if (geoData[y-1][x] <= 0) {
+            // Add last point of BSL points to prevent drawing gaps
+            shape = shape.concat(shape_below_sealevel.slice(-1))
+
+            // Close BSL path
+            shapes_belowsealevel.push(shape_below_sealevel)
+            shape_below_sealevel = new Array();
+          }
+
+          shape.push([px, py, pz])
+        }
       }
       shapes.push(shape);
+      shapes_belowsealevel.push(shape_below_sealevel)
     }
 
     //*/
@@ -901,6 +934,7 @@ class ThreeD {
     //*
     for (let y = 0 + crop; y < y_max - crop; y+=1) {
       let shape = new Array();
+      let shape_below_sealevel = new Array();
       for (let x = 0 + crop; x < x_max - crop; x+=1) {
 
         let px = PathHelp.map(x, 0, x_max, -grid_unit, grid_unit)
@@ -912,9 +946,40 @@ class ThreeD {
           continue;
         }
 
-        shape.push([px, py, pz])
+        if (geoData[y][x] < 0) {
+
+          // Below Sea Levl
+
+          // Previous point above sea level (ASL)
+          if (geoData[y][x-1] >= 0) {
+            // Add last point of above sea level points to prevent drawing gaps
+            shape_below_sealevel = shape_below_sealevel.concat(shape.slice(-1))
+
+            // Close above-sea-level path
+            shapes.push(shape)
+            shape = new Array();
+          }
+
+          shape_below_sealevel.push([px, py, pz])
+        } else {
+
+          // Above Sea Levl
+
+          // Previous point below sea level (BSL)
+          if (geoData[y][x-1] <= 0) {
+            // Add last point of BSL points to prevent drawing gaps
+            shape = shape.concat(shape_below_sealevel.slice(-1))
+
+            // Close BSL path
+            shapes_belowsealevel.push(shape_below_sealevel)
+            shape_below_sealevel = new Array();
+          }
+
+          shape.push([px, py, pz])
+        }
       }
       shapes.push(shape);
+      shapes_belowsealevel.push(shape_below_sealevel)
     }
     //*/
 
@@ -958,6 +1023,19 @@ class ThreeD {
       "color": "green",
       "paths": paths
     })
+
+    paths = new Array();
+    for (let h = 0; h < shapes_belowsealevel.length; h++) {
+      if (shapes_belowsealevel[h].length == 0){
+        continue;
+      }
+      paths = paths.concat(this.transform(shapes_belowsealevel[h], [rotationZ, rotationY, rotationX], scale, distance));
+    }
+    layers.push({
+      "color": "blue",
+      "paths": paths
+    })
+
 
     //////// TRACK
 
