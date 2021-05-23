@@ -11,7 +11,7 @@ class ThreeD {
   constructor() {
     this.key = "3d";
     this.name = "3D";
-    this.title = "Monico Grand Prix";
+    this.title = "Lorenz Attractor";
     this.constrain = false
   }
 
@@ -27,8 +27,9 @@ class ThreeD {
     // return this.sphereSpiral()
     // return this.noisePlane(p5)
     // return this.geoData()
-    return this.grandPrix()
+    // return this.grandPrix()
     // return this.geoIsolines(p5)
+    return this.attractor()
   }
 
   simpleCube() {
@@ -1175,6 +1176,159 @@ class ThreeD {
     }
 
     return layers;
+  }
+
+  attractor() {
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+    let paths = new Array();
+    let path = new Array();
+
+    // Perspective
+    let distance = 4;
+    let scale = 6;
+
+
+    // --- TRANSFORMATIONS
+
+    // Define Transformations
+    const x_rotation = (-1/16) * (2 * Math.PI)
+    const rotationX = [
+      [1, 0, 0],
+      [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
+      [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
+    ];
+
+    const y_rotation = (-1/32) * (2 * Math.PI)
+    const rotationY = [
+      [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
+      [0, 1, 0],
+      [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
+    ];
+
+    const z_rotation = (0/16) * (2 * Math.PI)
+    const rotationZ = [
+      [Math.cos(z_rotation), -Math.sin(z_rotation), 0],
+      [Math.sin(z_rotation),  Math.cos(z_rotation), 0],
+      [0, 0, 1]
+    ];
+
+
+    // --- CUBE
+
+    // Define 3D shape (cube) (x,y,z)
+    let points = [
+      [-0.5, -0.5, -0.5],
+      [0.5, -0.5, -0.5],
+      [0.5, 0.5, -0.5],
+      [-0.5, 0.5, -0.5],
+      [-0.5, -0.5, 0.5],
+      [0.5, -0.5, 0.5],
+      [0.5, 0.5, 0.5],
+      [-0.5, 0.5, 0.5]
+    ];
+
+    // Connect points to create paths (edges)
+    let shapes = new Array();
+    for (let i = 0; i < 4; i++) {
+      shapes.push(
+        new Array(
+          points[i],
+          points[(i + 1) % 4]
+        )
+      );
+      shapes.push(
+        new Array(
+          points[i + 4],
+          points[((i + 1) % 4) + 4],
+        )
+      );
+      shapes.push(
+        new Array(
+          points[i],
+          points[i + 4]
+        )
+      );
+    }
+
+    // Loop through Model points and apply transformation and projection
+    paths = new Array();
+    for (let h = 0; h < shapes.length; h++) {
+      paths = paths.concat(this.transform(shapes[h], [rotationZ, rotationY, rotationX], scale, distance));
+    }
+
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    // Attractor
+    path = this.lorenzAttractor(10000);
+    paths = this.transform(path, [rotationZ, rotationY, rotationX], scale, distance)
+
+    layers.push({
+      "color": "red",
+      "paths": paths
+    })
+
+    return layers;
+  }
+
+  /**
+   * Lorenz Attractor
+   * https://en.wikipedia.org/wiki/Lorenz_system
+   * Implementation inspiredhttps://thecodingtrain.com/CodingChallenges/012-lorenzattractor.html
+   * - https://github.com/CodingTrain/website/blob/main/CodingChallenges/CC_012_LorenzAttractor/P5/sketch.js
+   */
+  lorenzAttractor(iterations) {
+
+    // Scale factor to apply to the output
+    let scale = 0.016;
+
+    // Sigma
+    let a = 10;
+
+    // Rho
+    let b = 28;
+
+    // Beta
+    let c = 8.0/3.0
+
+    // Initial positions
+    let x = 0.01;
+    let y = 0.0;
+    let z = 0.0;
+
+    // Time step
+    let dt = 0.01
+
+    // Derivatives for x, y, z
+    let dx, dy, dz;
+
+    let points = new Array();
+
+    for (let i = 0; i < iterations; i++) {
+
+      // Calculate derivatives
+      dx = a * (y - x) * dt;
+      dy = (x * (b - z) - y) * dt;
+      dz = (x * y - c * z) * dt;
+
+      // Add derivatives to positions
+      x = x + dx;
+      y = y + dy;
+      z = z + dz;
+
+      // Add the point an array of points
+      points.push([
+        scale * x,
+        scale * y,
+        scale * z
+      ])
+    }
+
+    return points;
   }
 
   transform(points, transforms, scale = 1, distance = 1) {

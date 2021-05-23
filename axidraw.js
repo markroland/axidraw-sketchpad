@@ -1,4 +1,4 @@
-let selectedPattern = "geojson"
+let selectedPattern = "3d"
 let sketch_title = ''
 
 // Select sketch from Hash in URL
