@@ -1193,14 +1193,14 @@ class ThreeD {
     // --- TRANSFORMATIONS
 
     // Define Transformations
-    const x_rotation = (-1/16) * (2 * Math.PI)
+    const x_rotation = (-3/16) * (2 * Math.PI)
     const rotationX = [
       [1, 0, 0],
       [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
       [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
     ];
 
-    const y_rotation = (-1/32) * (2 * Math.PI)
+    const y_rotation = (4/32) * (2 * Math.PI)
     const rotationY = [
       [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
       [0, 1, 0],
@@ -1216,6 +1216,8 @@ class ThreeD {
 
 
     // --- CUBE
+
+    /*
 
     // Define 3D shape (cube) (x,y,z)
     let points = [
@@ -1263,13 +1265,48 @@ class ThreeD {
       "paths": paths
     })
 
+    //*/
+
+
+    // --- ATTRACTOR
+
     // Attractor
     path = this.lorenzAttractor(10000);
     paths = this.transform(path, [rotationZ, rotationY, rotationX], scale, distance)
 
+    // Split path into sub-paths to plot with different colors
+    let subpath = new Array();
+    let red_paths = new Array();
+    let blue_paths = new Array();
+    let subpath_length = 100;
+    for (let i = 0; i < paths[0].length; i++) {
+
+      subpath.push(paths[0][i]);
+
+      // Create new sub-path every 100 points
+      if (i % subpath_length == 0) {
+
+        if ( (i / subpath_length) % 2 == 1 ) {
+          red_paths.push(subpath)
+        } else {
+          blue_paths.push(subpath)
+        }
+
+        // Clear subpath and start it with the last point of the previous subpath
+        let last_point = subpath.slice(-1)
+        subpath = new Array();
+        subpath = subpath.concat(last_point);
+      }
+    }
+
     layers.push({
       "color": "red",
-      "paths": paths
+      "paths": red_paths
+    })
+
+    layers.push({
+      "color": "blue",
+      "paths": blue_paths
     })
 
     return layers;
@@ -1284,7 +1321,7 @@ class ThreeD {
   lorenzAttractor(iterations) {
 
     // Scale factor to apply to the output
-    let scale = 0.016;
+    let scale = 0.02;
 
     // Sigma
     let a = 10;
@@ -1301,7 +1338,7 @@ class ThreeD {
     let z = 0.0;
 
     // Time step
-    let dt = 0.01
+    let dt = 0.005
 
     // Derivatives for x, y, z
     let dx, dy, dz;
@@ -1357,10 +1394,10 @@ class ThreeD {
       // Translation matrix
       // Temp for this sketch only
       // TODO: make transform loop above able to handle a 4x4 matrix
-      /*
+      //*
       world = this.matrixMultiply([
-        [1,0,0,0.5],
-        [0,1,0,],
+        [1,0,0,-0.4],
+        [0,1,0,0.4],
         [0,0,1,0],
         [0,0,0,1]
       ], world.concat(1));
