@@ -19,7 +19,7 @@ class Truchet {
    */
   draw(p5) {
     // return this.sketch1(5)
-    return this.truchetRainbows(5, 4)
+    return this.truchetRainbows(5, 6)
     // return this.sketch2(5)
     // return this.gridPetals(3)
   }
@@ -148,6 +148,7 @@ class Truchet {
     return layers;
   }
 
+  // Inspired by Paul Rickards (@paulrickards) - https://twitter.com/paulrickards/status/1383899993862332423?s=20
   truchetRainbows(gridScale, num_arcs) {
 
     let PathHelp = new PathHelper;
@@ -165,95 +166,87 @@ class Truchet {
 
     // Shapes. Defined with local coordinates "[0,0]" at center of shape
 
-    // Arcs
-    let r = side_length
+    // Compose the arcs that make up the top-left of the cell tile
     let arcs = new Array();
     for (let a = 1; a < num_arcs; a++) {
 
-      // Build arc of set radius
-      let arc = new Array();
-      let r = side_length * (a/num_arcs);
-      let num_segments = 12;
-      for (let s = 0; s <= num_segments; s++) {
-        arc.push([
-          -side_length/2 + r * Math.cos(s/num_segments * Math.PI/2),
-          -side_length/2 + r * Math.sin(s/num_segments * Math.PI/2)
-        ])
-      }
+      let arc = this.arc(
+        [-side_length/2, -side_length/2],
+        side_length * (a/num_arcs),
+        Math.PI/2,
+        0,
+        12
+      );
+
       arcs.push(arc);
     }
-    //*/
 
-    // Construct the arcs
+    // Compose the arcs that make up the bottom-right of the cell tile
     for (let a = 1; a < num_arcs; a++) {
 
       let theta_start = Math.PI;
       let theta_end = theta_start + Math.PI/2;
-      let theta1 = null;
 
-      if (a/(num_arcs+1) > 0.5) {
-        let intersect1 = PathHelp.circleInterceptPoints([0,0], a, [-num_arcs, num_arcs], num_arcs-1, -1)
-        theta1 = Math.atan2(intersect1[1], intersect1[0]);
+      // Arcs that are less than or equal to half way across the cell tile can be drawn in full
+      if (a/(num_arcs+1) <= 0.5) {
 
-        // Math.PI is a reference adjustment
-        theta_end = theta_start + (Math.PI - theta1);
-      }
+        arcs.push(
+          this.arc(
+            [side_length/2, side_length/2],
+            side_length * (a/num_arcs),
+            theta_end - theta_start,
+            theta_start,
+            12
+          )
+        );
 
-      let arc = new Array();
-      let r = side_length * (a/num_arcs);
-      let segments_per_revolution = 48;
-      let delta_revolution = (theta_end - theta_start) / (2 * Math.PI);
-      // let delta_revolution = 0.25
-      // let max_s = segments_per_revolution * delta_revolution;
-      let max_s = 8;
-      for (let s = 0; s <= max_s; s++) {
+      } else {
 
-        let point = [
-          side_length/2 + r * Math.cos(theta_start + s/max_s * (theta_end - theta_start)),
-          side_length/2 + r * Math.sin(theta_start + s/max_s * (theta_end - theta_start))
-        ]
+        // Arcs that are half way across the cell tile must be split into 2 arcs
+        // so that they do not overlap existing arcs on the other corner of the cell
 
-        // Check if the point is with largest radius arc
-        // on the other side of the cell
-        arc.push(point)
-      }
+        // Calculate where the intersection happens
+        // This is used to draw 2 smaller arcs on the bottom-left and top-right
+        let intersection_point = PathHelp.circleInterceptPoints([0,0], a, [-num_arcs, num_arcs], num_arcs-1, -1)
+        let theta_intersect = Math.atan2(intersection_point[1], intersection_point[0]);
 
-      if (arc.length !== 0) {
-        arcs.push(arc);
-      }
+        // This is an offset for the coordinate system
+        theta_intersect = Math.PI - theta_intersect
 
-      // Second arc
-      if (a/(num_arcs+1) > 0.5) {
+        // Use the intersect point to calculate the new end Theta
+        theta_end = theta_start + theta_intersect;
 
+        // TODO: Something like this could be used to calculate the number of segments
+        // desired to create a smooth curve, but for now the hard-coded values (12 for full ardc
+        // and 4 for a sub-arc) are just fine.
+        // let segments_per_revolution = 48;
+        // let delta_revolution = theta / (2 * Math.PI);
+        // let max_s = segments_per_revolution * delta_revolution;
+
+        // Build first sub-arc
+        arcs.push(
+          this.arc(
+            [side_length/2, side_length/2],
+            side_length * (a/num_arcs),
+            theta_end - theta_start,
+            theta_start,
+            4
+          )
+        );
+
+        // Build the second sub-arc
         theta_end = 3/2 * Math.PI;
-        theta_start = theta_end - (Math.PI - theta1);
-
-        arc = new Array();
-        r = side_length * (a/num_arcs);
-        // segments_per_revolution = 48;
-        // delta_revolution = (theta_end - theta_start) / (2 * Math.PI);
-        // let delta_revolution = 0.25
-        // max_s = Math.ceil(segments_per_revolution * delta_revolution);
-        max_s = 8;
-        // console.log(max_s)
-        for (let s = 0; s <= max_s; s++) {
-
-          let point = [
-            side_length/2 + r * Math.cos(theta_start + s/max_s * (theta_end - theta_start)),
-            side_length/2 + r * Math.sin(theta_start + s/max_s * (theta_end - theta_start))
-          ]
-
-          // Check if the point is with largest radius arc
-          // on the other side of the cell
-          arc.push(point)
-        }
-
-        // if (a/(num_arcs+1) <= 0.5) {
-        if (arc.length !== 0) {
-          arcs.push(arc);
-        }
+        theta_start = theta_end - theta_intersect;
+        arcs.push(
+          this.arc(
+            [side_length/2, side_length/2],
+            side_length * (a/num_arcs),
+            theta_end - theta_start,
+            theta_start,
+            4
+          )
+        );
       }
-
     }
 
     // Build Grid
@@ -261,20 +254,7 @@ class Truchet {
     for (let c = 0; c < columns; c++) {
       for (let r = 0; r < rows; r++) {
 
-        // Square Grid for debugging
-        /*
-        paths.push(
-          PathHelp.translatePath(
-            square,
-            [
-              2 * (columns/rows) * (c/columns),
-              2 * (r/rows)
-            ]
-          )
-        )
-        //*/
-
-        // Randomly rotate the cell/tile
+        // Randomly rotate the cell tile
         let rotation = PathHelp.getRndInteger(0,3)
 
         // Arcs
@@ -443,4 +423,26 @@ class Truchet {
 
     return layers;
   }
+
+  /**
+   * Compose an arc
+   * Description incomplete
+   * @param Array An array of position [x,y]
+   * @param float The radius of the arc from the position
+   * @param float The number of radius to rotate through the arc
+   * @param float A radian offset from which to start the arc
+   * @param integer The number of line segments used to render the arc
+   * @return Array A Path array of points
+   **/
+  arc(position, radius, theta, theta_offset, segments) {
+    let path = new Array();
+    for (let s = 0; s <= segments; s++) {
+      path.push([
+        position[0] + radius * Math.cos(theta_offset + s/segments * theta),
+        position[0] + radius * Math.sin(theta_offset + s/segments * theta)
+      ])
+    }
+    return path;
+  }
+
 }
