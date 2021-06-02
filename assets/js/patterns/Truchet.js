@@ -281,6 +281,20 @@ class Truchet {
     // Center the Paths to the canvas
     paths = PathHelp.centerPaths(paths);
 
+    // Find the index of the longest path
+    // https://stackoverflow.com/questions/33577266/find-the-index-of-the-longest-array-in-an-array-of-arrays
+    var indexOfLongestArray = paths.reduce((acc, arr, idx) => {
+      return arr.length > paths[acc].length ? idx : acc
+    }, 0)
+
+    // Remove a path
+    let index_to_remove = indexOfLongestArray;
+    // let index_to_remove = PathHelp.getRndInteger(0, paths.length),
+    paths.splice(
+      index_to_remove,
+      1
+    );
+
     layers.push({
       "color": "black",
       "paths": paths
