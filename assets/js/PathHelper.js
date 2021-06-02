@@ -875,4 +875,38 @@ class PathHelper {
     ]
   }
 
+  /**
+   * Calculate an intersection point of two circles
+   * https://math.stackexchange.com/questions/256100/how-can-i-find-the-points-at-which-two-circles-intersect
+   * https://www.analyzemath.com/CircleEq/circle_intersection.html
+   * See alternate implementation: https://gist.github.com/jupdike/bfe5eb23d1c395d8a0a1a4ddd94882ac
+   * @param p1 Array of x/y position ([x,y]) of Circle 1
+   * @param r1 float Radius of Circle 1
+   * @param p2 Array of x/y position ([x,y]) of Circle 2
+   * @param r2 float Radius of Circle 2
+   * @return Array An array of intersection points
+   **/
+  circleInterceptPoints(p1, r1, p2, r2, sign) {
+
+    // Distance between centers of the circles
+    let d = this.distance(p1, p2)
+
+    let x = (1/2) * (p1[0] + p2[0])
+      + ((Math.pow(r1, 2) - Math.pow(r2, 2)) / (2 * Math.pow(d, 2))) * (p2[0] - p1[0])
+      + sign * (1/2) * Math.sqrt(
+          2 * ((Math.pow(r1, 2) + Math.pow(r2, 2))/(Math.pow(d, 2)))
+          - Math.pow((Math.pow(r1, 2) - Math.pow(r2, 2)), 2) / Math.pow(d, 4)
+          - 1
+        ) * (p2[1] - p1[1])
+
+    let y = (1/2) * (p1[1] + p2[1])
+      + ((Math.pow(r1, 2) - Math.pow(r2, 2)) / (2 * Math.pow(d, 2))) * (p2[1] - p1[1])
+      + sign * (1/2) * Math.sqrt(
+          2 * ((Math.pow(r1, 2) + Math.pow(r2, 2))/(Math.pow(d, 2)))
+          - Math.pow((Math.pow(r1, 2) - Math.pow(r2, 2)), 2) / Math.pow(d, 4)
+          - 1
+        ) * (p1[0] - p2[0])
+
+    return [x,y]
+  }
 }
