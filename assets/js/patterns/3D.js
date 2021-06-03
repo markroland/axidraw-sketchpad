@@ -11,7 +11,7 @@ class ThreeD {
   constructor() {
     this.key = "3d";
     this.name = "3D";
-    this.title = "Lorenz Attractor";
+    this.title = "Spike Ball";
     this.constrain = false
   }
 
@@ -29,7 +29,8 @@ class ThreeD {
     // return this.geoData()
     // return this.grandPrix()
     // return this.geoIsolines(p5)
-    return this.attractor()
+    // return this.attractor()
+    return this.spikeBall();
   }
 
   simpleCube() {
@@ -687,6 +688,70 @@ class ThreeD {
 
       layers.push({
         "color": color,
+        "paths": paths
+      })
+    }
+
+    return layers;
+  }
+
+  spikeBall() {
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+
+    // Define Model(s)
+    let shapes = new Array();
+    let sides = 96;
+    let revolutions = 32;
+    let radius = 2;
+    for (let a = 0; a < revolutions; a++) {
+      let shape = new Array();
+      for (let i = 0; i < sides; i++) {
+        let y = PathHelp.map(a*sides + i, 0, revolutions*sides, -radius, radius)
+        let theta_2 = Math.asin(y/radius)
+        let x = radius * Math.sin(theta_2 + Math.PI/2) * Math.cos(i/sides * 2 * Math.PI)
+        let z = radius * Math.sin(theta_2 + Math.PI/2) * Math.sin(i/sides * 2 * Math.PI)
+        if (((a * sides) + i) % 11 == 0) {
+
+          shapes.push([
+            // [0,0,0],
+            [
+              x/3, y/3, z/3
+            ],
+            [x,y,z]
+          ]);
+        }
+      }
+    }
+
+    // Define Transformations
+    const x_rotation = (2/16) * (2 * Math.PI)
+    const rotationX = [
+      [1, 0, 0],
+      [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
+      [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
+    ];
+
+    const y_rotation = (0/16) * (2 * Math.PI)
+    const rotationY = [
+      [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
+      [0, 1, 0],
+      [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
+    ];
+
+    const z_rotation = (0/16) * (2 * Math.PI)
+    const rotationZ = [
+      [Math.cos(z_rotation), -Math.sin(z_rotation), 0],
+      [Math.sin(z_rotation),  Math.cos(z_rotation), 0],
+      [0, 0, 1]
+    ];
+
+    // Loop through Model points and apply transformation and projection
+    for (let h = 0; h < shapes.length; h++) {
+      let paths = this.transform(shapes[h], [rotationY, rotationX], 6, 12)
+      layers.push({
+        "color": "black",
         "paths": paths
       })
     }
@@ -1394,7 +1459,7 @@ class ThreeD {
       // Translation matrix
       // Temp for this sketch only
       // TODO: make transform loop above able to handle a 4x4 matrix
-      //*
+      /*
       world = this.matrixMultiply([
         [1,0,0,-0.4],
         [0,1,0,0.4],
