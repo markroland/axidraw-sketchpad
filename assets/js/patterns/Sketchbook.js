@@ -11,7 +11,7 @@ class Sketchbook {
 
     this.constrain = false
 
-    this.title = "Recursive Tree"
+    this.title = "Resolution Test"
   }
 
   /**
@@ -20,7 +20,8 @@ class Sketchbook {
   draw(p5) {
     // return this.default()
     // return this.toxiclibtest()
-    return this.tree();
+    // return this.tree();
+    return this.resolutionTest(5 * 48, 3 * 48);
   }
 
   default() {
@@ -185,5 +186,63 @@ class Sketchbook {
 
     return layers;
 
+  }
+
+  resolutionTest(width, height) {
+    let layers = new Array();
+
+    let paths = new Array()
+
+    let PathHelp = new PathHelper;
+
+    // Vertical Lines
+    let vert_path = [
+      [0,-1],
+      [0,1],
+    ]
+
+    for (let i = 0; i <= width; i++) {
+
+      // Toggle path direction for plotting efficiency
+      vert_path.reverse();
+
+      paths.push(
+        PathHelp.translatePath(
+          vert_path,
+          [
+            PathHelp.map(i, 0, width, -5/3, 5/3),
+            0
+          ]
+        )
+      )
+    }
+
+    // Horizontal Lines
+    let horizontal_path = [
+      [-5/3,0],
+      [5/3,0],
+    ]
+    for (let j = 0; j <= height; j++) {
+
+      // Toggle path direction for plotting efficiency
+      horizontal_path.reverse();
+
+      paths.push(
+        PathHelp.translatePath(
+          horizontal_path,
+          [
+            0,
+            PathHelp.map(j, 0, height, -1, 1)
+          ]
+        )
+      )
+    }
+
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers;
   }
 }
