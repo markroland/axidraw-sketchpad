@@ -4,8 +4,8 @@
 class Grid {
 
   constructor(p5) {
+    this.title = "Fish Scale Pattern"
     this.constrain = false
-
   }
 
   draw(p5) {
@@ -14,7 +14,8 @@ class Grid {
     // return this.grid1()
     // return this.TenPrint(12) // 12 Feels nice
     // return this.SashikoStitching(8, ["black"]);
-    return this.SashikoStitching(8, ["cyan", "magenta"]);
+    // return this.SashikoStitching(8, ["cyan", "magenta"]);
+    return this.fishScales()
 
     // Hex Grid
     /*
@@ -530,5 +531,77 @@ class Grid {
     }
 
     return paths;
+  }
+
+  fishScales() {
+
+    let layers = new Array();
+
+    let paths = new Array()
+
+    let PathHelp = new PathHelper;
+
+    let num_arcs = 6;
+    let radius = 0.2;
+    let x_spacing = 2.0 * radius
+    let y_spacing = 0.5 * radius;
+
+    let arcs = new Array();
+    for (let a = 1; a <= num_arcs; a++) {
+
+      let intersection_point = PathHelp.circleInterceptPoints(
+        [0,0],
+        radius * (a/num_arcs),
+        [x_spacing/2, y_spacing],
+        radius,
+        1
+      )
+
+      let theta = Math.atan2(intersection_point[1], intersection_point[0])
+      // console.log((theta * (180/Math.PI)).toFixed(2), "degrees");
+
+      let arc = PathHelp.arc(
+        [0, 0],
+        radius * (a/num_arcs),
+        Math.PI + 2 * theta,
+        Math.PI + -theta,
+        12
+      );
+
+      arcs.push(arc);
+    }
+
+    // Rows
+    let rows = 19
+    let columns = 9; // Ideally odd
+    for (let i = 0; i < rows; i++) {
+      let j_max = columns;
+      if (i % 2 == 1) {
+        j_max -= 1;
+      }
+
+      // Columns
+      for (let j = 0; j < j_max; j++) {
+        let x_offset = 0;
+        if (j_max % 2 == 0) {
+          x_offset = x_spacing/2;
+        }
+        paths = paths.concat(
+          arcs.map(function(path){
+            return PathHelp.translatePath(path, [j * x_spacing + x_offset, i * y_spacing])
+          })
+        )
+      }
+    }
+
+    // Center everything
+    paths = PathHelp.centerPaths(paths);
+
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers;
   }
 }
