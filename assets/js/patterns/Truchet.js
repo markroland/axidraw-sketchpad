@@ -170,7 +170,7 @@ class Truchet {
     let arcs = new Array();
     for (let a = 1; a < num_arcs; a++) {
 
-      let arc = this.arc(
+      let arc = PathHelp.arc(
         [-side_length/2, -side_length/2],
         side_length * (a/num_arcs),
         Math.PI/2,
@@ -191,7 +191,7 @@ class Truchet {
       if (a/(num_arcs+1) <= 0.5) {
 
         arcs.push(
-          this.arc(
+          PathHelp.arc(
             [side_length/2, side_length/2],
             side_length * (a/num_arcs),
             theta_end - theta_start,
@@ -225,7 +225,7 @@ class Truchet {
 
         // Build first sub-arc
         arcs.push(
-          this.arc(
+          PathHelp.arc(
             [side_length/2, side_length/2],
             side_length * (a/num_arcs),
             theta_end - theta_start,
@@ -238,7 +238,7 @@ class Truchet {
         theta_end = 3/2 * Math.PI;
         theta_start = theta_end - theta_intersect;
         arcs.push(
-          this.arc(
+          PathHelp.arc(
             [side_length/2, side_length/2],
             side_length * (a/num_arcs),
             theta_end - theta_start,
@@ -437,26 +437,4 @@ class Truchet {
 
     return layers;
   }
-
-  /**
-   * Compose an arc
-   * Description incomplete
-   * @param Array An array of position [x,y]
-   * @param float The radius of the arc from the position
-   * @param float The number of radius to rotate through the arc
-   * @param float A radian offset from which to start the arc
-   * @param integer The number of line segments used to render the arc
-   * @return Array A Path array of points
-   **/
-  arc(position, radius, theta, theta_offset, segments) {
-    let path = new Array();
-    for (let s = 0; s <= segments; s++) {
-      path.push([
-        position[0] + radius * Math.cos(theta_offset + s/segments * theta),
-        position[0] + radius * Math.sin(theta_offset + s/segments * theta)
-      ])
-    }
-    return path;
-  }
-
 }

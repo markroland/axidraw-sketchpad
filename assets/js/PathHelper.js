@@ -269,6 +269,28 @@ class PathHelper {
   }
 
   /**
+   * Compose an arc
+   * Draw an arc centered at a position
+   * @param Array An array of position [x,y]
+   * @param float The radius of the arc from the position
+   * @param float The number of radius to rotate through the arc
+   * @param float A radian offset from which to start the arc
+   * @param integer The number of line segments used to render the arc
+   * @return Array A Path array of points
+   **/
+  arc(position, radius, theta, theta_offset, segments) {
+    let path = new Array();
+    for (let s = 0; s <= segments; s++) {
+      path.push([
+        position[0] + radius * Math.cos(theta_offset + s/segments * theta),
+        position[0] + radius * Math.sin(theta_offset + s/segments * theta)
+      ])
+    }
+    return path;
+  }
+
+
+  /**
    * Returns objet representing Line equation.
    * m = slope
    * b = Y intercept
