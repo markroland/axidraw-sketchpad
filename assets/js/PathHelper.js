@@ -211,7 +211,7 @@ class PathHelper {
         output = parallels[0]
 
         // Cap
-        output = output.concat(this.arc(
+        output = output.concat(this.arcPointToPoint(
             parallels[0][parallels[0].length-1][0],
             parallels[0][parallels[0].length-1][1],
             parallels[1][0][0],
@@ -224,7 +224,7 @@ class PathHelper {
         output = output.concat(parallels[1])
 
         // Cap
-        output = output.concat(this.arc(
+        output = output.concat(this.arcPointToPoint(
             parallels[1][parallels[1].length-1][0],
             parallels[1][parallels[1].length-1][1],
             parallels[0][0][0],
@@ -243,7 +243,18 @@ class PathHelper {
     }
   }
 
-  arc(x1, y1, x2, y2, theta, segments = 12) {
+  /**
+   * Compose an arc between 2 points
+   * Description incomplete
+   * @param x1 X-position of starting point
+   * @param y1 Y-position of starting point
+   * @param x2 X-position of end point
+   * @param y2 Y-position of end point
+   * @param theta rotation/angle to travel
+   * @param segments The number of steps to use
+   * @return Array A Path array of points
+   **/
+  arcPointToPoint(x1, y1, x2, y2, theta, segments = 12) {
     let path = new Array()
     let PathHelp = new PathHelper
     let theta_0 = Math.atan2(y2 - y1, x2 - x1)

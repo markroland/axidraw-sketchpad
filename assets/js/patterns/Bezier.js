@@ -414,7 +414,7 @@ class Bezier {
       // The turn-around rotation must be flipped each time.
       if (i > 0) {
         turn_angle = turn_angle * -1
-        path = path.concat(this.arc(
+        path = path.concat(PathHelp.arcPointToPoint(
           path[path.length-1][0],
           path[path.length-1][1],
           paths[index][0][0],
@@ -435,7 +435,7 @@ class Bezier {
 
     // Add turn-around
     turn_angle = turn_angle * -1
-    path = path.concat(this.arc(
+    path = path.concat(PathHelp.arcPointToPoint(
       path[path.length-1][0],
       path[path.length-1][1],
       curve[0][0],
@@ -461,7 +461,7 @@ class Bezier {
 
       // Turn around arc
       turn_angle = turn_angle * -1
-      path = path.concat(this.arc(
+      path = path.concat(PathHelp.arcPointToPoint(
         path[path.length-1][0],
         path[path.length-1][1],
         paths[index][0][0],
@@ -558,19 +558,5 @@ class Bezier {
     })
 
     return layers
-  }
-
-  arc(x1, y1, x2, y2, theta, segments = 12) {
-    let path = new Array()
-    let PathHelp = new PathHelper
-    let theta_0 = Math.atan2(y2 - y1, x2 - x1)
-    let distance = PathHelp.distance([x1, y1], [x2, y2])
-    for (let c = 1; c < segments; c++) {
-      path.push([
-        x1 + (x2 - x1)/2 + distance/2 * Math.cos(theta_0 + Math.PI + c/segments * theta),
-        y1 + (y2 - y1)/2 + distance/2 * Math.sin(theta_0 + Math.PI + c/segments * theta)
-      ])
-    }
-    return path
   }
 }
