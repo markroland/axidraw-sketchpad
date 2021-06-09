@@ -15,7 +15,8 @@ class Spiral {
    */
   draw() {
 
-    return [this.fermat()]
+    return this.spiral('hyperbolic');
+    // return [this.fermat()]
 
     // Calculate path
     let path = this.calc(
@@ -138,6 +139,59 @@ class Spiral {
       path.push([x,y]);
     }
 
+    return path;
+  }
+
+  spiral(type) {
+
+    let layers = new Array();
+
+    let paths = new Array()
+
+    let path = new Array();
+
+    switch(type) {
+      case "hyperbolic":
+        path = this.hyperbolicSpiral(0.4, 5)
+        break;
+      default:
+        path = this.hyperbolicSpiral(0.4, 5)
+    }
+
+    let PathHelp = new PathHelper;
+
+    path = PathHelp.rotatePath(path, Math.PI/2)
+
+    // path = PathHelp.expandPath(path, 0.01, 0.01, 'round')
+
+    path = PathHelp.translatePath(path, [0.3, -0.4])
+
+    paths.push(path);
+
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers;
+  }
+
+  /**
+   * Hyperbolic Spiral
+   * https://en.wikipedia.org/wiki/Hyperbolic_spiral
+   */
+  hyperbolicSpiral(a, periods) {
+    let path = new Array();
+    let segments_per_revolution = 60;
+    let t_max = segments_per_revolution * periods;
+    for (let t = 1; t <= t_max; t++) {
+      let phi = (t/t_max) * (periods * 2 * Math.PI)
+      let r = a/phi;
+      console.log(r)
+      let x = a * (Math.cos(phi)/phi);
+      let y = a * (Math.sin(phi)/phi)
+      path.push([x,y])
+    }
     return path;
   }
 
