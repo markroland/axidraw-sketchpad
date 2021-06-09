@@ -4,7 +4,7 @@
 class Grid {
 
   constructor(p5) {
-    this.title = "Fish Scale Pattern"
+    this.title = "Acrylicode Tutorial 1"
     this.constrain = false
   }
 
@@ -15,7 +15,8 @@ class Grid {
     // return this.TenPrint(12) // 12 Feels nice
     // return this.SashikoStitching(8, ["black"]);
     // return this.SashikoStitching(8, ["cyan", "magenta"]);
-    return this.fishScales()
+    // return this.fishScales()
+    return this.acrylicodeTutorial1(5)
 
     // Hex Grid
     /*
@@ -596,6 +597,59 @@ class Grid {
 
     // Center everything
     paths = PathHelp.centerPaths(paths);
+
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers;
+  }
+
+  /**
+   * Inspiration: https://www.youtube.com/watch?v=9NQVRFnkb1E
+   */
+  acrylicodeTutorial1(gridScale) {
+
+    let layers = new Array();
+
+    let paths = new Array();
+
+    // Grid definition
+    let rows = 3 * gridScale;
+    let columns = 5 * gridScale;
+    let side_length = 2 * (1/rows);
+
+    let PathHelp = new PathHelper();
+
+    // Critical numbers
+    let max_offset = 1 * (2/rows) // First number: [0 = no offset, 1 = max offset without crossing]
+    let subdivisions = 9;
+
+    // Create grid of points
+    let gridPoints = new Array(rows)
+    for (let r = 0; r <= rows; r++) {
+      gridPoints[r] = new Array(columns);
+      for (let c = 0; c <= columns; c++) {
+        gridPoints[r][c] = [
+         PathHelp.map(c, 0, columns, -5/3, 5/3) + PathHelp.getRandom(0, max_offset),
+         PathHelp.map(r, 0, rows, -1, 1) + PathHelp.getRandom(0, max_offset)
+        ]
+      }
+    }
+
+    // Connect grid of points into paths
+    for (let r = 0; r < rows; r++) {
+      for (let s = 0; s <= subdivisions; s++) {
+        let path = new Array();
+        for (let c = 0; c < columns; c++) {
+          let x = PathHelp.lerp(gridPoints[r][c][0], gridPoints[r+1][c][0], s/subdivisions);
+          let y = PathHelp.lerp(gridPoints[r][c][1], gridPoints[r+1][c][1], s/subdivisions);
+          path.push([x, y])
+        }
+        paths.push(path);
+      }
+    }
 
     layers.push({
       "color": "black",
