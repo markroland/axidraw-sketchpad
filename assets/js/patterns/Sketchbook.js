@@ -11,7 +11,7 @@ class Sketchbook {
 
     this.constrain = false
 
-    this.title = "Resolution Test"
+    this.title = "Concave Hull"
   }
 
   /**
@@ -21,7 +21,8 @@ class Sketchbook {
     // return this.default()
     // return this.toxiclibtest()
     // return this.tree();
-    return this.resolutionTest(5 * 48, 3 * 48);
+    // return this.resolutionTest(5 * 48, 3 * 48);
+    return this.concaveHull();
   }
 
   default() {
@@ -237,6 +238,28 @@ class Sketchbook {
         )
       )
     }
+
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers;
+  }
+
+  concaveHull() {
+
+    let PathHelp = new PathHelper;
+
+    let layers = new Array();
+
+    let paths = new Array();
+
+    paths.push(
+      PathHelp.polygon(6, 0.5, 0)
+    )
+
+    console.log(concaveHull.hello());
 
     layers.push({
       "color": "black",
