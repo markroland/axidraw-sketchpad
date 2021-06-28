@@ -11,7 +11,7 @@ if (window.location.hash != "") {
 let orientation = 'landscape'
 let showDate = true
 let showSignature = true
-let debugPenDownUp = false
+let debugPenDownUp = true
 let draw_grid = false
 
 let fonts
