@@ -254,8 +254,10 @@ class Sketchbook {
 
     let layers = new Array();
 
+    let paths = new Array();
+
     // Note: Convex Hull is [7, 2, 5, 13, 0, 11, 10, 12, 9, 17]
-    let points = [
+    let pointsA = [
       [
         0.7438854677770076,
         -0.2794490150906719
@@ -338,6 +340,27 @@ class Sketchbook {
       ]
     ]
 
+    let pointsB = [
+      [-0.2, -0.8],
+      [ 0.1, -0.8],
+      [ 0.5, -0.7],
+      [ 0.6, -0.6],
+      [-0.5, -0.5],
+      [ 0.3, -0.4],
+      [-0.6, -0.2],
+      [-0.35, -0.18],
+      [0.05, -0.2],
+      [-0.1, 0.1],
+      [-0.6, 0.2],
+      [0.05, 0.4],
+      [-0.5, 0.5],
+      [ 0.5, 0.55],
+      [-0.1, 0.7],
+      [ 0.2, 0.8]
+    ]
+
+    let points = pointsB;
+
     // Random Starting points
     /*
     let num_points = 20;
@@ -373,9 +396,13 @@ class Sketchbook {
     // Calculate Concave Hull
     let hull = concaveHull.calculate(points, 3);
     console.log("concaveHull() hull: ", hull);
+    if (hull !== null) {
+      paths = [hull]
+    }
+
     layers.push({
       "color": "black",
-      "paths": [hull]
+      "paths": paths
     })
 
     // Convex Hull

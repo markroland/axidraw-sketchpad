@@ -66,7 +66,11 @@ var concaveHull = function() {
   function calculate(pointsList, k) {
 
     // Make sure k >= 3
-    let kk = Math.max(k ,3)
+    let kk = Math.max(k, 3)
+
+    if (kk >= pointsList.length) {
+      return null;
+    }
 
     // Remove duplicate points
     let dataset = CleanList(pointsList);
@@ -95,13 +99,14 @@ var concaveHull = function() {
     // Remove the first point
     let currentPointId = firstPointId
     let currentPoint = firstPoint
-    dataset = RemovePoint(dataset, firstPointId)
+    dataset = RemovePoint(dataset, firstPoint)
 
+    console.log("-----")
     let previousAngle = 0.0;
-
     let step = 2;
-
     while ((!pointEquals(currentPoint, firstPoint) || step == 2) && dataset.length > 0) {
+
+      console.log("Step: " + step)
 
       // Add the firstPoint again
       if (step == 5) {
@@ -111,6 +116,18 @@ var concaveHull = function() {
       // Find the nearest neighbors
       let kNearestPoints = NearestPoints(dataset, currentPoint, kk)
 
+      // Debugging
+      //*
+      let debug_string = "Nearest Points to " + getIndex(pointsList, currentPoint) + ": ";
+      for (let p of kNearestPoints) {
+        debug_string += getIndex(pointsList, p) + ", "
+      }
+      console.log(debug_string.replace(/,\s*$/, ""));
+      //*/
+
+      // Debug exit
+      if (step > 3) { return hull; }
+
       // Sort the candidates (neighbours) in descending order of right-hand turn
       let cPoints = SortByAngle(kNearestPoints, currentPoint, previousAngle)
 
@@ -119,10 +136,12 @@ var concaveHull = function() {
       let i = 0;
       while (its == true && i < cPoints.length) {
 
+        // Note: This is NOT designed for zero-indexed arrays
         i++;
 
         let lastPoint;
-        if (pointEquals(cPoints[i], firstPoint)) {
+        // console.log(cPoints.length, i, cPoints[i], firstPoint);
+        if (pointEquals(cPoints[i-1], firstPoint)) {
           lastPoint = 1
         } else {
           lastPoint = 0
@@ -130,6 +149,7 @@ var concaveHull = function() {
 
         console.log("lastPoint: " + lastPoint);
 
+        // Only evaluate if the hull is 3 or more points
         let j = 2;
         its = false;
         while (its == false && j < (hull.length - lastPoint)) {
@@ -141,10 +161,12 @@ var concaveHull = function() {
             [hull[step-2], cPoints[i-1]],
             [hull[step-2-j], cPoints[step-1-j]]
           )
-          console.log("its: " + its)
+          console.log("intersection (its): " + its)
 
           j++
         }
+
+        console.log("-----")
       }
 
       // since all candidates intersect at least one edge, try again with a higher number of neighbours
@@ -153,16 +175,16 @@ var concaveHull = function() {
         return calculate(pointsList, kk+1)
       }
 
-      currentPoint = cPoints[i];
+      currentPoint = cPoints[i-1];
 
       // A valid candidate was found
       hull = AddPoint(hull, currentPoint)
 
-      return hull;
+      previousAngle = -1 * Angle(hull[step-1], hull[step-2])
 
-      previousAngle = Angle(hull[step-1], hull[step-2])
+      // console.log("hull 2", hull, previousAngle)
 
-      dataset = RemovePoint(dataset, currentPointId)
+      dataset = RemovePoint(dataset, currentPoint)
 
       step++
     }
@@ -236,8 +258,15 @@ var concaveHull = function() {
    * @return Array The point array with the lowest Y value
    */
   function RemovePoint(points, e){
-    points.splice(e, 1)
-    return points;
+    // points.splice(e, 1)
+    // return points;
+
+    for (let i = 0; i < points.length; i++) {
+      if (pointEquals(points[i], e)) {
+        points.splice(i, 1)
+        return points
+      }
+    }
   }
 
   /**
@@ -277,12 +306,12 @@ var concaveHull = function() {
     // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
     candidates.sort((a, b) => (a.distance > b.distance) ? 1 : -1)
 
+    k = Math.min(k, candidates.length)
+
     // Select "k" number of nearest points
     for (let i = 0; i < k; i++) {
       nearest_points.push(candidates[i].point)
     }
-
-    console.log("Nearest Points: " + candidates[0].id + ", " + candidates[1].id + ", " + candidates[2].id)
 
     return nearest_points;
   }
@@ -383,6 +412,14 @@ var concaveHull = function() {
       return true;
     }
     return false;
+  }
+
+  function getIndex(points, point) {
+    for (let i = 0; i < points.length; i++) {
+      if (pointEquals(points[i], point)) {
+        return i
+      }
+    }
   }
 
   function distance(p1, p2) {
