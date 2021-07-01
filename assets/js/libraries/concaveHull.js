@@ -10,7 +10,9 @@
  */
 var concaveHull = function() {
 
-  function calculate(points, k) {
+  function test(points, k) {
+
+    // Remove the first point
 
     // console.log(points);
 
@@ -61,6 +63,128 @@ var concaveHull = function() {
     return points;
   }
 
+  function calculate(pointsList, k) {
+
+    // Make sure k >= 3
+    let kk = Math.max(k ,3)
+
+    // Remove duplicate points
+    let dataset = CleanList(pointsList);
+
+    // A minimum of 3 dissimilar points is required
+    if (dataset.length < 3) {
+      return null
+    }
+
+    // For a 3 points dataset, the polygon is the dataset itself
+    if (dataset.length == 3) {
+      return dataset
+    }
+
+    // Make sure that k neighbors can be found
+    kk = Math.min(kk, dataset.length - 1)
+
+    // Identify the point in the dataset that is lowest on the vertical Y-axis
+    let firstPointId = FindMinYPoint(dataset)
+    let firstPoint = dataset[firstPointId]
+
+    // Initialize the hull with the first point
+    let hull = new Array();
+    hull.push(dataset[firstPointId]);
+
+    // Remove the first point
+    let currentPointId = firstPointId
+    let currentPoint = firstPoint
+    dataset = RemovePoint(dataset, firstPointId)
+
+    let previousAngle = 0.0;
+
+    let step = 2;
+
+    while ((!pointEquals(currentPoint, firstPoint) || step == 2) && dataset.length > 0) {
+
+      // Add the firstPoint again
+      if (step == 5) {
+        dataset = AddPoint(dataset, firstPoint)
+      }
+
+      // Find the nearest neighbors
+      let kNearestPoints = NearestPoints(dataset, currentPoint, kk)
+
+      // Sort the candidates (neighbours) in descending order of right-hand turn
+      let cPoints = SortByAngle(kNearestPoints, currentPoint, previousAngle)
+
+      // Select the first candidate that does not intersect any of the "hull" polygon edges
+      let its = true;
+      let i = 0;
+      while (its == true && i < cPoints.length) {
+
+        i++;
+
+        let lastPoint;
+        if (pointEquals(cPoints[i], firstPoint)) {
+          lastPoint = 1
+        } else {
+          lastPoint = 0
+        }
+
+        console.log("lastPoint: " + lastPoint);
+
+        let j = 2;
+        its = false;
+        while (its == false && j < (hull.length - lastPoint)) {
+
+          // TODO: evaluate this
+          console.log("Step: " + step, "i: " + i, hull, cPoints)
+          console.log([hull[step-2], cPoints[i]])
+          its = IntersectsQ(
+            [hull[step-2], cPoints[i-1]],
+            [hull[step-2-j], cPoints[step-1-j]]
+          )
+          console.log("its: " + its)
+
+          j++
+        }
+      }
+
+      // since all candidates intersect at least one edge, try again with a higher number of neighbours
+      if (its == true) {
+        console.log("Recalculating with k=" + (kk+1))
+        return calculate(pointsList, kk+1)
+      }
+
+      currentPoint = cPoints[i];
+
+      // A valid candidate was found
+      hull = AddPoint(hull, currentPoint)
+
+      return hull;
+
+      previousAngle = Angle(hull[step-1], hull[step-2])
+
+      dataset = RemovePoint(dataset, currentPointId)
+
+      step++
+    }
+
+    // check if all the given points are inside the computed polygon
+    let allInside = true;
+    let i = dataset.length
+    while (allInside == true && i > 0) {
+      allInside = PointInPolygonQ(dataset[i], hull)
+      i--;
+    }
+
+    // since at least one point is out of the computed polygon, try again with a higher number of neighbours
+    if (allInside == false) {
+      return calculate(pointsList, kk+1)
+    }
+
+    // A valid hull was found!
+    console.log(hull);
+    return hull;
+  }
+
   /**
    * Remove duplicate points
    * https://stackoverflow.com/a/20339709
@@ -96,13 +220,13 @@ var concaveHull = function() {
    * Important Note: In this coordinate system "lowest" Y has a positive value
    * and for that reason the Max value is used
    * @param Array An array of point arrays, i.e. [[0,0], [1,1], [1,1]]
-   * @return Array The point array with the lowest Y value
+   * @return Integer The position of the point with the lowest Y value in points
    */
   function FindMinYPoint(points){
     let y_coordinates = arrayColumn(points, 1);
     // let index = y_coordinates.indexOf(arrayMin(y_coordinates));
     let index = y_coordinates.indexOf(arrayMax(y_coordinates));
-    return points[index];
+    return index;
   }
 
   /**
@@ -143,6 +267,7 @@ var concaveHull = function() {
     let candidates = new Array();
     for (let p = 0; p < points.length; p++) {
       candidates.push({
+        "id": p,
         "point" : points[p],
         "distance" : distance(points[p], point)
       })
@@ -156,6 +281,8 @@ var concaveHull = function() {
     for (let i = 0; i < k; i++) {
       nearest_points.push(candidates[i].point)
     }
+
+    console.log("Nearest Points: " + candidates[0].id + ", " + candidates[1].id + ", " + candidates[2].id)
 
     return nearest_points;
   }
@@ -178,13 +305,16 @@ var concaveHull = function() {
     let candidates = new Array();
     for (let p = 0; p < points.length; p++) {
       candidates.push({
+        "id" : p,
         "point" : points[p],
-        "angle" : angle(last_point, point, points[p]) - prev_angle
+        "angle" : Angle(points[p], point) - prev_angle
+        // angle(last_point, point, points[p]) - prev_angle
       })
     }
 
-    // Sort points by angle
-    // TODO: Check to make sure this isn't backwards
+    // console.log("Sort by Angle Points: ", candidates);
+
+    // Sort points by angle in descending order
     // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
     candidates.sort((a, b) => (a.angle > b.angle) ? 1 : -1)
 
@@ -192,6 +322,8 @@ var concaveHull = function() {
     for (let i = 0; i < candidates.length; i++) {
       sorted_points.push(candidates[i].point)
     }
+
+    // console.log("Sorted By Angle: " + candidates[0].id + ", " + candidates[1].id + ", " + candidates[2].id)
 
     return sorted_points;
   }
@@ -203,9 +335,11 @@ var concaveHull = function() {
    * @param Array An array of 2 point arrays that define the start and end of a line
    * @return Boolean
    */
-  function IntersectQ(line1, line2){
+  function IntersectsQ(line1, line2){
 
     let intersection_point = intersect_point(line1[0], line1[1], line2[0], line2[1])
+
+    console.log("IntersectsQ: ", intersection_point)
 
     if (intersection_point.length == 0) {
       return false;
@@ -226,6 +360,10 @@ var concaveHull = function() {
     return pointInPolygonNested(point, points)
   }
 
+  function Angle(pointA, pointB) {
+    return Math.PI - Math.atan2(pointB[1] - pointA[1], pointB[0] - pointA[0])
+  }
+
   // Helpers
 
   function arrayColumn(arr, n){
@@ -240,6 +378,13 @@ var concaveHull = function() {
     return Math.max(...a);
   }
 
+  function pointEquals(a,b) {
+    if (a[0] === b[0] && a[1] === b[1]) {
+      return true;
+    }
+    return false;
+  }
+
   function distance(p1, p2) {
     return Math.sqrt(Math.pow(p2[0] - p1[0], 2) + Math.pow(p2[1] - p1[1], 2))
   }
@@ -252,24 +397,24 @@ var concaveHull = function() {
    * @param Array A 2-element point array. Point B
    * @return float The angle in Radians between the 3 points where p2 is the vertex
    */
-  function angle(p1, p2, p3) {
+  // function angle(p1, p2, p3) {
 
-    let sideOppP1 = distance(p2, p3)
-    let sideOppP2 = distance(p1, p3)
-    let sideOppP3 = distance(p1, p2)
+  //   let sideOppP1 = distance(p2, p3)
+  //   let sideOppP2 = distance(p1, p3)
+  //   let sideOppP3 = distance(p1, p2)
 
-    let a = sideOppP1
-    let b = sideOppP3
-    let c = sideOppP2
+  //   let a = sideOppP1
+  //   let b = sideOppP3
+  //   let c = sideOppP2
 
-    let angle = Math.acos(
-      (Math.pow(a,2) + Math.pow(b,2) - Math.pow(c,2))
-      /
-      (2 * a * b)
-    )
+  //   let angle = Math.acos(
+  //     (Math.pow(a,2) + Math.pow(b,2) - Math.pow(c,2))
+  //     /
+  //     (2 * a * b)
+  //   )
 
-    return angle;
-  }
+  //   return angle;
+  // }
 
   /**
    * Calculate the intersection point of 2 lines

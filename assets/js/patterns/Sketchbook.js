@@ -18,6 +18,7 @@ class Sketchbook {
    * Draw path
    */
   draw(p5) {
+    this.p5 = p5
     // return this.default()
     // return this.toxiclibtest()
     // return this.tree();
@@ -253,8 +254,6 @@ class Sketchbook {
 
     let layers = new Array();
 
-    let paths = new Array();
-
     // Note: Convex Hull is [7, 2, 5, 13, 0, 11, 10, 12, 9, 17]
     let points = [
       [
@@ -353,18 +352,34 @@ class Sketchbook {
     console.log(points);
     //*/
 
+    // Debugging: Render points in p5 land
+    //*
+    for (let i = 0; i < points.length; i++) {
+      this.p5.noStroke();
+      this.p5.fill(0,0,255);
+      let x = this.p5.width/2 + 288/2 * points[i][0];
+      let y = this.p5.height/2 + 288/2 * points[i][1]
+      this.p5.ellipse(x, y, 5, 5);
+      this.p5.text(i, x + 4, y + 5);
+      this.p5.noFill();
+    }
+    //*/
+
+    // layers.push({
+    //   "color": "blue",
+    //   "paths": [points]
+    // })
+
     // Calculate Concave Hull
     let hull = concaveHull.calculate(points, 3);
-
-    // Create path from hull points
-    paths.push(hull);
-
+    console.log("concaveHull() hull: ", hull);
     layers.push({
       "color": "black",
-      "paths": paths
+      "paths": [hull]
     })
 
     // Convex Hull
+    /*
     layers.push({
       "color": "red",
       "paths": [
@@ -383,6 +398,7 @@ class Sketchbook {
         ]
       ]
     })
+    //*/
 
     return layers;
   }
