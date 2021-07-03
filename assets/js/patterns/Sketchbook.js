@@ -359,21 +359,21 @@ class Sketchbook {
       [ 0.2, 0.8]
     ]
 
-    let points = pointsB;
-
     // Random Starting points
-    /*
-    let num_points = 20;
+    //*
+    let num_points = 10;
     let padding = 0.5;
-    let points = new Array();
+    let pointsC = new Array();
     for (let i = 0; i < num_points; i++) {
-      points.push([
+      pointsC.push([
         (1 - padding) * PathHelp.getRandom(-5/3, 5/3),
         (1 - padding) * PathHelp.getRandom(-1, 1)
       ])
     }
-    console.log(points);
     //*/
+
+    let points = pointsC;
+    // console.log(points);
 
     // Debugging: Render points in p5 land
     //*

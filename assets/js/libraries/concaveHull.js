@@ -104,14 +104,22 @@ var concaveHull = function() {
     console.log("-----")
     let previousAngle = 0.0;
     let step = 2;
+    let stop = step + kk;
     while ((!pointEquals(currentPoint, firstPoint) || step == 2) && dataset.length > 0) {
 
       console.log("Step: " + step)
 
       // Add the firstPoint again
-      if (step == 5) {
+      if (step == stop) {
         dataset = AddPoint(dataset, firstPoint)
       }
+
+      // TODO: Resume work here to debug selection of points 11,8,7 from point 9
+      // Debug exit
+      // if (step > 18) {
+        // return hull;
+      // }
+
 
       // Find the nearest neighbors
       let kNearestPoints = NearestPoints(dataset, currentPoint, kk)
@@ -125,16 +133,19 @@ var concaveHull = function() {
       console.log(debug_string.replace(/,\s*$/, ""));
       //*/
 
-      // Debug exit
-      if (step > 3) { return hull; }
-
       // Sort the candidates (neighbours) in descending order of right-hand turn
       let cPoints = SortByAngle(kNearestPoints, currentPoint, previousAngle)
 
+      debug_string = "Candidate Points to " + getIndex(pointsList, currentPoint) + ": ";
+      for (let cp of cPoints) {
+        debug_string += getIndex(pointsList, cp) + ", "
+      }
+      console.log(debug_string.replace(/,\s*$/, ""));
+
       // Select the first candidate that does not intersect any of the "hull" polygon edges
-      let its = true;
+      let intersects = true;
       let i = 0;
-      while (its == true && i < cPoints.length) {
+      while (intersects == true && i < cPoints.length) {
 
         // Note: This is NOT designed for zero-indexed arrays
         i++;
@@ -150,18 +161,32 @@ var concaveHull = function() {
         console.log("lastPoint: " + lastPoint);
 
         // Only evaluate if the hull is 3 or more points
-        let j = 2;
-        its = false;
-        while (its == false && j < (hull.length - lastPoint)) {
+        let j = 1;
+        intersects = false;
+        while (intersects == false && j < (hull.length - lastPoint)) {
 
-          // TODO: evaluate this
-          console.log("Step: " + step, "i: " + i, hull, cPoints)
-          console.log([hull[step-2], cPoints[i]])
-          its = IntersectsQ(
+          console.log("j " + j + " of " + (hull.length - lastPoint - 1))
+          // console.log("Step: " + step, "i: " + i, hull, cPoints)
+          // console.log([hull[step-2], cPoints[i]])
+          console.log("cPoints: ", cPoints);
+
+          console.log(
+            "Evaluating intersection of line "
+            + getIndex(pointsList, hull[step-2]) + "->" + getIndex(pointsList, cPoints[i-1])
+            + " and line " + getIndex(pointsList, hull[step-2-j]) + "->" + getIndex(pointsList, hull[step-1-j])
+          );
+
+          intersects = IntersectsQ(
             [hull[step-2], cPoints[i-1]],
-            [hull[step-2-j], cPoints[step-1-j]]
+            [hull[step-2-j], hull[step-1-j]]
           )
-          console.log("intersection (its): " + its)
+          console.log("intersects: " + intersects)
+
+          // TODO: Resume work here to debug selection of points 11,8,7 from point 9
+          // Debug exit
+          // if (step > 5) {
+            // return hull;
+          // }
 
           j++
         }
@@ -170,7 +195,7 @@ var concaveHull = function() {
       }
 
       // since all candidates intersect at least one edge, try again with a higher number of neighbours
-      if (its == true) {
+      if (intersects == true) {
         console.log("Recalculating with k=" + (kk+1))
         return calculate(pointsList, kk+1)
       }
@@ -360,21 +385,31 @@ var concaveHull = function() {
   /**
    * Returns True if the two given lines segments intersect each other,
    * and False otherwise.
+   * https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+   * https://en.wikipedia.org/wiki/Line–line_intersection#Mathematics
    * @param Array An array of 2 point arrays that define the start and end of a line
    * @param Array An array of 2 point arrays that define the start and end of a line
    * @return Boolean
    */
-  function IntersectsQ(line1, line2){
+  function IntersectsQ(lineA, lineB){
 
-    let intersection_point = intersect_point(line1[0], line1[1], line2[0], line2[1])
+    return getLineLineCollision(lineA[0], lineA[1], lineB[0], lineB[1])
+
+    let intersection_point = intersect_point(lineA[0], lineA[1], lineB[0], lineB[1])
 
     console.log("IntersectsQ: ", intersection_point)
 
-    if (intersection_point.length == 0) {
-      return false;
+    let within_x_bounds = intersection_point[0] <= Math.max(lineA[0], lineB[0])
+      && intersection_point[0] >= Math.min(lineA[0], lineB[0]);
+
+    let within_y_bounds = intersection_point[1] <= Math.max(lineA[1], lineB[1])
+      && intersection_point[1] >= Math.min(lineA[1], lineB[1]);
+
+    if (within_x_bounds && within_y_bounds) {
+      return true;
     }
 
-    return true;
+    return false;
   }
 
   /**
@@ -478,6 +513,54 @@ var concaveHull = function() {
 
     return [x, y]
   }
+
+  // https://stackoverflow.com/a/30159167
+  function getLineLineCollision(p0, p1, p2, p3) {
+
+    // console.log("getLineLineCollision: ", p0, p1, p2, p3)
+
+      var s1, s2;
+      s1 = {x: p1.x - p0.x, y: p1.y - p0.y};
+      s2 = {x: p3.x - p2.x, y: p3.y - p2.y};
+
+      var s10_x = p1.x - p0.x;
+      var s10_y = p1.y - p0.y;
+      var s32_x = p3.x - p2.x;
+      var s32_y = p3.y - p2.y;
+
+      var denom = s10_x * s32_y - s32_x * s10_y;
+
+      if(denom == 0) {
+          return false;
+      }
+
+      var denom_positive = denom > 0;
+
+      var s02_x = p0.x - p2.x;
+      var s02_y = p0.y - p2.y;
+
+      var s_numer = s10_x * s02_y - s10_y * s02_x;
+
+      if((s_numer < 0) == denom_positive) {
+          return false;
+      }
+
+      var t_numer = s32_x * s02_y - s32_y * s02_x;
+
+      if((t_numer < 0) == denom_positive) {
+          return false;
+      }
+
+      if((s_numer > denom) == denom_positive || (t_numer > denom) == denom_positive) {
+          return false;
+      }
+
+      var t = t_numer / denom;
+
+      var p = {x: p0.x + (t * s10_x), y: p0.y + (t * s10_y)};
+      return p;
+  }
+
 
   /**
    * Returns True if the given point is inside the polygon
