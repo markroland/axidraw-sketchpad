@@ -361,7 +361,7 @@ class Sketchbook {
 
     // Random Starting points
     //*
-    let num_points = 10;
+    let num_points = 20;
     let padding = 0.5;
     let pointsC = new Array();
     for (let i = 0; i < num_points; i++) {
@@ -382,7 +382,7 @@ class Sketchbook {
       this.p5.fill(0,0,255);
       let x = this.p5.width/2 + 288/2 * points[i][0];
       let y = this.p5.height/2 + 288/2 * points[i][1]
-      this.p5.ellipse(x, y, 5, 5);
+      this.p5.ellipse(x, y, 3, 3);
       this.p5.text(i, x + 4, y + 5);
       this.p5.noFill();
     }
@@ -395,7 +395,6 @@ class Sketchbook {
 
     // Calculate Concave Hull
     let hull = concaveHull.calculate(points, 3);
-    console.log("concaveHull() hull: ", hull);
     if (hull !== null) {
       paths = [hull]
     }

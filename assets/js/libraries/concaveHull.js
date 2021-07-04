@@ -10,6 +10,8 @@
  */
 var concaveHull = function() {
 
+  verbose = true;
+
   function test(points, k) {
 
     // Remove the first point
@@ -101,13 +103,13 @@ var concaveHull = function() {
     let currentPoint = firstPoint
     dataset = RemovePoint(dataset, firstPoint)
 
-    console.log("-----")
+    if (verbose) { console.log("-----") }
     let previousAngle = 0.0;
     let step = 2;
     let stop = step + kk;
     while ((!pointEquals(currentPoint, firstPoint) || step == 2) && dataset.length > 0) {
 
-      console.log("Step: " + step)
+      if (verbose) { console.log("Step: " + step) }
 
       // Add the firstPoint again
       if (step == stop) {
@@ -125,13 +127,13 @@ var concaveHull = function() {
       let kNearestPoints = NearestPoints(dataset, currentPoint, kk)
 
       // Debugging
-      //*
-      let debug_string = "Nearest Points to " + getIndex(pointsList, currentPoint) + ": ";
-      for (let p of kNearestPoints) {
-        debug_string += getIndex(pointsList, p) + ", "
+      if (verbose) {
+        let debug_string = "Nearest Points to " + getIndex(pointsList, currentPoint) + ": ";
+        for (let p of kNearestPoints) {
+          debug_string += getIndex(pointsList, p) + ", "
+        }
+        console.log(debug_string.replace(/,\s*$/, ""));
       }
-      console.log(debug_string.replace(/,\s*$/, ""));
-      //*/
 
       // Sort the candidates (neighbours) in descending order of right-hand turn
       let cPoints = SortByAngle(kNearestPoints, currentPoint, previousAngle)
@@ -140,7 +142,9 @@ var concaveHull = function() {
       for (let cp of cPoints) {
         debug_string += getIndex(pointsList, cp) + ", "
       }
-      console.log(debug_string.replace(/,\s*$/, ""));
+      if (verbose) {
+        console.log(debug_string.replace(/,\s*$/, ""));
+      }
 
       // Select the first candidate that does not intersect any of the "hull" polygon edges
       let intersects = true;
@@ -158,29 +162,33 @@ var concaveHull = function() {
           lastPoint = 0
         }
 
-        console.log("lastPoint: " + lastPoint);
+        if (verbose) {
+          console.log("lastPoint: " + lastPoint);
+        }
 
         // Only evaluate if the hull is 3 or more points
         let j = 1;
         intersects = false;
         while (intersects == false && j < (hull.length - lastPoint)) {
 
-          console.log("j " + j + " of " + (hull.length - lastPoint - 1))
-          // console.log("Step: " + step, "i: " + i, hull, cPoints)
-          // console.log([hull[step-2], cPoints[i]])
-          console.log("cPoints: ", cPoints);
+          if (verbose) {
+            console.log("j " + j + " of " + (hull.length - lastPoint - 1))
+            // console.log("Step: " + step, "i: " + i, hull, cPoints)
+            // console.log([hull[step-2], cPoints[i]])
+            console.log("cPoints: ", cPoints);
 
-          console.log(
-            "Evaluating intersection of line "
-            + getIndex(pointsList, hull[step-2]) + "->" + getIndex(pointsList, cPoints[i-1])
-            + " and line " + getIndex(pointsList, hull[step-2-j]) + "->" + getIndex(pointsList, hull[step-1-j])
-          );
+            console.log(
+              "Evaluating intersection of line "
+              + getIndex(pointsList, hull[step-2]) + "->" + getIndex(pointsList, cPoints[i-1])
+              + " and line " + getIndex(pointsList, hull[step-2-j]) + "->" + getIndex(pointsList, hull[step-1-j])
+            );
+          }
 
           intersects = IntersectsQ(
             [hull[step-2], cPoints[i-1]],
             [hull[step-2-j], hull[step-1-j]]
           )
-          console.log("intersects: " + intersects)
+          if (verbose) { console.log("intersects: " + intersects) }
 
           // TODO: Resume work here to debug selection of points 11,8,7 from point 9
           // Debug exit
@@ -191,12 +199,12 @@ var concaveHull = function() {
           j++
         }
 
-        console.log("-----")
+        if (verbose) { console.log("-----") }
       }
 
       // since all candidates intersect at least one edge, try again with a higher number of neighbours
       if (intersects == true) {
-        console.log("Recalculating with k=" + (kk+1))
+        if (verbose) { console.log("Recalculating with k=" + (kk+1)) }
         return calculate(pointsList, kk+1)
       }
 
@@ -216,8 +224,9 @@ var concaveHull = function() {
 
     // check if all the given points are inside the computed polygon
     let allInside = true;
-    let i = dataset.length
-    while (allInside == true && i > 0) {
+    let i = dataset.length-1
+    while (allInside == true && i >= 0) {
+      if (verbose) { console.log("PointInPolygonQ dataset: ", dataset); }
       allInside = PointInPolygonQ(dataset[i], hull)
       i--;
     }
@@ -228,7 +237,6 @@ var concaveHull = function() {
     }
 
     // A valid hull was found!
-    console.log(hull);
     return hull;
   }
 
