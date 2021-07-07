@@ -10,7 +10,7 @@
  */
 var concaveHull = function() {
 
-  verbose = true;
+  verbose = false;
 
   function test(points, k) {
 
@@ -104,7 +104,7 @@ var concaveHull = function() {
     dataset = RemovePoint(dataset, firstPoint)
 
     if (verbose) { console.log("-----") }
-    let previousAngle = 0.0;
+    let previousAngle = Math.PI;
     let step = 2;
     let stop = step + kk;
     while ((!pointEquals(currentPoint, firstPoint) || step == 2) && dataset.length > 0) {
@@ -116,12 +116,8 @@ var concaveHull = function() {
         dataset = AddPoint(dataset, firstPoint)
       }
 
-      // TODO: Resume work here to debug selection of points 11,8,7 from point 9
       // Debug exit
-      // if (step > 18) {
-        // return hull;
-      // }
-
+      // if (step > 2) { return hull; }
 
       // Find the nearest neighbors
       let kNearestPoints = NearestPoints(dataset, currentPoint, kk)
@@ -136,10 +132,12 @@ var concaveHull = function() {
       }
 
       // Sort the candidates (neighbours) in descending order of right-hand turn
-      let cPoints = SortByAngle(kNearestPoints, currentPoint, previousAngle)
+      let cPoints = SortByAngle(kNearestPoints, currentPoint, previousAngle, pointsList)
 
-      debug_string = "Candidate Points to " + getIndex(pointsList, currentPoint) + ": ";
-      for (let cp of cPoints) {
+      debug_string = "Sorted Candidate Points from " + getIndex(pointsList, currentPoint) + ": ";
+      // for (let cp of cPoints) {
+      for (let i = 0; i < cPoints.length; i++) {
+        let cp = cPoints[i];
         debug_string += getIndex(pointsList, cp) + ", "
       }
       if (verbose) {
@@ -151,7 +149,7 @@ var concaveHull = function() {
       let i = 0;
       while (intersects == true && i < cPoints.length) {
 
-        // Note: This is NOT designed for zero-indexed arrays
+        // Note: The source algorithm is NOT designed for zero-indexed arrays
         i++;
 
         let lastPoint;
@@ -167,7 +165,7 @@ var concaveHull = function() {
         }
 
         // Only evaluate if the hull is 3 or more points
-        let j = 1;
+        let j = 2;
         intersects = false;
         while (intersects == false && j < (hull.length - lastPoint)) {
 
@@ -190,16 +188,13 @@ var concaveHull = function() {
           )
           if (verbose) { console.log("intersects: " + intersects) }
 
-          // TODO: Resume work here to debug selection of points 11,8,7 from point 9
-          // Debug exit
-          // if (step > 5) {
-            // return hull;
-          // }
+          // Debug breakpoint
+          // if (step > 5) { return hull; }
 
           j++
         }
 
-        if (verbose) { console.log("-----") }
+        // if (verbose) { console.log("-----") }
       }
 
       // since all candidates intersect at least one edge, try again with a higher number of neighbours
@@ -213,13 +208,17 @@ var concaveHull = function() {
       // A valid candidate was found
       hull = AddPoint(hull, currentPoint)
 
-      previousAngle = -1 * Angle(hull[step-1], hull[step-2])
+      previousAngle = Angle(hull[step-2], hull[step-1])
+      console.log("hull: ", hull);
+      console.log("previousAngle: ", (previousAngle * (180/Math.PI)).toFixed(2));
 
       // console.log("hull 2", hull, previousAngle)
 
       dataset = RemovePoint(dataset, currentPoint)
 
       step++
+
+      if (verbose) { console.log("-----") }
     }
 
     // check if all the given points are inside the computed polygon
@@ -358,34 +357,57 @@ var concaveHull = function() {
    * @param Float The angle of the previous line segment in the path
    * @return Array A sorted points array
    */
-  function SortByAngle(points, point, prev_angle){
+  function SortByAngle(points, point, prev_angle, PointsListDebug){
 
     let sorted_points = new Array();
+
+    // prev_angle = prev_angle + Math.PI
 
     // Calculate the angle between each point in "points" and the target point
     // and insert the point index and angle into a "candidates" array for sorting
     let candidates = new Array();
     for (let p = 0; p < points.length; p++) {
-      candidates.push({
-        "id" : p,
+      let obj = {
+        "number": getIndex(PointsListDebug, points[p]),
+        // "id" : p,
         "point" : points[p],
-        "angle" : Angle(points[p], point) - prev_angle
-        // angle(last_point, point, points[p]) - prev_angle
-      })
+        // "angle" : Angle(points[p], point) - prev_angle,
+        // "raw_angle" : ((Math.PI - Angle(points[p], point)) * (180/Math.PI)).toFixed(2),
+        "raw_angle" : ((
+          Angle(points[p], point)
+          ) * (180/Math.PI)).toFixed(2),
+        "angle" : prev_angle - Angle(points[p], point),
+        // "degrees" : ((
+          // (prev_angle - Math.PI) + Angle(points[p], point)
+          // ) * (180/Math.PI)).toFixed(2)
+      }
+
+      if (obj.angle < 0) {
+        obj.angle = obj.angle + (2 * Math.PI)
+      }
+
+      obj.degrees = ((obj.angle) * (180/Math.PI)).toFixed(2)
+
+      candidates.push(obj);
     }
 
-    // console.log("Sort by Angle Points: ", candidates);
+    console.log("Previous Angle: ", (prev_angle * (180/Math.PI)).toFixed(2));
+    console.log("Sort by Angle Unsorted Points: ", candidates);
 
     // Sort points by angle in descending order
     // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
-    candidates.sort((a, b) => (a.angle > b.angle) ? 1 : -1)
+    candidates.sort((a, b) => (a.angle > b.angle) ? -1 : 1)
+
+    console.log("Sorted Candidates: ", candidates)
 
     // Extract the points
     for (let i = 0; i < candidates.length; i++) {
       sorted_points.push(candidates[i].point)
     }
 
-    // console.log("Sorted By Angle: " + candidates[0].id + ", " + candidates[1].id + ", " + candidates[2].id)
+    console.log("Sorted Points: ", sorted_points)
+
+    console.log("Sorted By Angle: " + candidates[0].id + ", " + candidates[1].id + ", " + candidates[2].id)
 
     return sorted_points;
   }
@@ -401,23 +423,48 @@ var concaveHull = function() {
    */
   function IntersectsQ(lineA, lineB){
 
-    return getLineLineCollision(lineA[0], lineA[1], lineB[0], lineB[1])
-
-    let intersection_point = intersect_point(lineA[0], lineA[1], lineB[0], lineB[1])
-
-    console.log("IntersectsQ: ", intersection_point)
-
-    let within_x_bounds = intersection_point[0] <= Math.max(lineA[0], lineB[0])
-      && intersection_point[0] >= Math.min(lineA[0], lineB[0]);
-
-    let within_y_bounds = intersection_point[1] <= Math.max(lineA[1], lineB[1])
-      && intersection_point[1] >= Math.min(lineA[1], lineB[1]);
-
-    if (within_x_bounds && within_y_bounds) {
-      return true;
+    // Method 1
+    let intersection_point = getLineLineCollision(
+      {"x": lineA[0][0], "y": lineA[0][1]},
+      {"x": lineA[1][0], "y": lineA[1][1]},
+      {"x": lineB[0][0], "y": lineB[0][1]},
+      {"x": lineB[1][0], "y": lineB[1][1]},
+      // lineA[0],
+      // lineA[1],
+      // lineB[0],
+      // lineB[1]
+    )
+    if (intersection_point !== false) {
+      return true
     }
+    return false
 
-    return false;
+    // Method 2
+
+    // let intersection_point = doLineSegmentsIntersect(lineA[0], lineA[1], lineB[0], lineB[1])
+    // if (intersection_point !== false) {
+    //   return true
+    // }
+    // return false
+
+    // Method 3
+
+
+    // let intersection_point = intersect_point(lineA[0], lineA[1], lineB[0], lineB[1])
+
+    // console.log("IntersectsQ: ", intersection_point)
+
+    // let within_x_bounds = intersection_point[0] <= Math.max(lineA[0], lineB[0])
+    //   && intersection_point[0] >= Math.min(lineA[0], lineB[0]);
+
+    // let within_y_bounds = intersection_point[1] <= Math.max(lineA[1], lineB[1])
+    //   && intersection_point[1] >= Math.min(lineA[1], lineB[1]);
+
+    // if (within_x_bounds && within_y_bounds) {
+    //   return true;
+    // }
+
+    // return false;
   }
 
   /**
@@ -433,7 +480,17 @@ var concaveHull = function() {
   }
 
   function Angle(pointA, pointB) {
-    return Math.PI - Math.atan2(pointB[1] - pointA[1], pointB[0] - pointA[0])
+    let angle = Math.atan2(pointB[1] - pointA[1], pointB[0] - pointA[0])
+
+    // Measure angle from left-side of the Y-axis
+    angle = Math.PI - angle
+
+    // Force between 0 and 2-Pi
+    if (angle < 0) {
+      angle = angle + (2 * Math.PI)
+    }
+
+    return angle
   }
 
   // Helpers
@@ -525,48 +582,47 @@ var concaveHull = function() {
   // https://stackoverflow.com/a/30159167
   function getLineLineCollision(p0, p1, p2, p3) {
 
-    // console.log("getLineLineCollision: ", p0, p1, p2, p3)
+    var s1, s2;
+    s1 = {x: p1.x - p0.x, y: p1.y - p0.y};
+    s2 = {x: p3.x - p2.x, y: p3.y - p2.y};
 
-      var s1, s2;
-      s1 = {x: p1.x - p0.x, y: p1.y - p0.y};
-      s2 = {x: p3.x - p2.x, y: p3.y - p2.y};
+    var s10_x = p1.x - p0.x;
+    var s10_y = p1.y - p0.y;
+    var s32_x = p3.x - p2.x;
+    var s32_y = p3.y - p2.y;
 
-      var s10_x = p1.x - p0.x;
-      var s10_y = p1.y - p0.y;
-      var s32_x = p3.x - p2.x;
-      var s32_y = p3.y - p2.y;
+    var denom = s10_x * s32_y - s32_x * s10_y;
 
-      var denom = s10_x * s32_y - s32_x * s10_y;
+    if(denom == 0) {
+        // console.log("A")
+        return false;
+    }
 
-      if(denom == 0) {
-          return false;
-      }
+    var denom_positive = denom > 0;
 
-      var denom_positive = denom > 0;
+    var s02_x = p0.x - p2.x;
+    var s02_y = p0.y - p2.y;
 
-      var s02_x = p0.x - p2.x;
-      var s02_y = p0.y - p2.y;
+    var s_numer = s10_x * s02_y - s10_y * s02_x;
 
-      var s_numer = s10_x * s02_y - s10_y * s02_x;
+    if((s_numer < 0) == denom_positive) {
+        return false;
+    }
 
-      if((s_numer < 0) == denom_positive) {
-          return false;
-      }
+    var t_numer = s32_x * s02_y - s32_y * s02_x;
 
-      var t_numer = s32_x * s02_y - s32_y * s02_x;
+    if((t_numer < 0) == denom_positive) {
+        return false;
+    }
 
-      if((t_numer < 0) == denom_positive) {
-          return false;
-      }
+    if((s_numer > denom) == denom_positive || (t_numer > denom) == denom_positive) {
+        return false;
+    }
 
-      if((s_numer > denom) == denom_positive || (t_numer > denom) == denom_positive) {
-          return false;
-      }
+    var t = t_numer / denom;
 
-      var t = t_numer / denom;
-
-      var p = {x: p0.x + (t * s10_x), y: p0.y + (t * s10_y)};
-      return p;
+    var p = {x: p0.x + (t * s10_x), y: p0.y + (t * s10_y)};
+    return p;
   }
 
 
