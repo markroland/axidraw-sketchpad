@@ -12,59 +12,12 @@ var concaveHull = function() {
 
   verbose = false;
 
-  function test(points, k) {
-
-    // Remove the first point
-
-    // console.log(points);
-
-    // Test angle()
-    /*
-    console.log(
-      angle(
-        [1,0],
-        [0,0],
-        [0,1]
-      )
-    )
-    //*/
-
-    // Test
-    /*
-    console.log(CleanList([
-      [0,1],
-      [1,0],
-      [0,1], // Duplicate
-      [1,2],
-      [2,3],
-      [1,2] // Duplicate
-    ]));
-    //*/
-
-    points = CleanList(points);
-
-    console.log("Num Points: ", Length(points));
-
-    console.log("Min Point: ", FindMinYPoint(points));
-
-    // points = RemovePoint(points, 19)
-    // console.log("After Remove: ", points)
-
-    // points = AddPoint(points, [0,0])
-    // console.log("After Add: ", points)
-
-    let point_of_interest = 10
-    console.log(points[point_of_interest]);
-    let other_points = RemovePoint(points, 19)
-    let nearest = NearestPoints(other_points, points[point_of_interest], k);
-    console.log("Nearest: ", nearest);
-
-    // let sorted = SortByAngle(nearest, points[point_of_interest], Math.PI);
-    // console.log("Sorted: ", sorted);
-
-    return points;
-  }
-
+  /**
+   * Calculate the concave hull for a list of points.
+   * @param Array An array of point arrays, i.e. [[0,0], [1,1], [1,1]]
+   * @param Integer k The number of neighbors to consider as perimeter points
+   * @return Array The portion of the original array that defines an outer perimeter
+   */
   function calculate(pointsList, k) {
 
     // Make sure k >= 3
@@ -241,23 +194,14 @@ var concaveHull = function() {
 
   /**
    * Remove duplicate points
-   * https://stackoverflow.com/a/20339709
    * @param Array An array of point arrays, i.e. [[0,0], [1,1], [1,1]]
    * @return Array The original array with duplicates removed [[0,0], [1,1]
    */
   function CleanList(points){
-    var uniques = [];
-    var itemsFound = {};
-    let l = points.length;
-    for (var i = 0; i < l; i++) {
-      var stringified = JSON.stringify(points[i]);
-      if (itemsFound[stringified]) {
-        continue;
-      }
-      uniques.push(points[i]);
-      itemsFound[stringified] = true;
-    }
-    return uniques;
+
+    // This is calling another function so that the function signature can match
+    // the algorithm and so that pre-written code can be leveraged
+    return multiDimensionalUnique(points);
   }
 
   /**
@@ -270,31 +214,30 @@ var concaveHull = function() {
   }
 
   /**
-   * Get the coordinates of the point with the lowest Y value
-   * Important Note: In this coordinate system "lowest" Y has a positive value
-   * and for that reason the Max value is used
+   * Find the index of the point with the lowest Y value. Note: The index is returned
+   * instead of the actual value.
+   * Important Note: In this coordinate system "lowest" Y has the maximum value
    * @param Array An array of point arrays, i.e. [[0,0], [1,1], [1,1]]
    * @return Integer The position of the point with the lowest Y value in points
    */
   function FindMinYPoint(points){
+
+    // Extract the Y coordinate in the 2nd position of each point
     let y_coordinates = arrayColumn(points, 1);
-    // let index = y_coordinates.indexOf(arrayMin(y_coordinates));
-    let index = y_coordinates.indexOf(arrayMax(y_coordinates));
-    return index;
+
+    // Find the index from the points array where the maximum value is stored
+    return y_coordinates.indexOf(arrayMax(y_coordinates));
   }
 
   /**
-   * Get the coordinates of the point with the lowest Y value
-   * @param Array An array of point arrays, i.e. [[0,0], [1,1], [1,1]]
-   * @param Integer The element position to remove
-   * @return Array The point array with the lowest Y value
+   * Remove a point from an array of points.
+   * @param Array An array of point arrays with unique values only (no duplicates.
+   * @param Array A point array, i.e. [2,2]
+   * @return Array The points array with the point removed
    */
-  function RemovePoint(points, e){
-    // points.splice(e, 1)
-    // return points;
-
+  function RemovePoint(points, point){
     for (let i = 0; i < points.length; i++) {
-      if (pointEquals(points[i], e)) {
+      if (pointEquals(points[i], point)) {
         points.splice(i, 1)
         return points
       }
@@ -305,7 +248,7 @@ var concaveHull = function() {
    * Add a point array onto the end of the Points array
    * @param Array An array of point arrays, i.e. [[0,0], [1,1], [1,1]]
    * @param Array A point array, i.e. [2,2]
-   * @return Array The points array
+   * @return Array The updated points array
    */
   function AddPoint(points, point){
     points.push(point)
@@ -335,9 +278,10 @@ var concaveHull = function() {
     }
 
     // Sort points by distance
-    // https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
+    // See https://flaviocopes.com/how-to-sort-array-of-objects-by-property-javascript/
     candidates.sort((a, b) => (a.distance > b.distance) ? 1 : -1)
 
+    // Set limit for results
     k = Math.min(k, candidates.length)
 
     // Select "k" number of nearest points
@@ -423,48 +367,18 @@ var concaveHull = function() {
    */
   function IntersectsQ(lineA, lineB){
 
-    // Method 1
+    // This is calling another function so that the function signature can match
+    // the algorithm and so that pre-written code can be leveraged
     let intersection_point = getLineLineCollision(
       {"x": lineA[0][0], "y": lineA[0][1]},
       {"x": lineA[1][0], "y": lineA[1][1]},
       {"x": lineB[0][0], "y": lineB[0][1]},
-      {"x": lineB[1][0], "y": lineB[1][1]},
-      // lineA[0],
-      // lineA[1],
-      // lineB[0],
-      // lineB[1]
+      {"x": lineB[1][0], "y": lineB[1][1]}
     )
     if (intersection_point !== false) {
       return true
     }
     return false
-
-    // Method 2
-
-    // let intersection_point = doLineSegmentsIntersect(lineA[0], lineA[1], lineB[0], lineB[1])
-    // if (intersection_point !== false) {
-    //   return true
-    // }
-    // return false
-
-    // Method 3
-
-
-    // let intersection_point = intersect_point(lineA[0], lineA[1], lineB[0], lineB[1])
-
-    // console.log("IntersectsQ: ", intersection_point)
-
-    // let within_x_bounds = intersection_point[0] <= Math.max(lineA[0], lineB[0])
-    //   && intersection_point[0] >= Math.min(lineA[0], lineB[0]);
-
-    // let within_y_bounds = intersection_point[1] <= Math.max(lineA[1], lineB[1])
-    //   && intersection_point[1] >= Math.min(lineA[1], lineB[1]);
-
-    // if (within_x_bounds && within_y_bounds) {
-    //   return true;
-    // }
-
-    // return false;
   }
 
   /**
@@ -476,10 +390,22 @@ var concaveHull = function() {
    * @return Boolean
    */
   function PointInPolygonQ(point, points){
+
+    // This is calling another function so that the function signature can match
+    // the algorithm and so that pre-written code can be leveraged
     return pointInPolygonNested(point, points)
   }
 
+  /**
+   * Calculate the angle between two points. The angle is measured between the
+   * line formed from point B to point A and the line from point A extending
+   * into the negative X direction (left). This is done to match the algorithm.
+   * @param Array A point array. The starting point.
+   * @param Array A point array. The ending point.
+   * @return Float The angle in Radians
+   */
   function Angle(pointA, pointB) {
+
     let angle = Math.atan2(pointB[1] - pointA[1], pointB[0] - pointA[0])
 
     // Measure angle from left-side of the Y-axis
@@ -493,27 +419,16 @@ var concaveHull = function() {
     return angle
   }
 
-  // Helpers
+  // Helper functions. These are not defined as part of the Algorithm, but
+  // are required to support it.
 
-  function arrayColumn(arr, n){
-    return arr.map(a => a[n]);
-  }
-
-  function arrayMin(a) {
-    return Math.min(...a);
-  }
-
-  function arrayMax(a) {
-    return Math.max(...a);
-  }
-
-  function pointEquals(a,b) {
-    if (a[0] === b[0] && a[1] === b[1]) {
-      return true;
-    }
-    return false;
-  }
-
+  /**
+   * Determine the index position of the point in the array of points.
+   * This is used for debugging purposes only.
+   * @param Array An array of points
+   * @param Array A point array
+   * @return Integer The index position of the point, if found
+   */
   function getIndex(points, point) {
     for (let i = 0; i < points.length; i++) {
       if (pointEquals(points[i], point)) {
@@ -522,64 +437,84 @@ var concaveHull = function() {
     }
   }
 
+  /**
+   * Extract a column from a 2D array
+   * @param Array The soure array
+   * @param String The name of the column to extract
+   * @return Array A single-dimensional array containing column values
+   */
+  function arrayColumn(arr, n){
+    return arr.map(a => a[n]);
+  }
+
+  /**
+   * Get the minimum value from an array of numbers
+   * @param Array The soure array
+   * @return Integer The minimum value
+   */
+  function arrayMin(a) {
+    return Math.min(...a);
+  }
+
+  /**
+   * Get the maximum value from an array of numbers
+   * @param Array The soure array
+   * @return Integer The maximum value
+   */
+  function arrayMax(a) {
+    return Math.max(...a);
+  }
+
+  /**
+   * Determine if two point arrays are equivalent
+   * @param Array A point array containing two values for x and y
+   * @param Array A point array containing two values for x and y
+   * @return Boolean True if the same, false otherwise
+   */
+  function pointEquals(a, b) {
+    if (a[0] === b[0] && a[1] === b[1]) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Calculate the distance between two points
+   * @param Array A point array containing two values for x and y
+   * @param Array A point array containing two values for x and y
+   * @return Float The calculated distance
+   */
   function distance(p1, p2) {
     return Math.sqrt(Math.pow(p2[0] - p1[0], 2) + Math.pow(p2[1] - p1[1], 2))
   }
 
   /**
-   * Calculate the angle in Radians between the 3 points where p2 is the vertex
-   * Use the Law of Cosines (https://en.wikipedia.org/wiki/Law_of_cosines)
-   * @param Array A 2-element point array. Point A
-   * @param Array A 2-element point array. Point C - this is the vertex of the 3 points
-   * @param Array A 2-element point array. Point B
-   * @return float The angle in Radians between the 3 points where p2 is the vertex
+   * Remove duplicate elements of a multidimensional array
+   * From https://stackoverflow.com/a/20339709
+   * @param Array A multidimensional array
+   * @return Array The original array with duplicates removed
    */
-  // function angle(p1, p2, p3) {
-
-  //   let sideOppP1 = distance(p2, p3)
-  //   let sideOppP2 = distance(p1, p3)
-  //   let sideOppP3 = distance(p1, p2)
-
-  //   let a = sideOppP1
-  //   let b = sideOppP3
-  //   let c = sideOppP2
-
-  //   let angle = Math.acos(
-  //     (Math.pow(a,2) + Math.pow(b,2) - Math.pow(c,2))
-  //     /
-  //     (2 * a * b)
-  //   )
-
-  //   return angle;
-  // }
-
-  /**
-   * Calculate the intersection point of 2 lines
-   * Copied from https://editor.p5js.org/mwburke/sketches/h1ec1s6LG
-   * @param Array A 2-element point array. Start Point of Line 1
-   * @param Array A 2-element point array. End Point of Line 1
-   * @param Array A 2-element point array. Start Point of Line 2
-   * @param Array A 2-element point array. End Point of Line 2
-   * @return Array A 2-element point array. End Point of Line 2
-   */
-  function intersect_point(p1, p2, p3, p4) {
-    const ua = ((p4[0] - p3[0]) * (p1[1] - p3[1]) -
-      (p4[1] - p3[1]) * (p1[0] - p3[0])) /
-      ((p4[1] - p3[1]) * (p2[0] - p1[0]) -
-      (p4[0] - p3[0]) * (p2[1] - p1[1]));
-
-    const ub = ((p2[0] - p1[0]) * (p1[1] - p3[1]) -
-      (p2[1] - p1[1]) * (p1[0] - p3[0])) /
-      ((p4[1] - p3[1]) * (p2[0] - p1[0]) -
-      (p4[0] - p3[0]) * (p2[1] - p1[1]));
-
-    const x = p1[0] + ua * (p2[0] - p1[0]);
-    const y = p1[1] + ua * (p2[1] - p1[1]);
-
-    return [x, y]
+  function multiDimensionalUnique(arr) {
+    var uniques = [];
+    var itemsFound = {};
+    for(var i = 0, l = arr.length; i < l; i++) {
+      var stringified = JSON.stringify(arr[i]);
+      if(itemsFound[stringified]) { continue; }
+      uniques.push(arr[i]);
+      itemsFound[stringified] = true;
+    }
+    return uniques;
   }
 
-  // https://stackoverflow.com/a/30159167
+  /**
+   * Calculate if and where two finite line segments intersect
+   * From https://stackoverflow.com/a/30159167
+   * @param Array A point array containing two values for x and y. Start Point of Line A
+   * @param Array A point array containing two values for x and y. End Point of Line A
+   * @param Array A point array containing two values for x and y. Start Point of Line B
+   * @param Array A point array containing two values for x and y. End Point of Line B
+   * @return Boolean True if the lines intersect, false otherwise
+   */
   function getLineLineCollision(p0, p1, p2, p3) {
 
     var s1, s2;
@@ -625,7 +560,6 @@ var concaveHull = function() {
     return p;
   }
 
-
   /**
    * Returns True if the given point is inside the polygon
    * From https://github.com/substack/point-in-polygon
@@ -652,7 +586,7 @@ var concaveHull = function() {
     return inside;
   };
 
-  // Return public points to the private methods and properties you want to reveal
+  // Expose private functions publicly
   return {
     calculate: calculate
   }
