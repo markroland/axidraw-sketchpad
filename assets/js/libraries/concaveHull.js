@@ -3,14 +3,27 @@
  *
  * The purpose of this library is to calculate a Concave Hull from a set of points in 2D space
  *
- * References
- *  - https://towardsdatascience.com/the-concave-hull-c649795c0f0f
- *   - http://repositorium.sdum.uminho.pt/bitstream/1822/6429/1/ConcaveHull_ACM_MYS.pdf
+ * It follows the algorithm defined by Adriano Moreira and Maribel Yasmina Santos in their paper
+ * "CONCAVE HULL: A K-NEAREST NEIGHBOURS APPROACH FOR THE COMPUTATION OF THE REGION OCCUPIED BY A SET OF POINTS"
+ * See http://repositorium.sdum.uminho.pt/bitstream/1822/6429/1/ConcaveHull_ACM_MYS.pdf.
+ * Some parts of the algorithm have been adapted to more closely align with Javascript. Comments are
+ * added where the deviations occur.
+ *
+ * With special thanks to this article from João Paulo Figueira describing his Python implementation.
+ * See https://towardsdatascience.com/the-concave-hull-c649795c0f0f
+ *
+ * In an effort to create an all-in-one library, I have used code available online in public forums
+ * from other developers. Links are provided where this code appears and I have made an effort to
+ * isolate these functions and modify them as little as possible.
  *
  */
 var concaveHull = function() {
 
   verbose = false;
+
+  // ---
+  // The Moreira and Santos Algorithm
+  // ---
 
   /**
    * Calculate the concave hull for a list of points.
@@ -191,6 +204,10 @@ var concaveHull = function() {
     // A valid hull was found!
     return hull;
   }
+
+  // ---
+  // Supporting methods of the Moreira and Santos Algorithm
+  // ---
 
   /**
    * Remove duplicate points
@@ -419,8 +436,11 @@ var concaveHull = function() {
     return angle
   }
 
-  // Helper functions. These are not defined as part of the Algorithm, but
-  // are required to support it.
+  // ---
+  // Helper functions.
+  // These are not defined as part of the Moreira and Santos Algorithm,
+  // but are required to support it.
+  // ---
 
   /**
    * Determine the index position of the point in the array of points.
@@ -586,7 +606,9 @@ var concaveHull = function() {
     return inside;
   };
 
+  // ---
   // Expose private functions publicly
+  // ---
   return {
     calculate: calculate
   }
