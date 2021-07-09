@@ -1279,7 +1279,7 @@ class LineImage {
 
     console.log(lower_threshold, upper_threshold);
 
-    const scale = 1;
+    const scale = 0.5;
     const y_axis_pixel_range = 288
     const x_axis_pixel_range = 480
     const sketch_margin = 48;
@@ -1373,6 +1373,9 @@ class LineImage {
 
     console.log("Number of Points: " + points.length)
 
+    console.log("Calculating Concave Hull")
+    let hull = concaveHull.calculate(points, 3);
+
     // // Start a new path with the first point
     // //*
     // path = path.concat([
@@ -1414,6 +1417,34 @@ class LineImage {
       "color": "black",
       "paths": paths
     })
+
+    // Concave Hull
+
+    if (hull !== null) {
+
+      hull = PathHelp.translatePath(
+        hull,
+        [
+          -(columns/rows) + pixel_size/2,
+          -1 + pixel_size/2
+        ]
+      )
+
+      let parallel = new Array();
+      for (let i = 0; i < hull.length-1; i++) {
+        let parallel_segment = PathHelp.parallelPath(hull[i], hull[i+1], 0.1)
+        parallel.push(parallel_segment[0])
+      }
+      parallel.push(parallel[0])
+      parallel = PathHelp.subdividePath(parallel)
+      parallel.push(parallel[0])
+      parallel = PathHelp.smoothPath(parallel, 5)
+
+      layers.push({
+        "color": "blue",
+        "paths": [parallel]
+      })
+    }
 
     return layers;
   }

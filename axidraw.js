@@ -1,5 +1,5 @@
 // Change this to a value from Patterns to select the sketch class
-let selectedPattern = "sketchbook"
+let selectedPattern = "lineimage"
 
 let sketch_title = ''
 
@@ -11,7 +11,7 @@ if (window.location.hash != "") {
 let orientation = 'landscape'
 let showDate = true
 let showSignature = true
-let debugPenDownUp = true
+let debugPenDownUp = false
 let draw_grid = false
 
 let fonts
