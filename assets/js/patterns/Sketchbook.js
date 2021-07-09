@@ -499,7 +499,7 @@ class Sketchbook {
     ]
 ];
 
-    let points = pointsC;
+    let points = pointsB;
     // console.log(points);
 
     // Debugging: Render points in p5 land
