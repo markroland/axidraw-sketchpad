@@ -11,17 +11,19 @@ class Sketchbook {
 
     this.constrain = false
 
-    this.title = "Resolution Test"
+    this.title = "Concave Hull"
   }
 
   /**
    * Draw path
    */
   draw(p5) {
+    this.p5 = p5
     // return this.default()
     // return this.toxiclibtest()
     // return this.tree();
-    return this.resolutionTest(5 * 48, 3 * 48);
+    // return this.resolutionTest(5 * 48, 3 * 48);
+    return this.concaveHull();
   }
 
   default() {
@@ -236,6 +238,56 @@ class Sketchbook {
           ]
         )
       )
+    }
+
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers;
+  }
+
+  concaveHull() {
+
+    let PathHelp = new PathHelper;
+
+    let layers = new Array();
+
+    let paths = new Array();
+
+    // Random points
+    //*
+    let num_points = 60;
+    let padding = 0.5;
+    let points = new Array();
+    for (let i = 0; i < num_points; i++) {
+      points.push([
+        (1 - padding) * PathHelp.getRandom(-5/3, 5/3),
+        (1 - padding) * PathHelp.getRandom(-1, 1)
+      ])
+    }
+    // console.log("Point Set: ", points)
+    //*/
+
+    // Debugging: Render points in p5 land
+    //*
+    for (let i = 0; i < points.length; i++) {
+      this.p5.noStroke();
+      this.p5.fill(0,0,255);
+      let x = this.p5.width/2 + 288/2 * points[i][0];
+      let y = this.p5.height/2 + 288/2 * points[i][1]
+      this.p5.ellipse(x, y, 3, 3);
+      this.p5.textSize(8)
+      this.p5.text(i, x + 4, y + 3);
+      this.p5.noFill();
+    }
+    //*/
+
+    // Calculate Concave Hull
+    let hull = concaveHull.calculate(points, 3);
+    if (hull !== null) {
+      paths = [hull]
     }
 
     layers.push({

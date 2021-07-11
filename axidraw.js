@@ -1,4 +1,6 @@
-let selectedPattern = "grid"
+// Change this to a value from Patterns to select the sketch class
+let selectedPattern = "lineimage"
+
 let sketch_title = ''
 
 // Select sketch from Hash in URL
