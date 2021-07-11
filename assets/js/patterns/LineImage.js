@@ -59,9 +59,9 @@ class LineImage {
     // return this.drawHatchSolid(p5, imported_image);
     // return this.drawHatchColor(p5, imported_image);
     // return this.dither(p5, imported_image, true);
-    return this.edgeDetection(p5, imported_image);
-    
-    //return this.combo(p5, imported_image)
+    // return this.edgeDetection(p5, imported_image);
+    return this.edgeDetectionConvexHull(p5, imported_image)
+    // return this.combo(p5, imported_image)
   }
 
   drawHatchColor(p5, imported_image) {
@@ -1373,9 +1373,6 @@ class LineImage {
 
     console.log("Number of Points: " + points.length)
 
-    console.log("Calculating Concave Hull")
-    let hull = concaveHull.calculate(points, 3);
-
     // // Start a new path with the first point
     // //*
     // path = path.concat([
@@ -1418,35 +1415,43 @@ class LineImage {
       "paths": paths
     })
 
-    // Concave Hull
+    return layers;
+  }
 
+  edgeDetectionConvexHull(p5, p5_imported_image) {
+
+    let PathHelp = new PathHelper()
+
+    // Perform edge detection on image
+    let layers = this.edgeDetection(p5, p5_imported_image)
+
+    // Calculate Concave Hullof resulting paths
+    let points = layers[0].paths.flat()
+    console.log("Calculating Concave Hull")
+    let hull = concaveHull.calculate(points, 3);
     if (hull !== null) {
 
-      hull = PathHelp.translatePath(
-        hull,
-        [
-          -(columns/rows) + pixel_size/2,
-          -1 + pixel_size/2
-        ]
-      )
+      // // Offset hull
+      // let parallel = new Array();
+      // for (let i = 0; i < hull.length-1; i++) {
+      //   let parallel_segment = PathHelp.parallelPath(hull[i], hull[i+1], 0.1)
+      //   parallel.push(parallel_segment[0])
+      // }
+      // parallel.push(parallel[0])
+      // hull = parallel;
 
-      let parallel = new Array();
-      for (let i = 0; i < hull.length-1; i++) {
-        let parallel_segment = PathHelp.parallelPath(hull[i], hull[i+1], 0.1)
-        parallel.push(parallel_segment[0])
-      }
-      parallel.push(parallel[0])
-      parallel = PathHelp.subdividePath(parallel)
-      parallel.push(parallel[0])
-      parallel = PathHelp.smoothPath(parallel, 5)
+      // // Smooth path. Subdivide for better results
+      // hull = PathHelp.subdividePath(hull)
+      // hull.push(hull[0])
+      // hull = PathHelp.smoothPath(hull, 5)
 
       layers.push({
         "color": "blue",
-        "paths": [parallel]
+        "paths": [hull]
       })
     }
 
-    return layers;
+    return layers
   }
 
   combo(p5, imported_image) {
