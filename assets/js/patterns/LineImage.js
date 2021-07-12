@@ -1451,6 +1451,69 @@ class LineImage {
       })
     }
 
+    // Calculate the bounding box for paths of layer (the Hull in this case)
+    let bounding_boxes = new Array();
+    for (let p of layers[1].paths) {
+      bounding_boxes.push(
+        PathHelp.boundingBox(p)
+      )
+    }
+
+    // Background lines
+    let num_lines = 80;
+    let p1,p2
+    let max_x = 5/3;
+    let min_x = -5/3;
+    let max_y = 1;
+    let min_y = -1;
+    let paths = new Array();
+    for(let i = 0; i <= num_lines; i++) {
+
+      let y = (max_y - min_y) * (i/num_lines) + min_y;
+
+      // Left-most Point of horizontal line
+      p1 = [min_x, y];
+
+      // Right-most point of horizontal line
+      p2 = [max_x, y];
+
+      // Bounding Box Intersection
+      // Check Y-Dimension
+      if (y > bounding_boxes[0][1][0] && y < bounding_boxes[0][1][1]) {
+
+        // Check X-Dimension
+        paths.push(
+          [
+            [p1[0], y],
+            [bounding_boxes[0][0][0], y]
+          ],
+          [
+            [bounding_boxes[0][0][1], y],
+            [p2[0], y]
+          ]
+        );
+
+        continue;
+      }
+
+      // TODO: Calculate intersections with Hull
+
+      // let intersect_1 = PathHelp.intersect_point(p1,p2,triangle[0],triangle[1]);
+      // if (p1[1] >= triangle[0][1]) {
+      //   paths.push([
+      //     [intersect_1[0], p1[1]],
+      //     p2
+      //   ]);
+      // }
+
+      paths.push([p1,p2]);
+    }
+
+    layers.push({
+      "color": "red",
+      "paths": paths
+    })
+
     return layers
   }
 

@@ -40,6 +40,18 @@ class PathHelper {
     ]
   }
 
+  /**
+   *
+   **/
+  boundingBox(path) {
+    let mins = this.getMin(path);
+    let maxs = this.getMax(path);
+    return [
+      [mins[0], maxs[0]],
+      [mins[1], maxs[1]]
+    ]
+  }
+
   arrayMin(a) {
     return Math.min(...a);
   }
