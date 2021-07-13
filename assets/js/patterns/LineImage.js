@@ -9,6 +9,8 @@ class LineImage {
 
     this.name = "Line Image";
 
+    this.title = 'Porsche 959 - Concave Hull Study'
+
     this.constrain = false
 
     this.config = {
@@ -1268,8 +1270,8 @@ class LineImage {
 
     // Square: 180, 240
     // Portrait: 50, 110
-    let lower_threshold = 15;
-    let upper_threshold = 140;
+    let lower_threshold = 30;
+    let upper_threshold = 50;
     // lower_threshold = parseInt(document.querySelector('#sketch-controls > div:nth-child(1) > input').value)
     // upper_threshold = parseInt(document.querySelector('#sketch-controls > div:nth-child(2) > input').value)
 
@@ -1279,7 +1281,7 @@ class LineImage {
 
     console.log(lower_threshold, upper_threshold);
 
-    const scale = 0.5;
+    const scale = 1;
     const y_axis_pixel_range = 288
     const x_axis_pixel_range = 480
     const sketch_margin = 48;
@@ -1313,7 +1315,7 @@ class LineImage {
     //*/
 
     // Boost Contrast
-    image_array = ImageHelp.contrast(image_array, 2.0)
+    // image_array = ImageHelp.contrast(image_array, 2.0)
 
     // Blur image to reduce detection of minor edges
     //*
@@ -1425,42 +1427,50 @@ class LineImage {
     // Perform edge detection on image
     let layers = this.edgeDetection(p5, p5_imported_image)
 
+    // Line fill
+    let fill_layers = this.calcLines(p5_imported_image, true)
+    layers = layers.concat(fill_layers)
+
+    // Define bounding boxes of polygons (the hull)
+    let bounding_boxes = new Array();
+
     // Calculate Concave Hullof resulting paths
-    let points = layers[0].paths.flat()
     console.log("Calculating Concave Hull")
+    let points = layers[0].paths.flat()
     let hull = concaveHull.calculate(points, 3);
     if (hull !== null) {
 
-      // // Offset hull
-      // let parallel = new Array();
-      // for (let i = 0; i < hull.length-1; i++) {
-      //   let parallel_segment = PathHelp.parallelPath(hull[i], hull[i+1], 0.1)
-      //   parallel.push(parallel_segment[0])
-      // }
-      // parallel.push(parallel[0])
-      // hull = parallel;
+      // Offset hull
+      /*
+      let offset = 0.04;
+      let parallel = new Array();
+      for (let i = 0; i < hull.length-1; i++) {
+        let parallel_segment = PathHelp.parallelPath(hull[i], hull[i+1], offset)
+        parallel.push(parallel_segment[0])
+      }
+      parallel.push(parallel[0])
+      hull = parallel;
+      //*/
 
       // // Smooth path. Subdivide for better results
       // hull = PathHelp.subdividePath(hull)
       // hull.push(hull[0])
       // hull = PathHelp.smoothPath(hull, 5)
 
-      layers.push({
-        "color": "blue",
-        "paths": [hull]
-      })
-    }
-
-    // Calculate the bounding box for paths of layer (the Hull in this case)
-    let bounding_boxes = new Array();
-    for (let p of layers[1].paths) {
+      // Calculate the bounding box for paths of layer (the Hull in this case)
+      // This is used for optimizing intersections later
       bounding_boxes.push(
-        PathHelp.boundingBox(p)
+        PathHelp.boundingBox(hull)
       )
+
+      // layers.push({
+      //   "color": "blue",
+      //   "paths": [hull]
+      // })
     }
 
     // Background lines
-    let num_lines = 80;
+    let num_lines = 20;
     let p1,p2
     let max_x = 5/3;
     let min_x = -5/3;
@@ -1481,36 +1491,97 @@ class LineImage {
       // Check Y-Dimension
       if (y > bounding_boxes[0][1][0] && y < bounding_boxes[0][1][1]) {
 
-        // Check X-Dimension
-        paths.push(
-          [
-            [p1[0], y],
-            [bounding_boxes[0][0][0], y]
-          ],
-          [
-            [bounding_boxes[0][0][1], y],
-            [p2[0], y]
-          ]
-        );
+        // Inside of bounding box
 
+        // Check X-Dimension
+        // paths.push(
+        //   [
+        //     [p1[0], y],
+        //     [bounding_boxes[0][0][0], y]
+        //   ],
+        //   [
+        //     [bounding_boxes[0][0][1], y],
+        //     [p2[0], y]
+        //   ]
+        // );
+
+        // Calculate intersections with Hull
+
+        // Loop through all side line segments of Hull
+        let intersections = new Array();
+        for (let a = 0; a < hull.length; a++) {
+
+          // Define side of hull
+          let b = a + 1;
+          if (b >= hull.length) {
+            b = b % hull.length
+          }
+
+          // console.log("i: " + i, [hull[a], hull[b]])
+          // console.log(p1, p2, hull[a], hull[b])
+
+          // Calculate intersection
+          let intersection = PathHelp.getLineLineCollision(
+            {"x": p1[0], "y": p1[1]},
+            {"x": p2[0], "y": p2[1]},
+            {"x": hull[a][0], "y": hull[a][1]},
+            {"x": hull[b][0], "y": hull[b][1]}
+          );
+
+          // Add to array of intersection points
+          if (intersection !== false) {
+            intersections.push(intersection);
+            continue;
+          }
+        }
+
+        // Process intersections
+        if (intersections.length > 0) {
+
+          // Sort by X-position to determine order of intersection
+          intersections.sort(
+            (a, b) => (a.x > b.x) ? 1 : -1
+          )
+
+          // Line to left-most side of hull
+          paths.push([
+            [p1[0], y],
+            [intersections[0].x, intersections[1].y]
+          ]);
+
+          // Draw lines in concave cavaties of polygon hull
+          if (intersections.length > 2) {
+            for (let d = 2; d < intersections.length; d++) {
+              if (d % 2 == 0) {
+                paths.push([
+                  [intersections[d-1].x, intersections[d-1].y],
+                  [intersections[d].x, intersections[d].y]
+                ]);
+              }
+            }
+          }
+
+          // Line from right-most side of hull
+          if (intersections.length % 2 == 0) {
+            let d = intersections.length -1
+            paths.push([
+              [intersections[d].x, intersections[d].y],
+              [p2[0], y]
+            ]);
+          }
+        }
+
+        // Continue to next iteration of i
         continue;
       }
 
-      // TODO: Calculate intersections with Hull
-
-      // let intersect_1 = PathHelp.intersect_point(p1,p2,triangle[0],triangle[1]);
-      // if (p1[1] >= triangle[0][1]) {
-      //   paths.push([
-      //     [intersect_1[0], p1[1]],
-      //     p2
-      //   ]);
-      // }
-
+      // Not within vertical range of bounding box so draw
+      // uninterrupted  line
       paths.push([p1,p2]);
     }
 
     layers.push({
-      "color": "red",
+      "color": "black",
       "paths": paths
     })
 

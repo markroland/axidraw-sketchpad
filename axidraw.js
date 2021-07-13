@@ -66,7 +66,10 @@ let sketch = function(p) {
 
     // Pre-load supporting data
     if (selectedPattern == "lineimage") {
+
+      // Porsche 959 Image Source: https://forza.fandom.com/wiki/Porsche_959?file=HOR_XB1_Porsche_959.png
       let image_path = "assets/data/landscape.jpg";
+
       imported_image = p.loadImage(image_path,
         success => { /* console.log('jpg success') */ },
         fail => { /* console.log('jpg fail') */ }
