@@ -14,21 +14,9 @@ class Spiral {
    * Draw path - Use class's "calc" method to convert inputs to a draw path
    */
   draw() {
-
+    // return this.spiral('arithmetic');
+    // return this.spiral('fermat');
     return this.spiral('hyperbolic');
-    // return [this.fermat()]
-
-    // Calculate path
-    let path = this.calc(
-      0.0,
-      0.0,
-      30,
-      20,
-      3,
-      0
-    );
-
-    return [path];
   }
 
   /**
@@ -38,7 +26,7 @@ class Spiral {
    *
    * @return Array Path
    **/
-  calc(start_r, start_theta, revolutions, sides, twist, noise) {
+  arithmetic(start_r, start_theta, revolutions, sides, twist, noise) {
 
     // Set initial values
     var x;
@@ -104,17 +92,14 @@ class Spiral {
     const pow_n = 1.0;
 
     // Radius of spiral
-    let a = 28 / revolutions;
-
-    // Arbitrarily scale down
-    a = a / 150;
+    let a = 1 / 150;
 
     // The number of "sides" to the circle.
     const steps_per_revolution = 60;
 
     // Loop through one revolution
     const t_min = revolutions * 0;
-    const t_max = revolutions * (2 * Math.PI);
+    const t_max = revolutions * (0.25 * Math.PI);
     const t_step = (t_max - t_min) / (revolutions * steps_per_revolution);
 
     // Negative Radius
@@ -142,6 +127,58 @@ class Spiral {
     return path;
   }
 
+  /**
+   * Hyperbolic Spiral
+   * @param float "a" represents the distance from the center of the spiral to its asymptote
+   * @param float "revolutions" represents the number of spiral revolutions
+   * @param float An optional cutoff distance for the spiral "tail"
+   * https://en.wikipedia.org/wiki/Hyperbolic_spiral
+   */
+  hyperbolic(a, revolutions, x_max = undefined) {
+
+    let path = new Array();
+
+    // Set the resolution of the line segments
+    let segments_per_revolution = 60;
+
+    // Set the max number of revolutions
+    let t_max = segments_per_revolution * revolutions;
+
+    for (let t = 1; t < t_max; t++) {
+
+      // Set the rotational angle phi based on the iteration
+      let phi = (1 - (t/t_max)) * (revolutions * 2 * Math.PI)
+
+      // Calculate x and y points using the parametric equations
+      let x = a * (Math.cos(phi)/phi);
+      let y = a * (Math.sin(phi)/phi)
+
+      // Add to the path
+      path.push([x,y])
+
+      // Stop early if the maximum X distance has been exceeded
+      // The radius value (r = a/phi) could optionally be used as well;
+      if (x > x_max) {
+
+        // Interpolate Y-value at x_max
+        y = path[path.length-2][1] +
+          (path[path.length-1][1] - path[path.length-2][1])
+          *
+          (
+            (x_max - path[path.length-2][0])
+            /
+            (path[path.length-1][0] - path[path.length-2][0])
+          );
+
+        path[path.length-1] = [x_max, y]
+
+        break;
+      }
+    }
+
+    return path;
+  }
+
   spiral(type) {
 
     let layers = new Array();
@@ -151,20 +188,41 @@ class Spiral {
     let path = new Array();
 
     switch(type) {
+      case "arithmetic":
+        path = this.arithmetic(
+          0.0,
+          0.0,
+          30,
+          20,
+          3,
+          0
+        );
+        break;
       case "hyperbolic":
-        path = this.hyperbolicSpiral(0.4, 5)
+        // path = this.hyperbolic(0.4, 5)
+        path = this.hyperbolic(0.7, 0.8, 5/3)
+        break;
+      case "fermat":
+        path = this.fermat()
         break;
       default:
-        path = this.hyperbolicSpiral(0.4, 5)
+        path = this.calc(
+          0.0,
+          0.0,
+          30,
+          20,
+          3,
+          0
+        );
     }
 
     let PathHelp = new PathHelper;
 
-    path = PathHelp.rotatePath(path, Math.PI/2)
+    // path = PathHelp.rotatePath(path, Math.PI/2)
 
     // path = PathHelp.expandPath(path, 0.01, 0.01, 'round')
 
-    path = PathHelp.translatePath(path, [0.3, -0.4])
+    // path = PathHelp.translatePath(path, [0.3, -0.4])
 
     paths.push(path);
 
@@ -175,24 +233,4 @@ class Spiral {
 
     return layers;
   }
-
-  /**
-   * Hyperbolic Spiral
-   * https://en.wikipedia.org/wiki/Hyperbolic_spiral
-   */
-  hyperbolicSpiral(a, periods) {
-    let path = new Array();
-    let segments_per_revolution = 60;
-    let t_max = segments_per_revolution * periods;
-    for (let t = 1; t <= t_max; t++) {
-      let phi = (t/t_max) * (periods * 2 * Math.PI)
-      let r = a/phi;
-      console.log(r)
-      let x = a * (Math.cos(phi)/phi);
-      let y = a * (Math.sin(phi)/phi)
-      path.push([x,y])
-    }
-    return path;
-  }
-
 }
