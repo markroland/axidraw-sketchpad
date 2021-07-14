@@ -11,7 +11,7 @@ class Sketchbook {
 
     this.constrain = false
 
-    this.title = "Concave Hull"
+    this.title = "Hyperbolic Spiral Study"
   }
 
   /**
@@ -23,7 +23,8 @@ class Sketchbook {
     // return this.toxiclibtest()
     // return this.tree();
     // return this.resolutionTest(5 * 48, 3 * 48);
-    return this.concaveHull();
+    // return this.concaveHull();
+    return this.hyperbolicSpirals();
   }
 
   default() {
@@ -292,6 +293,47 @@ class Sketchbook {
 
     layers.push({
       "color": "black",
+      "paths": paths
+    })
+
+    return layers;
+  }
+
+  hyperbolicSpirals() {
+
+    let num_spirals = 7;
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+    let paths = new Array()
+    let path, bbox;
+    let Spir = new Spiral;
+
+    for (let i = 0; i < num_spirals; i++) {
+
+      // Set parameters
+      let a = PathHelp.getRandom(0.1, 5/3);
+      let revolutions = PathHelp.getRandom(0.1, 5.0);
+      let max_x = PathHelp.getRandom(0.5, 2);
+      let flip = false;
+      if (Math.random() > 0.5) {
+        flip = true;
+      }
+
+      // calculate spiral and move to bottom-center of canvas
+      path = Spir.hyperbolic(a, revolutions, max_x)
+      bbox = PathHelp.boundingBox(path);
+      path = PathHelp.translatePath(path, [-bbox[0][1], -bbox[1][1]])
+      path = PathHelp.rotatePath(path, Math.PI/2)
+      if (flip) {
+        path = PathHelp.scalePath(path, [-1, 1]);
+      }
+      path = PathHelp.translatePath(path, [0, 1])
+      paths.push(path)
+    }
+
+    layers.push({
+      "color": "green",
       "paths": paths
     })
 
