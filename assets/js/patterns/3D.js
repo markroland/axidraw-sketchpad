@@ -11,7 +11,7 @@ class ThreeD {
   constructor() {
     this.key = "3d";
     this.name = "3D";
-    this.title = "Spike Ball";
+    this.title = "";
     this.constrain = false
   }
 
@@ -30,7 +30,8 @@ class ThreeD {
     // return this.grandPrix()
     // return this.geoIsolines(p5)
     // return this.attractor()
-    return this.spikeBall();
+    // return this.spikeBall();
+    return this.sphereCircles();
   }
 
   simpleCube() {
@@ -691,6 +692,73 @@ class ThreeD {
         "paths": paths
       })
     }
+
+    return layers;
+  }
+
+  sphereCircles() {
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+    let paths = new Array();
+
+    // Create a circle
+    // Since PathHelper.polygon is only in 2 dimensions a Z component must be added
+    let circle = PathHelp.polygon(120, 0.5)
+    circle.map(function(a){
+      return a.push(0)
+    })
+
+    // Loop through Model points and apply transformation and projection
+    let i_max = 40;
+    for (let i = 0; i < i_max; i++) {
+
+      // let shape = circle;
+      let shape = circle.map(function(a){
+        return [
+          a[0] * (1 + 4 * i/i_max),
+          a[1] * (1 + 4 * i/i_max),
+          a[2] * (1 + 4 * i/i_max)
+        ]
+      })
+
+      // Define Transformations
+      // let x_rotation = (i/i_max) * (0.25 * Math.PI)
+      let x_rotation = (-0.375 * Math.PI)
+      let rotationX = [
+        [1, 0, 0],
+        [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
+        [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
+      ];
+
+      // let y_rotation = (i/i_max) * (0.125 * Math.PI)
+      let y_rotation = 0.125 * Math.sin(3 * i/i_max * 2 * Math.PI)
+      let rotationY = [
+        [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
+        [0, 1, 0],
+        [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
+      ];
+
+      let z_rotation = (i/i_max) * (0.25 * Math.PI)
+      let rotationZ = [
+        [Math.cos(z_rotation), -Math.sin(z_rotation), 0],
+        [Math.sin(z_rotation),  Math.cos(z_rotation), 0],
+        [0, 0, 1]
+      ];
+
+      // Perspective
+      // let path = this.transform(shape, [rotationX, rotationY], 1, 2)
+
+      // Orthographic
+      let path = this.transform(shape, [rotationX, rotationY], 0.5, 1)
+
+      paths = paths.concat(path);
+    }
+
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
 
     return layers;
   }
