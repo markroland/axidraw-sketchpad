@@ -701,64 +701,124 @@ class ThreeD {
     let PathHelp = new PathHelper;
     let layers = new Array();
     let paths = new Array();
+    let path = new Array();
+    let transformations;
+    let rotationX, rotationY, rotationZ;
 
     // Create a circle
     // Since PathHelper.polygon is only in 2 dimensions a Z component must be added
-    let circle = PathHelp.polygon(120, 0.5)
+    let circle = PathHelp.polygon(120, 1)
     circle.map(function(a){
       return a.push(0)
     })
 
     // Loop through Model points and apply transformation and projection
-    let i_max = 40;
+    let i_max = 50;
     for (let i = 0; i < i_max; i++) {
 
       // let shape = circle;
       let shape = circle.map(function(a){
         return [
-          a[0] * (1 + 4 * i/i_max),
-          a[1] * (1 + 4 * i/i_max),
-          a[2] * (1 + 4 * i/i_max)
+          a[0] * (1 + 2 * i/i_max),
+          a[1] * (1 + 2 * i/i_max),
+          a[2] * (1 + 2 * i/i_max)
         ]
       })
 
-      // Define Transformations
-      // let x_rotation = (i/i_max) * (0.25 * Math.PI)
-      let x_rotation = (-0.375 * Math.PI)
-      let rotationX = [
+      // Define Transformations for Model
+      let x_rotation = (-0.0 * Math.PI)
+      rotationX = [
         [1, 0, 0],
         [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
         [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
       ];
 
-      // let y_rotation = (i/i_max) * (0.125 * Math.PI)
-      let y_rotation = 0.125 * Math.sin(3 * i/i_max * 2 * Math.PI)
-      let rotationY = [
+      let y_rotation = 0.05 * Math.sin(3 * i/i_max * 2 * Math.PI)
+      rotationY = [
         [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
         [0, 1, 0],
         [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
       ];
 
-      let z_rotation = (i/i_max) * (0.25 * Math.PI)
-      let rotationZ = [
+      // Rotate in Z to hide pen up/down in dense line areas
+      let z_rotation = -0.5 * Math.PI;
+      rotationZ = [
         [Math.cos(z_rotation), -Math.sin(z_rotation), 0],
         [Math.sin(z_rotation),  Math.cos(z_rotation), 0],
         [0, 0, 1]
       ];
 
-      // Perspective
-      // let path = this.transform(shape, [rotationX, rotationY], 1, 2)
+      path = new Array();
+      transformations = [rotationZ, rotationX, rotationY]
+      for (let point of shape) {
+        for (let transform of transformations) {
+          point = this.matrixMultiply(transform, point);
+        }
+        path.push(point)
+      }
 
-      // Orthographic
-      let path = this.transform(shape, [rotationX, rotationY], 0.5, 1)
-
-      paths = paths.concat(path);
+      paths.push(path);
     }
 
+    // Draw Axes to help debug orientation
+    /*
+    let axes = this.axisPaths();
+    // let path = this.transform(axes, [rotationZ], 0.5, 1)
+    layers.push({
+      "color": "red",
+      "paths": [axes[0]]
+    })
+    layers.push({
+      "color": "green",
+      "paths": [axes[1]]
+    })
+    layers.push({
+      "color": "blue",
+      "paths": [axes[2]]
+    })
+    //*/
+
+    // Draw art shapes
     layers.push({
       "color": "black",
       "paths": paths
     })
+
+    // Transform World
+    for (let l = 0; l < layers.length; l++) {
+      let temp = new Array();
+      for (let p = 0; p < layers[l].paths.length; p++) {
+
+        // Define Transformations for Model
+        let x_rotation = -0.375 * Math.PI
+        rotationX = [
+          [1, 0, 0],
+          [0,  Math.cos(x_rotation), Math.sin(x_rotation)],
+          [0, -Math.sin(x_rotation), Math.cos(x_rotation)]
+        ];
+
+        let y_rotation = 0.0 * Math.PI
+        rotationY = [
+          [ Math.cos(y_rotation), 0, Math.sin(y_rotation)],
+          [0, 1, 0],
+          [-Math.sin(y_rotation), 0, Math.cos(y_rotation)]
+        ];
+
+        let z_rotation = 0.25 * Math.PI
+        rotationZ = [
+          [Math.cos(z_rotation), -Math.sin(z_rotation), 0],
+          [Math.sin(z_rotation),  Math.cos(z_rotation), 0],
+          [0, 0, 1]
+        ];
+
+        // Transform
+        temp.push(this.transform(layers[l].paths[p], [rotationZ, rotationX], 4, 8)[0])
+      }
+      layers[l].paths = temp
+    }
+
+    // Center to canvas
+    layers[0].paths = PathHelp.centerPaths(layers[0].paths)
 
     return layers;
   }
@@ -1499,6 +1559,23 @@ class ThreeD {
     }
 
     return points;
+  }
+
+  axisPaths() {
+    return [
+      [
+        [0,0,0],
+        [1,0,0]
+      ],
+      [
+        [0,0,0],
+        [0,1,0]
+      ],
+      [
+        [0,0,0],
+        [0,0,1]
+      ]
+    ]
   }
 
   transform(points, transforms, scale = 1, distance = 1) {
