@@ -20,6 +20,7 @@ class ThreeD {
    */
   draw(p5) {
     // return this.simpleCube()
+    return this.cube2()
     // return this.anaglyphCube()
     // return this.cubeGrid(2)
     // return this.isometricPlanes()
@@ -31,7 +32,7 @@ class ThreeD {
     // return this.geoIsolines(p5)
     // return this.attractor()
     // return this.spikeBall();
-    return this.sphereCircles();
+    // return this.sphereCircles();
   }
 
   simpleCube() {
@@ -132,6 +133,99 @@ class ThreeD {
     })
 
     return layers;
+  }
+
+  cube2() {
+
+    let PathHelp = new PathHelper;
+    let layers = new Array();
+    let paths = new Array();
+    let path = new Array();
+
+    // Define 3D shape (cube) (x,y,z)
+    let points = [
+      [-0.5, -0.5, -0.5],
+      [0.5, -0.5, -0.5],
+      [0.5, 0.5, -0.5],
+      [-0.5, 0.5, -0.5],
+      [-0.5, -0.5, 0.5],
+      [0.5, -0.5, 0.5],
+      [0.5, 0.5, 0.5],
+      [-0.5, 0.5, 0.5]
+    ];
+
+    // Translate the points
+    points = this.translatePoints3D(points, [0.5, 0.5, 0.0])
+
+    // Rotate the world and Project (flatten) 3D world to 2D
+    const rotateWorldX = this.rotateX((1/16) * (2 * Math.PI));
+    const rotateWorldY = this.rotateY((2/16) * (2 * Math.PI));;
+    const rotateWorldZ = this.rotateZ((2/16) * (2 * Math.PI));;
+    let points3D = this.project3D(points, [rotateWorldY, rotateWorldX], 6, 12)[0]
+
+    // Connect points to create paths (edges)
+    for (let i = 0; i < 4; i++) {
+      paths.push(
+        new Array(
+          points3D[i],
+          points3D[(i + 1) % 4]
+        )
+      );
+      paths.push(
+        new Array(
+          points3D[i + 4],
+          points3D[((i + 1) % 4) + 4],
+        )
+      );
+      paths.push(
+        new Array(
+          points3D[i],
+          points3D[i + 4]
+        )
+      );
+    }
+
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    // Create a 2nd cube that's modified on it's own, but shares the same world projection
+
+    let points2 = points;
+    points2 = this.rotatePoints3dX(points2, (1/32) * (2 * Math.PI))
+    points2 = this.translatePoints3D(points2, [0.1, 0.1, 0.2])
+    let points2_3D = this.project3D(points2, [rotateWorldY, rotateWorldX], 6, 12)[0]
+
+    // Connect points to create paths (edges)
+    paths = new Array();
+    for (let i = 0; i < 4; i++) {
+      paths.push(
+        new Array(
+          points2_3D[i],
+          points2_3D[(i + 1) % 4]
+        )
+      );
+      paths.push(
+        new Array(
+          points2_3D[i + 4],
+          points2_3D[((i + 1) % 4) + 4],
+        )
+      );
+      paths.push(
+        new Array(
+          points2_3D[i],
+          points2_3D[i + 4]
+        )
+      );
+    }
+
+    layers.push({
+      "color": "blue",
+      "paths": paths
+    })
+
+    return layers
   }
 
   anaglyphCube() {
@@ -1601,18 +1695,6 @@ class ThreeD {
         [0, z, 0]
       ];
 
-      // Translation matrix
-      // Temp for this sketch only
-      // TODO: make transform loop above able to handle a 4x4 matrix
-      /*
-      world = this.matrixMultiply([
-        [1,0,0,-0.4],
-        [0,1,0,0.4],
-        [0,0,1,0],
-        [0,0,0,1]
-      ], world.concat(1));
-      //*/
-
       // Project model onto 2D surface
       let projected2d = this.matrixMultiply(projection, world);
 
@@ -1631,6 +1713,90 @@ class ThreeD {
     paths.push(path);
 
     return paths;
+  }
+
+  /**
+   * This is a better name for this function, but
+   * I want the previously written code to work as well.
+   */
+  project3D(points, transforms, scale = 1, distance = 1) {
+    return this.transform(points, transforms, scale, distance)
+  }
+
+  translatePoints3D(points, translation) {
+    for (let i = 0; i < points.length; i++) {
+
+      // A 4th point is required for the matrix multiplication
+      points[i] = points[i].concat(1)
+
+      points[i] = this.matrixMultiply(
+        [
+          [1,0,0, translation[0]],
+          [0,1,0, translation[1]],
+          [0,0,1, translation[2]],
+          [0,0,0, 1]
+        ],
+        points[i]
+      );
+
+      // Remove 4th point
+      points[i].pop();
+    }
+    return points
+  }
+
+  rotateX(angle) {
+    return [
+      [1, 0, 0],
+      [0,  Math.cos(angle), Math.sin(angle)],
+      [0, -Math.sin(angle), Math.cos(angle)]
+    ];
+  }
+
+  rotateY(angle) {
+    return [
+      [ Math.cos(angle), 0, Math.sin(angle)],
+      [0, 1, 0],
+      [-Math.sin(angle), 0, Math.cos(angle)]
+    ]
+  }
+
+  rotateZ(angle) {
+    return [
+      [Math.cos(angle), -Math.sin(angle), 0],
+      [Math.sin(angle),  Math.cos(angle), 0],
+      [0, 0, 1]
+    ]
+  }
+
+  rotatePoints3dX(points, angle) {
+    for (let i = 0; i < points.length; i++) {
+      points[i] = this.matrixMultiply(
+        this.rotateX(angle),
+        points[i]
+      );
+    }
+    return points;
+  }
+
+  rotatePoints3dY(points, angle) {
+    for (let i = 0; i < points.length; i++) {
+      points[i] = this.matrixMultiply(
+        this.rotateY(angle),
+        points[i]
+      );
+    }
+    return points;
+  }
+
+  rotatePoints3dZ(points, angle) {
+    for (let i = 0; i < points.length; i++) {
+      points[i] = this.matrixMultiply(
+        this.rotateZ(angle),
+        points[i]
+      );
+    }
+    return points;
   }
 
   /**
