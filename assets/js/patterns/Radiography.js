@@ -1,7 +1,7 @@
 class Radiography {
 
   draw() {
-    return this.draw1();
+    return this.draw3D();
   }
 
   draw1() {
@@ -47,6 +47,60 @@ class Radiography {
     }
 
     return paths;
+  }
+
+  draw3D() {
+
+    let PathHelp = new PathHelper;
+
+    let ThreeDimensions = new ThreeD();
+
+    let layers = new Array();
+
+    let paths = new Array();
+    let paths3D = new Array();
+
+    // Create design
+    let paths2D = this.draw1();
+
+    // Define how the 3D world will be transformed
+    let worldTransformations = new Array();
+    const rotateWorldX = ThreeDimensions.rotateX(-(6/32) * (2 * Math.PI));
+    const rotateWorldY = ThreeDimensions.rotateY((5/32) * (2 * Math.PI));;
+    const rotateWorldZ = ThreeDimensions.rotateZ((2/16) * (2 * Math.PI));;
+    // worldTransformations = [rotateWorldY, rotateWorldX]
+    worldTransformations = [rotateWorldX]
+
+    // Loop through paths and convert to 3D
+    let i_max = paths2D.length;
+    for (let i = 0; i < i_max; i++) {
+
+      // Add a 3rd "Z" dimension to each point in the path
+      paths2D[i].map(function(a){
+        return a.push(
+          // PathHelp.map(i, 0, i_max, -0.1, 0.1)
+          0
+        )
+      })
+
+      let path_3D = ThreeDimensions.project3D(paths2D[i], worldTransformations, 2, 2)[0]
+      paths3D.push(path_3D)
+    }
+
+    // 2D Version
+    //*
+    layers.push({
+      "color": "cyan",
+      "paths": paths2D
+    })
+    //*/
+
+    layers.push({
+      "color": "black",
+      "paths": paths3D
+    })
+
+    return layers;
   }
 
   /**

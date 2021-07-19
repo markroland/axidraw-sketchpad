@@ -1679,6 +1679,11 @@ class ThreeD {
     let z;
     for (let i = 0; i < points.length; i++) {
 
+      // Convert 2D (x,y) points to 3D in the z=0 plane
+      if (points[i].length == 2) {
+        points[i].push(0)
+      }
+
       // Apply transformation(s)
       let world = points[i]
       for (let transform of transforms) {

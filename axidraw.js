@@ -1,4 +1,4 @@
-let selectedPattern = "sketchbook"
+let selectedPattern = "radiography"
 let sketch_title = ''
 
 // Select sketch from Hash in URL
