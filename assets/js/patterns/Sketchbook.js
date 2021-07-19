@@ -11,7 +11,7 @@ class Sketchbook {
 
     this.constrain = false
 
-    this.title = "Hyperbolic Spiral Study"
+    this.title = "Crop to Circle Study"
   }
 
   /**
@@ -24,7 +24,8 @@ class Sketchbook {
     // return this.tree();
     // return this.resolutionTest(5 * 48, 3 * 48);
     // return this.concaveHull();
-    return this.hyperbolicSpirals();
+    // return this.hyperbolicSpirals();
+    return this.circleCrop();
   }
 
   default() {
@@ -334,6 +335,73 @@ class Sketchbook {
 
     layers.push({
       "color": "green",
+      "paths": paths
+    })
+
+    return layers;
+  }
+
+  circleCrop() {
+
+    const max_radius = (Math.min(canvas_x_max - canvas_x_min, canvas_y_max - canvas_y_min) / 2);
+
+    let PathHelp = new PathHelper;
+
+    let layers = new Array();
+
+    let paths = new Array();
+
+    // Design
+    const num_lines = 50;
+    for (let i = 0; i < num_lines; i++) {
+
+      let steps = 120;
+      let line = new Array();
+      for (let j = 0; j < steps; j++) {
+        line.push([
+          PathHelp.map(j, 0, steps, canvas_x_min, canvas_x_max),
+          PathHelp.map(i, 0, num_lines, 1.25 * canvas_y_min, 1.25 * canvas_y_max)
+            + 0.1 * Math.cos((4 + 4 * (i/num_lines)) * (j/steps) * (2 * Math.PI))
+        ])
+      }
+      paths.push(line);
+    }
+
+    // Debug test override
+    /*
+    paths = [
+      [
+        [-1.1, -0.2],
+        [-0.5, -0.5]
+      ],
+      [
+        [-5/3, 0.5],
+        [0, 0.5]
+      ]
+    ]
+    //*/
+
+    /*
+    // Show paths before crop
+    layers.push({
+      "color": "cyan",
+      "paths": paths
+    })
+    //*/
+
+    // Crop Paths
+    paths = PathHelp.cropToCircle(paths, [0,0], 0.95 * max_radius)
+
+    // Draw border circle
+    //*
+    layers.push({
+      "color": "red",
+      "paths": [PathHelp.polygon(60, max_radius, 0)]
+    })
+    //*/
+
+    layers.push({
+      "color": "black",
       "paths": paths
     })
 

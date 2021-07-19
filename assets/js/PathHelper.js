@@ -354,7 +354,6 @@ class PathHelper {
     return path;
   }
 
-
   /**
    * Returns objet representing Line equation.
    * m = slope
@@ -973,6 +972,89 @@ class PathHelper {
     ]
   }
 
+  // From http://www.jeffreythompson.org/collision-detection/line-circle.php
+  pointOnLineSegment(p, line, buffer = 0.01) {
+
+    // get distance from the point to the two ends of the line
+    let d1 = this.distance(p, line[0])
+    let d2 = this.distance(p, line[1])
+
+    // get the length of the line
+    let lineLen = this.distance(line[0], line[1])
+
+    // if the two distances are equal to the line's
+    // length, the point is on the line!
+    // note we use the buffer here to give a range,
+    // rather than one #
+    if (d1+d2 >= lineLen-buffer && d1+d2 <= lineLen+buffer) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Calculate the intersection points (0, 1 or 2) between a line and a circle
+   */
+  lineCircleIntersect(p1, p2, circle) {
+
+    let intersections = [];
+
+    // Get line.m and line.b
+    let line = this.lineSlopeIntercept(p1, p2);
+
+    let r = circle[1]
+
+    // Note: This is for circle at origin only right now
+    let a = Math.pow(line.m, 2) + 1;
+    let b = 2 * line.m * line.b;
+    let c = Math.pow(line.b, 2) - Math.pow(r,2);
+
+    let x_values = this.solveQuadratic(a, b, c);
+
+    if (x_values.length == 0) {
+      return intersections;
+    }
+
+    for (let x_value of x_values) {
+
+      let intersect = [
+        x_value,
+        line.m * x_value + line.b
+      ]
+
+      // Determine if coordinate is on the line p1->p2
+      if (this.pointOnLineSegment(intersect, [p1, p2])) {
+        intersections.push(intersect);
+      }
+    }
+
+    return intersections
+  }
+
+  /**
+   * Solve the Quadratic Equation. For real values only
+   */
+  solveQuadratic(a, b, c) {
+
+    let discriminant = Math.pow(b, 2) - 4 * a * c;
+
+    // One real and equal answer
+    if (discriminant == 0) {
+      let x = -b / (2 * a);
+      return [x]
+    }
+
+    // Two real and different answers
+    if (discriminant > 0) {
+      let x1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+      let x2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+      return [x1, x2]
+    }
+
+    return [];
+  }
+
   /**
    * Calculate an intersection point of two circles
    * https://math.stackexchange.com/questions/256100/how-can-i-find-the-points-at-which-two-circles-intersect
@@ -1006,5 +1088,104 @@ class PathHelper {
         ) * (p1[0] - p2[0])
 
     return [x,y]
+  }
+
+  /**
+   * Take a path and crop it to a circle
+   * This works, but hasn't been rigorously tested on edge cases
+   */
+  cropToCircle(candidate_paths, center = [0,0], crop_radius = 1) {
+
+    let paths = new Array();
+
+    let path = new Array();
+
+    for (let i = 0; i < candidate_paths.length; i++) {
+
+      // path = new Array();
+
+      // Loop through points/segments of path
+      for (let p = 0; p < candidate_paths[i].length; p++) {
+
+        // Calculate distance of point from center
+        let d1 = this.distance([0,0], candidate_paths[i][p])
+
+        // Calculate distance from next point (if it exists) to the center
+        let d2 = null
+        if (p+1 < candidate_paths[i].length) {
+          d2 = this.distance([0,0], candidate_paths[i][p+1])
+        }
+
+        if (d1 < crop_radius) {
+
+          // Point is inside circle
+
+          // Check if next point (if there is one) is outside the circle.
+          if (d2 !== null && d2 > crop_radius) {
+
+            // The point is outside of the crop circle, so calculate its point of intersection
+            let intersections = this.lineCircleIntersect(
+              candidate_paths[i][p],
+              candidate_paths[i][p+1],
+              [[0,0], crop_radius]
+            )
+
+            // Assuming these are short line segments
+            // there should only be one point of intersection.
+            // Add it to the path
+            if (intersections.length == 1) {
+              path.push(intersections[0]);
+            }
+
+            // End active path and start a new one if there are at least 2 points to define a line
+            if (path.length >= 2) {
+              paths.push(path);
+              path = new Array();
+            }
+
+          } else {
+
+            // The next point is also inside the circle so no need to calculate an intersection
+            path.push(candidate_paths[i][p])
+
+            // End active path and start a new one if it's the last point
+            if (d2 == null) {
+              paths.push(path);
+              path = new Array();
+            }
+
+          }
+        } else if ((d1 > crop_radius) && (d2 !== null && d2 < crop_radius)) {
+
+          // The point is outside the circle, but the next point is in, so calculate
+          // the point of intersection.
+          let intersections = this.lineCircleIntersect(
+            candidate_paths[i][p],
+            candidate_paths[i][p+1],
+            [[0,0], crop_radius]
+          )
+
+          // Assuming these are short line segments
+          // there should only be one point of intersection.
+          // Add it to the path
+          if (intersections.length == 1) {
+            path.push(intersections[0]);
+          }
+
+          // End active path and start a new one if there are at least 2 points to define a line
+          // if (path.length >= 2) {
+          //   paths.push(path);
+          //   path = new Array();
+          // }
+        }
+      }
+    }
+
+    // Save path if it contains at least one line segment (2 points)
+    if (path.length >= 2) {
+      paths.push(path);
+    }
+
+    return paths;
   }
 }

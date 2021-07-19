@@ -1,4 +1,4 @@
-let selectedPattern = "3d"
+let selectedPattern = "sketchbook"
 let sketch_title = ''
 
 // Select sketch from Hash in URL
@@ -13,6 +13,12 @@ let debugPenDownUp = false
 let draw_grid = false
 
 let fonts
+
+// Define canvas constraints for global use
+const canvas_x_min = -5/3;
+const canvas_x_max =  5/3;
+const canvas_y_min = -1;
+const canvas_y_max =  1;
 
 let f1 = new Array();
 
