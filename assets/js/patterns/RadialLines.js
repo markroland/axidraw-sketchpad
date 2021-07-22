@@ -1,5 +1,12 @@
 class RadialLines {
 
+  constructor() {
+    this.key = "radiallines";
+    this.name = "Radial Lines";
+    this.title = "Radial Lines"
+    this.constrain = false
+  }
+
   draw() {
     return this.draw3();
   }

@@ -48,7 +48,18 @@ class Genuary {
    * Draw path
    */
   draw() {
-    return this.genuary_25(5, 3);
+    // return this.genuary_1();
+    // return this.genuary_4();
+    // return this.genuary_6();
+    // return this.genuary_8();
+    // return this.genuary_9();
+    // return this.genuary_10();
+    // return this.genuary_13();
+    // return this.genuary_15();
+    // return this.genuary_16();
+    // return this.genuary_19();
+    return this.genuary_21();
+    // return this.genuary_25(5, 3);
   }
 
   /**

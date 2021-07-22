@@ -8,9 +8,11 @@ class WolframRules {
 
   constructor() {
 
+    this.title = "Wolfram Rules";
+
     this.key = "wolframrules";
 
-    this.name = "WolframRules";
+    this.name = "Wolfram Rules";
   }
 
   setup() {

@@ -1,4 +1,12 @@
 class NegativeSpace {
+
+  constructor() {
+    this.key = "negativespace";
+    this.name = "Negative Space";
+    this.title = "Negative Space Study"
+    this.constrain = false
+  }
+
   draw() {
     // return this.sketch1();
     return this.sketch2();

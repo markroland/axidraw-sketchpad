@@ -3,13 +3,15 @@
  */
 class Grid {
 
-  constructor(p5) {
+  constructor() {
+    this.key = "grid"
     this.title = "Acrylicode Tutorial 1"
+    this.name = "Grid"
     this.constrain = false
   }
 
   draw(p5) {
-    // this.p5 = p5
+    this.p5 = p5
     // return this.perspectiveGridWithNoise();
     // return this.grid1()
     // return this.TenPrint(12) // 12 Feels nice

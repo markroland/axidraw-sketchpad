@@ -19,6 +19,12 @@ class Superellipse {
 
   draw() {
 
+    let PathHelp = new PathHelper;
+
+    let layers = new Array();
+
+    let paths = new Array();
+
     // Calculate path
     let path = this.calc(
       1.0,
@@ -28,10 +34,14 @@ class Superellipse {
       true
     );
 
-    // Update object
-    this.path = path;
+    paths.push(path);
 
-    return path;
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers;
   }
 
   /**

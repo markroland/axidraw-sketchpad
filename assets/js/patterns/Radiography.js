@@ -1,6 +1,14 @@
 class Radiography {
 
+  constructor() {
+    this.key = "radiography";
+    this.name = "Radiography";
+    this.title = "Radial Design Study"
+    this.constrain = false
+  }
+
   draw() {
+    // return this.draw1();
     return this.draw3D();
   }
 

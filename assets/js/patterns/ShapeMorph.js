@@ -20,6 +20,32 @@ class ShapeMorph {
     this.path = [];
   }
 
+  draw() {
+
+    let PathHelp = new PathHelper;
+
+    let layers = new Array();
+
+    let paths = new Array();
+
+    paths.push(this.calc(
+      this.circleShape(60, 1),
+      this.squareShape(60, 1),
+      60,
+      40,
+      1.0,
+      0
+    ))
+
+    layers.push({
+      "color": "black",
+      "paths": paths
+    })
+
+    return layers;
+
+
+  }
   /**
    * Calculate coordinates for the shape
    *

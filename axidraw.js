@@ -1,4 +1,4 @@
-let selectedPattern = "radiography"
+let selectedPattern = "lineimage"
 let sketch_title = ''
 
 // Select sketch from Hash in URL
@@ -38,6 +38,7 @@ let sketch = function(p) {
   let draw_count = 0;
 
   var Patterns = {
+    "3d": new ThreeD(),
     "bezier": new Bezier(),
     "cassinioval": new CassiniOval(),
     "cycloid": new Cycloid(),
@@ -56,10 +57,12 @@ let sketch = function(p) {
     "postcard": new Postcard(),
     "radiallines": new RadialLines(),
     "radiography": new Radiography(),
+    "shapemorph": new ShapeMorph(),
     "sketchbook": new Sketchbook(),
+    "superellipse": new Superellipse(),
     "spiral": new Spiral(),
-    "3d": new ThreeD(),
-    "truchet": new Truchet()
+    "truchet": new Truchet(),
+    "wolframrules": new WolframRules(),
   }
 
   // Preload data

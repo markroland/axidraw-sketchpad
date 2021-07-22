@@ -58,6 +58,133 @@ but here is a command for Python 3.
 python -m http.server
 ```
 
+## Patterns
+
+The Patterns folder contains classes used for composing sketches. Classes contain helper functions.
+The actual sketch can be selected from the `draw` method of the class.
+
+ - 3D
+   - Simple Cube
+   - Anaglyph Cube
+   - Spiral Sphere
+   - Perlin Noise Plane
+   - GeoJSON Elevation Plane
+   - GeoJSON Grand Prix Track Map
+   - Spike Ball
+   - Lorenz Attractor
+ - Bezier
+   - Basic Bezier Curve
+   - Bezier Curve with Offset
+   - Bezier Curve offset with capped ends
+   - Bezier Curve with capped ends and tapered offset
+ - CassiniOval
+ - Cycloid
+ - Extrusion
+ - Fibonacci Spiral Phyllotaxis
+ - FlowField
+ - Genuary 2021](https://genuary2021.github.io/prompts)
+   - Farris Curves
+   - Crosshatch study
+   - Circle Packing
+   - Touching Circles on the perimeter of a Circle
+ - GeoJSON
+ - Gravity
+ - Grid
+   - 10 Print
+   - Sashiko Stitching
+   - Fish Scales
+ - Heart
+ - Ioslines
+ - Lindenmayer System
+   - Hilbert Curve
+   - Gosper Curve
+   - Sierpinski Arrowhead
+ - LineImage
+   - Bitmap image to horizontal lines
+   - Bitmap image -> posterization -> marching squares contours
+   - Bitmap image to 4-direction cross hatching
+   - Bitmap image to 4-direction cross hatching (CMYK color)
+   - Bitmap image to pixel spirals
+   - Bitmap image to pixel double (fermat) spirals
+   - Bitmap image to "weave" spirals
+   - Bitmap image to dithered pixels
+   - Bitmap image to edge detection with Sobel Filter
+   - Bitmap image to edge detection with Canny Edge Detection
+   - Bitmap image to Convex Hull tracing
+ - Lissajous
+ - NegativeSpace
+ - Postcard
+ - RadialLines
+ - Radiography
+ - ShapeMorph
+ - Sketchbook
+   - [Toxiclib](https://github.com/hapticdata/toxiclibsjs) Test
+   - Recursive Tree
+   - Pen Resolution Test
+   - Concave Hull Test
+   - Hyperbolic Spiral Study
+   - Crop Paths to Circle
+ - Spirals
+   - Arithmetic (Archimedean)
+   - Fermat (Double)
+   - Hyperbolic
+ - Superellipse
+ - Truchet
+   - Basic Truchet Tiling
+   - Parallel Line Truchet Tiling
+   - Grid Petals
+ - WolframRules (Rule 30)
+   - Pyramidal
+   - Circular
+
+## PathHelper
+
+The PathHelper class contains a variety of methods to assist with performing operations
+on multi-point paths (polylines).
+
+ - info
+ - getMin
+ - getMax
+ - boundingBox
+ - arrayMin
+ - arrayMax
+ - getRndInteger
+ - getRandom
+ - map
+ - lerp
+ - polygon
+ - intersect_point
+ - getLineLineCollision
+ - distance
+ - perpendicularPath
+ - parallelPath
+ - expandPath
+ - arcPointToPoint
+ - arc
+ - lineSlopeIntercept
+ - arrayColumn
+ - centerPaths
+ - scapePath
+ - translatePath
+ - rotatePath
+ - shiftPath
+ - subdividePath
+ - dividePath
+ - joinPaths
+ - pointsToPaths2
+ - pointsToPaths
+ - smoothPath
+ - quadraticBezierPath
+ - quadraticBezierPathAlgorithm
+ - cubicBezierPath
+ - sortPaths
+ - polarToRect
+ - pointOnLineSegment
+ - lineCircleIntersect
+ - solveQuadratic
+ - circleInterceptPoints
+ - cropToCircle
+
 ## License
 
 At this point I am not formally licensing this code. It's my intent for others to learn from 
